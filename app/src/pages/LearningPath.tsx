@@ -42,6 +42,7 @@ import {
 import { useProgress } from '@/store/progress';
 import CertificatePanel from '@/components/Certificate';
 import SelfCheck from '@/components/SelfCheck';
+import Diagnostic from '@/components/Diagnostic';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -866,6 +867,8 @@ export default function LearningPath() {
           came before it. The app saves your progress on this device. You can leave and come
           back any time.
         </p>
+
+        <Diagnostic ordered={data.ordered} />
 
         <motion.div
           initial={{ opacity: 0, y: 32 }}
