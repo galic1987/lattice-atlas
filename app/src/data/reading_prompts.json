@@ -1,0 +1,94 @@
+{
+  "quant-ph/9811052": [
+    "Find where the boundaries enter: what distinguishes a 'rough' edge from a 'smooth' edge, and which logical operator ends on which?",
+    "The torus needed periodic boundary conditions. What does this paper's planar construction give up, and what does it gain for real hardware?"
+  ],
+  "quant-ph/0110143": [
+    "Locate the mapping from decoding to a statistical-mechanics model — which physical quantity plays the role of temperature?",
+    "This paper coined the error threshold for the toric code under faulty measurements. What number do they estimate, and under which noise model?"
+  ],
+  "quant-ph/0510135": [
+    "How does a 3D cluster state encode the same physics as a 2D surface code run through time? Find the picture that convinced you.",
+    "What threshold do the authors report, and why was it the field's high-water mark for years?"
+  ],
+  "quant-ph/0610082": [
+    "The 3D cluster is never built all at once. Trace how the scheme only ever needs a 2D slice of live qubits.",
+    "Which operations does the scheme demand of the hardware, and which does it deliberately avoid?"
+  ],
+  "quant-ph/0703143": [
+    "Find the three transformations the authors apply to cluster-state schemes — what does each one buy?",
+    "How does the 3D-to-(2D+time) reduction here prefigure the modern circuit-based surface code?"
+  ],
+  "0803.0272": [
+    "How is a CNOT performed by braiding one defect around another? Follow one full braid in their figures.",
+    "What overhead does universality cost here — where do the non-Clifford gates come from?"
+  ],
+  "0805.3202": [
+    "This is a review: map each section to a topic you have studied and note which one the paper treats differently.",
+    "What practical constraints (geometry, measurement, timing) do the authors emphasize that earlier theory papers ignored?"
+  ],
+  "1009.3686": [
+    "Error rates above 1% were tolerated — what specific assumptions about the hardware make that possible?",
+    "Compare their simulated threshold with the asymptotic theory numbers you know. Where does the gap come from?"
+  ],
+  "1110.5133": [
+    "What part of decoding is the bottleneck this paper attacks, and what complexity does it achieve?",
+    "Find the argument that decoding can be parallelized to constant time per round. What resource pays for it?"
+  ],
+  "1111.4022": [
+    "Walk through one merge and one split: which stabilizers change, and what joint operator gets measured?",
+    "Why does lattice surgery keep everything 2D-local where transversal gates and braiding could not?"
+  ],
+  "1206.0800": [
+    "What exactly is proven here that earlier threshold estimates only measured numerically?",
+    "Which realistic circuit features (measurement errors, gate errors) does the proof include, and at what threshold value?"
+  ],
+  "1208.0928": [
+    "This is the field's standard tutorial: find the qubit-count formula for a factoring-scale machine and identify what dominates it.",
+    "Follow one full syndrome-extraction cycle in their figures until you can redraw it from memory."
+  ],
+  "1209.0510": [
+    "How do triorthogonal codes beat the 15-to-1 protocol's ratio of noisy inputs to distilled outputs?",
+    "Find the overhead scaling: how does the cost per magic state grow as the target error rate falls, and why was that the number to beat?"
+  ],
+  "1210.4626": [
+    "How do the authors compress a logical computation in the time direction, and what limits how far this goes?",
+    "Which assumptions about classical control speed does the construction quietly require?"
+  ],
+  "1307.1740": [
+    "What makes average-O(1) parallel decoding possible when worst-case matching is much harder?",
+    "Find where locality of errors enters the argument — why do distant defects rarely need each other?"
+  ],
+  "1310.0863": [
+    "How does this decoder use information from the X-syndrome to improve Z-decoding (and vice versa)?",
+    "At what error rates does correlated decoding beat independent matching, and by how much?"
+  ],
+  "1402.4848": [
+    "Which gate fidelities did this experiment reach, and which single number put the surface code within reach?",
+    "What does 'poised for fault tolerance' mean concretely — what was still missing after this result?"
+  ],
+  "1808.06709": [
+    "Find the lattice-surgery implementation of a logical CNOT: how many patches, how many rounds?",
+    "How much of the qubit-count reduction comes from the rotated code, and how much from better scheduling?"
+  ],
+  "1812.01238": [
+    "How does the CCZ factory's footprint compare with the 15-to-1 T factories you know from earlier papers?",
+    "Find the catalysis trick: what state is borrowed, used, and returned intact?"
+  ],
+  "1905.08916": [
+    "What does AutoCCZ automate that earlier layouts did by hand?",
+    "Find the spacetime-volume accounting: which operation dominates the budget for a large computation?"
+  ],
+  "2207.06431": [
+    "What does the d=5 vs d=3 comparison show, and why is the margin so thin in this experiment?",
+    "Which error sources dominate their budget breakdown — and which of them are not qubit errors at all?"
+  ],
+  "2408.13687": [
+    "Find Λ: how is it measured, what value do they get, and what would Λ = 1 mean physically?",
+    "How does the real-time decoder keep up with the syndrome stream, and what latency do they report?"
+  ],
+  "2602.09099": [
+    "What is a hook error's orientation, and how does the diagonal schedule rotate it harmless?",
+    "Which operations (junctions, Hadamards, rotations) does the uniform schedule simplify, and why does uniformity matter to hardware?"
+  ]
+}

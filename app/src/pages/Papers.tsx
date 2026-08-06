@@ -22,6 +22,9 @@ import {
 } from '@/data';
 import { useProgress } from '@/store/progress';
 import DifficultyMeter from '@/components/DifficultyMeter';
+import readingPromptsJson from '@/data/reading_prompts.json';
+
+const READING_PROMPTS = readingPromptsJson as Record<string, string[]>;
 
 /* ------------------------------------------------------------------ */
 /* Era metadata (design.md §2 / papers.md §2)                          */
@@ -252,6 +255,21 @@ function PaperCard({ paper, firstOfYear, side, highlighted, onPlan }: PaperCardP
                   </p>
                   <p className="text-[15px] leading-relaxed text-text-mid">{paper.why_it_matters}</p>
                 </div>
+                {(READING_PROMPTS[paper.arxiv_id] ?? []).length > 0 && (
+                  <div>
+                    <p className="eyebrow mb-1.5" style={{ color: eraColor }}>
+                      {'// READ WITH THESE QUESTIONS'}
+                    </p>
+                    <ol className="flex flex-col gap-1.5">
+                      {READING_PROMPTS[paper.arxiv_id].map((prompt, i) => (
+                        <li key={i} className="flex gap-2.5 text-[15px] leading-relaxed text-text-mid">
+                          <span className="font-mono text-[12px] text-text-low">{i + 1}.</span>
+                          {prompt}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

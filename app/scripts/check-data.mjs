@@ -145,6 +145,17 @@ for (const [topicId, questions] of Object.entries(selfChecks)) {
 for (const id of topicIds)
   if (!(id in selfChecks)) err(`topic "${id}" has no self-check questions`);
 
+/* ---------------- reading prompts ---------------- */
+
+const readingPrompts = readJson('src/data/reading_prompts.json');
+for (const [pid, prompts] of Object.entries(readingPrompts)) {
+  if (!paperIds.has(pid)) err(`reading_prompts key "${pid}" is not a paper id`);
+  if (!Array.isArray(prompts) || prompts.length === 0 || prompts.some((s) => typeof s !== 'string' || !s.trim()))
+    err(`reading_prompts["${pid}"] must be a non-empty array of strings`);
+}
+for (const pid of paperIds)
+  if (!(pid in readingPrompts)) err(`paper "${pid}" has no reading prompts`);
+
 /* ---------------- Glossary.tsx cross-links (regex-extracted) ---------------- */
 
 const glossary = readText('src/data/glossary.ts');
