@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npm run check-data && tsc -b && vite build",
     "check-data": "node scripts/check-data.mjs",
+    "verify-lattice": "node scripts/verify-lattice.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

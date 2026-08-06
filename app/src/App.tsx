@@ -5,6 +5,7 @@ import Layout from '@/components/Layout';
 const Home = lazy(() => import('@/pages/Home'));
 const KnowledgeMap = lazy(() => import('@/pages/KnowledgeMap'));
 const LearningPath = lazy(() => import('@/pages/LearningPath'));
+const SurfaceCodeLab = lazy(() => import('@/pages/SurfaceCodeLab'));
 const Papers = lazy(() => import('@/pages/Papers'));
 const FieldToday = lazy(() => import('@/pages/FieldToday'));
 const Glossary = lazy(() => import('@/pages/Glossary'));
@@ -28,6 +29,7 @@ export default function App() {
         <Route index element={lazyPage(<Home />)} />
         <Route path="map" element={lazyPage(<KnowledgeMap />)} />
         <Route path="path" element={lazyPage(<LearningPath />)} />
+        <Route path="lab" element={lazyPage(<SurfaceCodeLab />)} />
         <Route path="papers" element={lazyPage(<Papers />)} />
         <Route path="field-today" element={lazyPage(<FieldToday />)} />
         <Route path="glossary" element={lazyPage(<Glossary />)} />

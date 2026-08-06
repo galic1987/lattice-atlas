@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Home' },
   { to: '/map', label: 'Map' },
   { to: '/path', label: 'Path' },
+  { to: '/lab', label: 'Lab' },
   { to: '/papers', label: 'Papers' },
   { to: '/field-today', label: 'Field Today' },
   { to: '/glossary', label: 'Glossary' },
