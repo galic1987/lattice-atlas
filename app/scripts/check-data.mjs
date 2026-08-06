@@ -147,7 +147,7 @@ for (const id of topicIds)
 
 /* ---------------- Glossary.tsx cross-links (regex-extracted) ---------------- */
 
-const glossary = readText('src/pages/Glossary.tsx');
+const glossary = readText('src/data/glossary.ts');
 const glossarySlugs = [...glossary.matchAll(/^\s*slug: '([a-z0-9-]+)'/gm)].map((m) => m[1]);
 if (glossarySlugs.length < 10)
   err('could not extract glossary slugs from Glossary.tsx — update the regex in scripts/check-data.mjs');
@@ -160,11 +160,11 @@ const extractIds = (source, field) =>
     .map((s) => s.slice(1, -1));
 
 for (const s of extractIds(glossary, 'related_terms'))
-  if (!slugSet.has(s)) err(`Glossary related_terms slug "${s}" has no glossary entry`);
+  if (!slugSet.has(s)) err(`glossary related_terms slug "${s}" has no glossary entry`);
 for (const id of extractIds(glossary, 'related_topics'))
-  if (!topicIds.has(id)) err(`Glossary related_topics id "${id}" is not a topic`);
+  if (!topicIds.has(id)) err(`glossary related_topics id "${id}" is not a topic`);
 for (const id of extractIds(glossary, 'related_papers'))
-  if (!paperIds.has(id)) err(`Glossary related_papers id "${id}" is not in papers.json`);
+  if (!paperIds.has(id)) err(`glossary related_papers id "${id}" is not in papers.json`);
 
 /* ---------------- FieldToday.tsx hand-written links ---------------- */
 

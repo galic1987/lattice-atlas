@@ -35,6 +35,7 @@ import {
 } from '@/data';
 import { useProgress } from '@/store/progress';
 import SelfCheck from '@/components/SelfCheck';
+import GlossaryText from '@/components/GlossaryText';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -902,11 +903,15 @@ function TopicDrawer({
 
               <div className="mt-8 flex flex-col gap-8">
                 <DrawerSection>
-                  <p className="text-[17px] leading-[1.7] text-text-hi">{topic.short}</p>
+                  <p className="text-[17px] leading-[1.7] text-text-hi">
+                    <GlossaryText text={topic.short} />
+                  </p>
                 </DrawerSection>
 
                 <DrawerSection eyebrow="// FULL EXPLANATION">
-                  <p className="leading-[1.7] text-text-mid">{topic.detail}</p>
+                  <p className="leading-[1.7] text-text-mid">
+                    <GlossaryText text={topic.detail} />
+                  </p>
                 </DrawerSection>
 
                 <SelfCheck topicId={topic.id} />

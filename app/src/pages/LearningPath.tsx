@@ -43,6 +43,7 @@ import { useProgress } from '@/store/progress';
 import CertificatePanel from '@/components/Certificate';
 import SelfCheck from '@/components/SelfCheck';
 import Diagnostic from '@/components/Diagnostic';
+import GlossaryText from '@/components/GlossaryText';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -281,7 +282,9 @@ function TopicDrawer({
             </div>
 
             <div className="flex-1 space-y-8 p-6">
-              <p className="leading-relaxed text-text-mid">{topic.detail}</p>
+              <p className="leading-relaxed text-text-mid">
+                <GlossaryText text={topic.detail} />
+              </p>
 
               <div>
                 <p className="eyebrow mb-3">// KEY POINTS</p>
