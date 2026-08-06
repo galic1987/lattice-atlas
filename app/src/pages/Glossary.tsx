@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -335,7 +336,7 @@ export default function Glossary() {
       {/* Section 5 — cross-links band */}
       <section className="mx-auto max-w-6xl px-6 pb-20 md:px-8">
         <img
-          src="/braid-divider.svg"
+          src={asset('braid-divider.svg')}
           alt=""
           className="mx-auto mb-12 w-full max-w-3xl opacity-80"
         />

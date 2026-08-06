@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import { useEffect, useState } from 'react';
 import { NavLink, Link, Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -18,7 +19,7 @@ function Logo() {
   return (
     <Link to="/" className="group flex items-center gap-2.5">
       <img
-        src="/logo.svg"
+        src={asset('logo.svg')}
         alt=""
         className="h-7 w-7 transition-transform duration-200 group-hover:scale-105"
       />

@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import {
   useCallback,
   useEffect,
@@ -129,7 +130,7 @@ function PageHeader({ understoodCount }: { understoodCount: number }) {
     <header className="lattice-bg relative overflow-hidden">
       {/* anyon illustration, floated right (desktop only) */}
       <motion.img
-        src="/anyon-illustration.svg"
+        src={asset('anyon-illustration.svg')}
         alt=""
         aria-hidden
         initial={reduce ? false : { opacity: 0, x: 60 }}
@@ -1039,7 +1040,7 @@ function BottomCta() {
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <img src="/braid-divider.svg" alt="" aria-hidden className="mx-auto mb-12 w-full max-w-3xl opacity-70" />
+        <img src={asset('braid-divider.svg')} alt="" aria-hidden className="mx-auto mb-12 w-full max-w-3xl opacity-70" />
         <h2 className="font-display text-2xl font-semibold text-text-hi md:text-[32px]">
           Do you prefer a guided route?
         </h2>

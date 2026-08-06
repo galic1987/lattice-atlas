@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -41,7 +42,7 @@ function Reveal({
 function BraidDivider() {
   return (
     <div className="mx-auto max-w-6xl px-6 md:px-8" aria-hidden="true">
-      <img src="/braid-divider.svg" alt="" className="h-16 w-full object-cover opacity-70" />
+      <img src={asset('braid-divider.svg')} alt="" className="h-16 w-full object-cover opacity-70" />
     </div>
   );
 }
@@ -107,7 +108,7 @@ function Hero() {
         aria-hidden="true"
       >
         <img
-          src="/frontier-hero.svg"
+          src={asset('frontier-hero.svg')}
           alt=""
           className="h-full w-full object-cover"
         />

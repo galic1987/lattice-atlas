@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -912,7 +913,7 @@ export default function Papers() {
 
       {/* ---------------- Section 5: bottom CTA ---------------- */}
       <section className="mx-auto max-w-6xl px-6 pb-20 md:px-8">
-        <img src="/braid-divider.svg" alt="" aria-hidden className="mx-auto mb-16 w-full max-w-3xl opacity-70" />
+        <img src={asset('braid-divider.svg')} alt="" aria-hidden className="mx-auto mb-16 w-full max-w-3xl opacity-70" />
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}

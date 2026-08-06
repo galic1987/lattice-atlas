@@ -1,3 +1,4 @@
+import { asset } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -88,7 +89,7 @@ function Hero() {
       {/* Torus poster backdrop (hero-torus-fallback stands in for the WebGL torus) */}
       <div className="absolute inset-0" aria-hidden>
         <motion.img
-          src="/hero-torus-fallback.svg"
+          src={asset('hero-torus-fallback.svg')}
           alt=""
           className="h-full w-full object-cover opacity-70"
           initial={{ scale: 1.02 }}
@@ -180,7 +181,7 @@ function WhatIsTqec() {
   return (
     <section className="relative">
       <img
-        src="/braid-divider.svg"
+        src={asset('braid-divider.svg')}
         alt=""
         aria-hidden
         className="mx-auto w-full max-w-6xl px-6 opacity-60 md:px-8"
@@ -236,7 +237,7 @@ function WhatIsTqec() {
         >
           <div className="overflow-hidden rounded-xl border border-ink-600 bg-ink-800">
             <img
-              src="/surface-code-diagram.svg"
+              src={asset('surface-code-diagram.svg')}
               alt="A distance-3 rotated surface code lattice with data qubits, stabilizer plaquettes, and an error chain"
               className="w-full transition group-hover:animate-error-pulse"
             />
@@ -544,7 +545,7 @@ function Canon() {
   return (
     <section className="relative overflow-hidden border-t border-ink-600">
       <img
-        src="/era-strip.svg"
+        src={asset('era-strip.svg')}
         alt=""
         aria-hidden
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10"
@@ -742,7 +743,7 @@ function EntryPoints() {
       </motion.div>
 
       <img
-        src="/braid-divider.svg"
+        src={asset('braid-divider.svg')}
         alt=""
         aria-hidden
         className="mx-auto mt-20 w-full opacity-60 md:mt-28"
