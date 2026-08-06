@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
+  Check,
   Cpu,
   Download,
   ExternalLink,
@@ -15,6 +16,7 @@ import {
   buildLattice,
   computeSyndrome,
   decode,
+  logicalFlips,
   sampleDepolarizing,
   toStimCircuit,
   PAULI_LABEL,
@@ -583,6 +585,74 @@ const BRUSHES: { pauli: Exclude<Pauli, 0>; label: string; hint: string }[] = [
   { pauli: 3, label: 'Y', hint: 'both' },
 ];
 
+/* ---------------- challenges ---------------- */
+
+interface LabChallenge {
+  id: string;
+  d: number;
+  title: string;
+  goal: string;
+  hint: string;
+  lesson: string;
+  check: (a: {
+    errors: Pauli[];
+    syndrome: Set<string>;
+    result: DecodeResult | null;
+    lat: Lattice;
+  }) => boolean;
+}
+
+const CHALLENGES: LabChallenge[] = [
+  {
+    id: 'lonely-defect',
+    d: 3,
+    title: 'The lonely defect',
+    goal: 'Light up exactly one detector.',
+    hint: 'In the bulk, an error always lights two detectors — it is a chain with two endpoints. What changes next to a boundary?',
+    lesson: 'Boundaries absorb chain endpoints. That is why the decoder must be allowed to match defects to the edge, not just to each other.',
+    check: ({ syndrome }) => syndrome.size === 1,
+  },
+  {
+    id: 'invisible',
+    d: 3,
+    title: 'The invisible error',
+    goal: 'Build an error with a completely silent syndrome — that still corrupts the logical qubit.',
+    hint: 'A chain with no endpoints triggers nothing. Stretch one from boundary to boundary (try a full column of X).',
+    lesson: 'You just applied a logical operator by hand: undetectable, uncorrectable. Its minimum length is the code distance d — the whole game is making such chains unlikely.',
+    check: ({ errors, syndrome, lat }) => {
+      if (syndrome.size !== 0 || !errors.some((e) => e !== 0)) return false;
+      const f = logicalFlips(lat, errors);
+      return f.x || f.z;
+    },
+  },
+  {
+    id: 'fool-3',
+    d: 3,
+    title: 'Fool the decoder',
+    goal: 'Make the decoder cause a logical error using at most 2 painted errors, then press Decode.',
+    hint: 'Put two errors on one logical line (e.g. two X in one column). The cheapest explanation of the syndrome completes your chain the wrong way.',
+    lesson: 'd=3 guarantees correction of 1 error; with ⌈d/2⌉ = 2 well-placed errors the most likely explanation is wrong. The decoder did its job perfectly — and still lost.',
+    check: ({ errors, result }) => {
+      const n = errors.filter((e) => e !== 0).length;
+      return result !== null && !result.success && n > 0 && n <= 2;
+    },
+  },
+  {
+    id: 'fool-5',
+    d: 5,
+    title: 'Distance raises the bar',
+    goal: 'Now fool the d=5 decoder — with at most 3 painted errors.',
+    hint: 'Two errors are always corrected at d=5. You need ⌈d/2⌉ = 3, in a line starting from a boundary, so the short completion crosses the lattice.',
+    lesson: 'The minimum number of errors that can fool an ideal decoder grows with distance — exactly why below-threshold scaling suppresses logical errors exponentially.',
+    check: ({ errors, result }) => {
+      const n = errors.filter((e) => e !== 0).length;
+      return result !== null && !result.success && n > 0 && n <= 3;
+    },
+  },
+];
+
+const CHALLENGES_KEY = 'lattice-atlas-lab-challenges';
+
 export default function SurfaceCodeLab() {
   const [d, setD] = useState(5);
   const lat = useMemo(() => buildLattice(d), [d]);
@@ -596,6 +666,41 @@ export default function SurfaceCodeLab() {
   const errorCount = errors.filter((e) => e !== 0).length;
   const stimUrl = useRef<string | null>(null);
 
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
+  const [challengesDone, setChallengesDone] = useState<Set<string>>(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(CHALLENGES_KEY) ?? '[]') as string[]);
+    } catch {
+      return new Set();
+    }
+  });
+  const activeChallenge = CHALLENGES.find((c) => c.id === challengeId) ?? null;
+  const activeSolved = activeChallenge !== null && challengesDone.has(activeChallenge.id);
+
+  /** Called from the event handlers with the freshly-computed state. */
+  const checkChallenge = (nextErrors: Pauli[], nextResult: DecodeResult | null) => {
+    const ch = activeChallenge;
+    if (!ch || lat.d !== ch.d || challengesDone.has(ch.id)) return;
+    const win = ch.check({
+      errors: nextErrors,
+      syndrome: computeSyndrome(lat, nextErrors),
+      result: nextResult,
+      lat,
+    });
+    if (!win) return;
+    setChallengesDone((prev) => {
+      const next = new Set(prev);
+      next.add(ch.id);
+      try {
+        localStorage.setItem(CHALLENGES_KEY, JSON.stringify([...next]));
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
+  };
+
   const changeD = (next: number) => {
     setD(next);
     setErrors(new Array<Pauli>(next * next).fill(0));
@@ -604,27 +709,35 @@ export default function SurfaceCodeLab() {
 
   const editQubit = (q: number) => {
     setResult(null);
-    setErrors((prev) => {
-      const next = [...prev];
-      next[q] = (next[q] ^ brush) as Pauli;
-      return next;
-    });
+    const next = [...errors];
+    next[q] = (next[q] ^ brush) as Pauli;
+    setErrors(next);
+    checkChallenge(next, null);
   };
 
   const injectNoise = () => {
     setResult(null);
-    setErrors(sampleDepolarizing(lat.n, p));
+    const next = sampleDepolarizing(lat.n, p);
+    setErrors(next);
+    checkChallenge(next, null);
   };
 
   const runDecoder = () => {
     const res = decode(lat, errors);
     setResult(res);
     setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
+    checkChallenge(errors, res);
   };
 
   const clear = () => {
     setErrors(new Array<Pauli>(lat.n).fill(0));
     setResult(null);
+  };
+
+  const startChallenge = (ch: LabChallenge) => {
+    setChallengeId(ch.id);
+    setShowHint(false);
+    changeD(ch.d);
   };
 
   const downloadStim = () => {
@@ -843,6 +956,82 @@ export default function SurfaceCodeLab() {
                   {score.fails} logical error{score.fails === 1 ? '' : 's'} ·{' '}
                   {((1 - score.fails / score.trials) * 100).toFixed(0)}% recovered
                 </p>
+              )}
+            </div>
+
+            {/* challenges */}
+            <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
+              <p className="eyebrow mb-1">{'// CHALLENGES'}</p>
+              <p className="font-mono text-[11px] text-text-low">
+                {challengesDone.size}/{CHALLENGES.length} solved
+              </p>
+              <div className="mt-3 flex flex-col gap-1.5">
+                {CHALLENGES.map((ch) => {
+                  const done = challengesDone.has(ch.id);
+                  const active = challengeId === ch.id;
+                  return (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => startChallenge(ch)}
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-[13px] transition-colors duration-150 ${
+                        active
+                          ? 'border-plaquette/60 bg-plaquette/10 text-text-hi'
+                          : 'border-ink-600 text-text-mid hover:border-plaquette/40 hover:text-text-hi'
+                      }`}
+                    >
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                          done
+                            ? 'border-stabilizer bg-stabilizer/20 text-stabilizer'
+                            : 'border-ink-500 text-transparent'
+                        }`}
+                      >
+                        <Check className="h-3 w-3" strokeWidth={3} />
+                      </span>
+                      <span className="flex-1">{ch.title}</span>
+                      <span className="font-mono text-[10px] text-text-low">d={ch.d}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {activeChallenge && (
+                <div
+                  className={`mt-3 rounded-lg border p-3 ${
+                    activeSolved
+                      ? 'border-stabilizer/50 bg-stabilizer/10'
+                      : 'border-plaquette/40 bg-plaquette/[0.06]'
+                  }`}
+                >
+                  {activeSolved ? (
+                    <>
+                      <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-stabilizer">
+                        ✓ solved — {activeChallenge.title}
+                      </p>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-text-mid">
+                        {activeChallenge.lesson}
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[13px] leading-relaxed text-text-hi">
+                        {activeChallenge.goal}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowHint((v) => !v)}
+                        className="mt-2 font-mono text-[11px] text-text-low transition-colors hover:text-plaquette"
+                      >
+                        {showHint ? 'hide hint' : 'show hint'}
+                      </button>
+                      {showHint && (
+                        <p className="mt-1.5 text-[13px] leading-relaxed text-text-mid">
+                          {activeChallenge.hint}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
               )}
             </div>
 

@@ -369,6 +369,16 @@ export function decode(lat: Lattice, errors: Pauli[]): DecodeResult {
   };
 }
 
+/**
+ * Whether a (syndrome-free) error pattern acts as a logical operator.
+ * Only meaningful when the pattern commutes with all stabilizers.
+ */
+export function logicalFlips(lat: Lattice, pattern: Pauli[]): { x: boolean; z: boolean } {
+  const parity = (support: number[], bit: 1 | 2) =>
+    support.reduce((acc, q) => acc ^ (pattern[q] & bit ? 1 : 0), 0);
+  return { x: parity(lat.logicalZ, 1) === 1, z: parity(lat.logicalX, 2) === 1 };
+}
+
 /* ------------------------------------------------------------------ */
 /* Stim export                                                         */
 /* ------------------------------------------------------------------ */
