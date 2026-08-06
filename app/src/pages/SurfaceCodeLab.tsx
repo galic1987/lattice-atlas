@@ -1043,6 +1043,12 @@ export default function SurfaceCodeLab() {
                 <span className="mono-pill">.stim</span> format — the simulator
                 used in the below-threshold experiments. Paste it into Crumble
                 to step through the circuit, or sample it with Stim + PyMatching.
+                The repo&apos;s{' '}
+                <span className="font-mono text-[12px] text-star">
+                  notebooks/first-threshold-curve.ipynb
+                </span>{' '}
+                walks the full pipeline and reproduces this page&apos;s plot with
+                circuit-level noise — where the threshold drops to the famous ~1%.
               </p>
               <button type="button" onClick={downloadStim} className="btn-secondary mt-4 w-full !border-star/50 !text-star hover:!bg-star/10">
                 <Download className="h-4 w-4" /> Download .stim circuit
