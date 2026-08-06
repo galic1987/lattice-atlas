@@ -45,6 +45,7 @@ import CertificatePanel from '@/components/Certificate';
 import SelfCheck from '@/components/SelfCheck';
 import Diagnostic from '@/components/Diagnostic';
 import GlossaryText from '@/components/GlossaryText';
+import TopicNotes from '@/components/TopicNotes';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -330,6 +331,8 @@ function TopicDrawer({
                   </div>
                 </div>
               )}
+
+              <TopicNotes topicId={topic.id} />
 
               {topic.resources.length > 0 && (
                 <div>

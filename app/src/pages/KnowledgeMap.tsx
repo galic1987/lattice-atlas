@@ -36,6 +36,7 @@ import {
 import { useProgress } from '@/store/progress';
 import SelfCheck from '@/components/SelfCheck';
 import GlossaryText from '@/components/GlossaryText';
+import TopicNotes from '@/components/TopicNotes';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -971,6 +972,8 @@ function TopicDrawer({
                     </div>
                   </DrawerSection>
                 )}
+
+                <TopicNotes topicId={topic.id} />
 
                 {topic.resources.length > 0 && (
                   <DrawerSection eyebrow="// RESOURCES">
