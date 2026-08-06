@@ -9,6 +9,7 @@ const SurfaceCodeLab = lazy(() => import('@/pages/SurfaceCodeLab'));
 const Papers = lazy(() => import('@/pages/Papers'));
 const FieldToday = lazy(() => import('@/pages/FieldToday'));
 const Glossary = lazy(() => import('@/pages/Glossary'));
+const Review = lazy(() => import('@/pages/Review'));
 
 function PageFallback() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="papers" element={lazyPage(<Papers />)} />
         <Route path="field-today" element={lazyPage(<FieldToday />)} />
         <Route path="glossary" element={lazyPage(<Glossary />)} />
+        <Route path="review" element={lazyPage(<Review />)} />
         <Route path="*" element={lazyPage(<Home />)} />
       </Route>
     </Routes>

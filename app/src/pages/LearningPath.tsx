@@ -18,6 +18,7 @@ import {
   Library,
   Lock,
   Map as MapIcon,
+  Repeat,
   RotateCcw,
   ScrollText,
   Telescope,
@@ -1095,6 +1096,9 @@ export default function LearningPath() {
           </Link>
           <Link to="/glossary" className="link-slide inline-flex items-center gap-1.5 text-text-mid hover:text-plaquette">
             <BookOpen className="h-3.5 w-3.5" /> Glossary
+          </Link>
+          <Link to="/review" className="link-slide inline-flex items-center gap-1.5 text-text-mid hover:text-plaquette">
+            <Repeat className="h-3.5 w-3.5" /> Daily review
           </Link>
         </div>
       </section>

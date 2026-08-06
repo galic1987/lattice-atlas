@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, Map as MapIcon, ScrollText, Route } from 'lucide-react';
+import { Search, ChevronDown, Map as MapIcon, Repeat, ScrollText, Route } from 'lucide-react';
 import { topicById, shortName } from '@/data';
 import {
   CATEGORIES,
@@ -339,8 +339,15 @@ export default function Glossary() {
           alt=""
           className="mx-auto mb-12 w-full max-w-3xl opacity-80"
         />
-        <div className="grid gap-4 md:grid-cols-3 md:gap-6">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-4">
           {[
+            {
+              to: '/review',
+              icon: Repeat,
+              color: 'text-magic',
+              title: 'Review daily',
+              body: 'A few minutes of recall keeps the vocabulary from fading. Cards unlock as you learn.',
+            },
             {
               to: '/map',
               icon: MapIcon,
