@@ -41,6 +41,7 @@ import {
 } from '@/data';
 import { useProgress } from '@/store/progress';
 import CertificatePanel from '@/components/Certificate';
+import SelfCheck from '@/components/SelfCheck';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -292,6 +293,8 @@ function TopicDrawer({
                   ))}
                 </ul>
               </div>
+
+              <SelfCheck topicId={topic.id} />
 
               {topic.depends_on.length > 0 && (
                 <div>

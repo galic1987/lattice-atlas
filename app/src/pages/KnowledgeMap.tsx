@@ -34,6 +34,7 @@ import {
   type Topic,
 } from '@/data';
 import { useProgress } from '@/store/progress';
+import SelfCheck from '@/components/SelfCheck';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -907,6 +908,8 @@ function TopicDrawer({
                 <DrawerSection eyebrow="// FULL EXPLANATION">
                   <p className="leading-[1.7] text-text-mid">{topic.detail}</p>
                 </DrawerSection>
+
+                <SelfCheck topicId={topic.id} />
 
                 <DrawerSection eyebrow="// KEY POINTS">
                   <ul className="flex flex-col gap-3">

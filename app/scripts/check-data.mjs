@@ -126,6 +126,25 @@ const usedPrereqKeys = new Set(papers.flatMap((p) => (p.prerequisites ?? []).map
 for (const k of Object.keys(aliases))
   if (!usedPrereqKeys.has(k)) warn(`alias "${k}" is not used by any paper prerequisite`);
 
+/* ---------------- self-check questions ---------------- */
+
+const selfChecks = readJson('src/data/self_checks.json');
+for (const [topicId, questions] of Object.entries(selfChecks)) {
+  if (!topicIds.has(topicId)) err(`self_checks key "${topicId}" is not a topic id`);
+  if (!Array.isArray(questions) || questions.length === 0)
+    err(`self_checks["${topicId}"] has no questions`);
+  for (const [i, q] of (questions ?? []).entries()) {
+    if (typeof q.q !== 'string' || !q.q.trim()) err(`self_checks["${topicId}"][${i}] missing q`);
+    if (!Array.isArray(q.options) || q.options.length !== 4)
+      err(`self_checks["${topicId}"][${i}] must have exactly 4 options`);
+    if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= (q.options?.length ?? 0))
+      err(`self_checks["${topicId}"][${i}] answer index out of range`);
+    if (typeof q.why !== 'string' || !q.why.trim()) err(`self_checks["${topicId}"][${i}] missing why`);
+  }
+}
+for (const id of topicIds)
+  if (!(id in selfChecks)) err(`topic "${id}" has no self-check questions`);
+
 /* ---------------- Glossary.tsx cross-links (regex-extracted) ---------------- */
 
 const glossary = readText('src/pages/Glossary.tsx');
