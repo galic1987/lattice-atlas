@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 640" width="1920" height="640">
+  <defs>
+    <linearGradient id="eraBlend" x1="0" y1="0" x2="1920" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="0.28" stop-color="#22D3EE"/>
+      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="0.76" stop-color="#F5B83D"/>
+      <stop offset="1" stop-color="#FB7185"/>
+    </linearGradient>
+    <pattern id="eraDots" width="80" height="80" patternUnits="userSpaceOnUse">
+      <circle cx="0" cy="0" r="1.8" fill="#EAF0FB" fill-opacity="0.14"/>
+      <circle cx="40" cy="40" r="1.2" fill="#EAF0FB" fill-opacity="0.09"/>
+      <circle cx="80" cy="0" r="1.8" fill="#EAF0FB" fill-opacity="0.14"/>
+      <circle cx="0" cy="80" r="1.8" fill="#EAF0FB" fill-opacity="0.14"/>
+      <circle cx="80" cy="80" r="1.8" fill="#EAF0FB" fill-opacity="0.14"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="640" fill="#05080F"/>
+  <!-- five horizontal bands blending left-to-right, kept very dark (<=15% brightness) -->
+  <g opacity="0.15">
+    <rect x="0" y="0" width="1920" height="128" fill="url(#eraBlend)" opacity="0.55"/>
+    <rect x="0" y="128" width="1920" height="128" fill="url(#eraBlend)" opacity="0.8"/>
+    <rect x="0" y="256" width="1920" height="128" fill="url(#eraBlend)"/>
+    <rect x="0" y="384" width="1920" height="128" fill="url(#eraBlend)" opacity="0.8"/>
+    <rect x="0" y="512" width="1920" height="128" fill="url(#eraBlend)" opacity="0.55"/>
+  </g>
+  <rect width="1920" height="640" fill="url(#eraDots)"/>
+  <!-- thin connecting braid lines -->
+  <g fill="none" stroke-width="1">
+    <path d="M0 320 C 320 260, 560 380, 880 320 C 1200 260, 1440 380, 1920 300" stroke="#EAF0FB" stroke-opacity="0.12"/>
+    <path d="M0 300 C 320 380, 560 260, 880 320 C 1200 380, 1440 260, 1920 340" stroke="#EAF0FB" stroke-opacity="0.08"/>
+  </g>
+  <!-- top/bottom fade to base -->
+  <rect width="1920" height="640" fill="#05080F" opacity="0.25"/>
+</svg>

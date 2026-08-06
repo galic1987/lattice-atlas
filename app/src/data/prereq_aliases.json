@@ -1,0 +1,12 @@
+{
+  "cluster states mbqc": "cluster-states-mbqc",
+  "decoding matching algorithms": "decoding-mwpm",
+  "defects braiding": "defects-braiding",
+  "fault tolerance thresholds": "fault-tolerance-thresholds",
+  "magic states": "magic-states-distillation",
+  "quantum error correction basics": "quantum-codes-basics",
+  "qubits gates": "qubits-pauli-operators",
+  "surface code": "surface-code",
+  "syndrome extraction circuits": "syndrome-extraction-circuits",
+  "toric code": "toric-code"
+}

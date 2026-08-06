@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <!-- Seamless tileable lattice texture: dim dots + faint alternating plaquettes -->
+  <g fill="#2A3A5F" fill-opacity="0.06">
+    <rect x="0" y="0" width="60" height="60"/>
+    <rect x="60" y="60" width="60" height="60"/>
+    <rect x="120" y="120" width="60" height="60"/>
+    <rect x="180" y="180" width="60" height="60"/>
+    <rect x="120" y="0" width="60" height="60" fill-opacity="0.03"/>
+    <rect x="180" y="60" width="60" height="60" fill-opacity="0.03"/>
+    <rect x="0" y="120" width="60" height="60" fill-opacity="0.03"/>
+    <rect x="60" y="180" width="60" height="60" fill-opacity="0.03"/>
+  </g>
+  <g fill="#2A3A5F">
+    <!-- dots on 30px offset grid, wrapped for tiling -->
+    <circle cx="0" cy="0" r="2.2"/><circle cx="60" cy="0" r="2.2"/><circle cx="120" cy="0" r="2.2"/><circle cx="180" cy="0" r="2.2"/><circle cx="240" cy="0" r="2.2"/>
+    <circle cx="30" cy="30" r="1.6"/><circle cx="90" cy="30" r="1.6"/><circle cx="150" cy="30" r="1.6"/><circle cx="210" cy="30" r="1.6"/>
+    <circle cx="0" cy="60" r="2.2"/><circle cx="60" cy="60" r="2.2"/><circle cx="120" cy="60" r="2.2"/><circle cx="180" cy="60" r="2.2"/><circle cx="240" cy="60" r="2.2"/>
+    <circle cx="30" cy="90" r="1.6"/><circle cx="90" cy="90" r="1.6"/><circle cx="150" cy="90" r="1.6"/><circle cx="210" cy="90" r="1.6"/>
+    <circle cx="0" cy="120" r="2.2"/><circle cx="60" cy="120" r="2.2"/><circle cx="120" cy="120" r="2.2"/><circle cx="180" cy="120" r="2.2"/><circle cx="240" cy="120" r="2.2"/>
+    <circle cx="30" cy="150" r="1.6"/><circle cx="90" cy="150" r="1.6"/><circle cx="150" cy="150" r="1.6"/><circle cx="210" cy="150" r="1.6"/>
+    <circle cx="0" cy="180" r="2.2"/><circle cx="60" cy="180" r="2.2"/><circle cx="120" cy="180" r="2.2"/><circle cx="180" cy="180" r="2.2"/><circle cx="240" cy="180" r="2.2"/>
+    <circle cx="30" cy="210" r="1.6"/><circle cx="90" cy="210" r="1.6"/><circle cx="150" cy="210" r="1.6"/><circle cx="210" cy="210" r="1.6"/>
+    <circle cx="0" cy="240" r="2.2"/><circle cx="60" cy="240" r="2.2"/><circle cx="120" cy="240" r="2.2"/><circle cx="180" cy="240" r="2.2"/><circle cx="240" cy="240" r="2.2"/>
+  </g>
+</svg>

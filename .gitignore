@@ -1,0 +1,15 @@
+# dependencies & build output
+node_modules/
+app/dist/
+*.tsbuildinfo
+
+# OS noise
+.DS_Store
+
+# heavy source material kept out of history (remove these lines to version them)
+*.zip
+tqec/papers/
+tqec/extracted/
+
+# stale early scaffold superseded by app/ (delete the folder when ready)
+quantum-knowledge-map/

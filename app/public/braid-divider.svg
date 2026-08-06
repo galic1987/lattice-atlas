@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" width="1200" height="120" fill="none">
+  <defs>
+    <linearGradient id="braidCyan" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.1"/>
+      <stop offset="0.2" stop-color="#22D3EE"/>
+      <stop offset="0.8" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="braidViolet" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.1"/>
+      <stop offset="0.2" stop-color="#8B5CF6"/>
+      <stop offset="0.8" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <!-- two anyon world-lines crossing twice -->
+  <path d="M40 78 C 220 78, 300 30, 460 30 C 620 30, 640 90, 800 90 C 960 90, 1020 42, 1160 42"
+        stroke="url(#braidCyan)" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M40 42 C 220 42, 300 90, 460 90 C 620 90, 640 30, 800 30 C 960 30, 1020 78, 1160 78"
+        stroke="url(#braidViolet)" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- endpoint dots -->
+  <circle cx="40" cy="78" r="3" fill="#22D3EE"/>
+  <circle cx="1160" cy="42" r="3" fill="#22D3EE"/>
+  <circle cx="40" cy="42" r="3" fill="#8B5CF6"/>
+  <circle cx="1160" cy="78" r="3" fill="#8B5CF6"/>
+  <!-- crossing markers -->
+  <circle cx="530" cy="60" r="2.5" fill="#EAF0FB" fill-opacity="0.5"/>
+  <circle cx="720" cy="60" r="2.5" fill="#EAF0FB" fill-opacity="0.5"/>
+</svg>

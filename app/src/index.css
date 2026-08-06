@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Lattice Atlas design tokens (design.md §2) */
+    --ink-950: #05080F;
+    --ink-900: #0A0F1C;
+    --ink-850: #0E1526;
+    --ink-800: #121B31;
+    --ink-700: #1B2743;
+    --ink-600: #2A3A5F;
+    --ink-500: #3D5178;
+    --text-hi: #EAF0FB;
+    --text-mid: #A9B4CC;
+    --text-low: #64708E;
+    --plaquette: #22D3EE;
+    --star: #8B5CF6;
+    --magic: #F5B83D;
+    --syndrome: #FB7185;
+    --stabilizer: #34D399;
+    --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* shadcn bridge tokens (dark theme values) */
+    --background: 221 48% 7%;
+    --foreground: 219 44% 92%;
+    --card: 222 47% 13%;
+    --card-foreground: 219 44% 92%;
+    --popover: 224 44% 10%;
+    --popover-foreground: 219 44% 92%;
+    --primary: 187 85% 53%;
+    --primary-foreground: 222 47% 5%;
+    --secondary: 222 40% 16%;
+    --secondary-foreground: 219 44% 92%;
+    --muted: 222 40% 16%;
+    --muted-foreground: 220 24% 60%;
+    --accent: 222 40% 18%;
+    --accent-foreground: 219 44% 92%;
+    --destructive: 351 95% 71%;
+    --destructive-foreground: 222 47% 5%;
+    --border: 222 39% 27%;
+    --input: 222 39% 27%;
+    --ring: 187 85% 53%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  body {
+    @apply bg-ink-900 text-text-hi font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background: rgba(34, 211, 238, 0.25);
+    color: #EAF0FB;
+  }
+  :focus-visible {
+    outline: 2px solid var(--plaquette);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Mono pill for inline physics notation (design.md §3) */
+  .mono-pill {
+    @apply inline-block rounded-md bg-ink-800 px-1.5 py-0.5 font-mono text-[0.85em] text-plaquette;
+  }
+  .mono-pill-violet {
+    @apply inline-block rounded-md bg-ink-800 px-1.5 py-0.5 font-mono text-[0.85em] text-star;
+  }
+
+  /* Lattice ripple hover glow: follows cursor via --mx/--my custom props */
+  .ripple-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .ripple-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 250ms ease;
+    background: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(34, 211, 238, 0.08),
+      transparent 70%
+    );
+  }
+  .ripple-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Buttons (design.md §7.11) */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-plaquette px-5 py-2.5 text-sm font-semibold text-ink-950 transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-plaquette/40 px-5 py-2.5 text-sm font-semibold text-plaquette transition-all duration-200 hover:border-plaquette hover:bg-plaquette/10;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 text-sm font-medium text-text-mid transition-colors duration-200 hover:text-text-hi;
+  }
+
+  /* Link underline slide-in */
+  .link-slide {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 200ms ease;
+  }
+  .link-slide:hover {
+    background-size: 100% 1px;
+  }
+
+  /* Section eyebrow label */
+  .eyebrow {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em] text-plaquette;
+  }
+}
+
+@layer utilities {
+  .lattice-bg {
+    background-image: url('/lattice-texture.svg');
+    background-repeat: repeat;
+  }
+  .text-gradient-cyan-violet {
+    background: linear-gradient(90deg, #22D3EE, #8B5CF6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
