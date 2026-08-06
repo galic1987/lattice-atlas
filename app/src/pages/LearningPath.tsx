@@ -40,6 +40,7 @@ import {
   type Topic,
 } from '@/data';
 import { useProgress } from '@/store/progress';
+import CertificatePanel from '@/components/Certificate';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -775,6 +776,8 @@ function CompletionBand() {
           <Library className="h-4 w-4" /> Review the glossary
         </Link>
       </div>
+
+      <CertificatePanel />
     </motion.section>
   );
 }
