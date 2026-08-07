@@ -189,7 +189,7 @@ export default function RealQuantumEndpoint() {
       {/* Code Export Tabs */}
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         {/* Stim Export */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+        <div className="min-w-0 rounded-xl border border-ink-700 bg-ink-950 p-4">
           <div className="flex items-center justify-between border-b border-ink-800 pb-2 font-mono text-xs">
             <span className="text-plaquette font-bold">1. Google Stim Circuit (.stim)</span>
             <button
@@ -209,7 +209,7 @@ export default function RealQuantumEndpoint() {
         </div>
 
         {/* Google Cirq Python Code */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+        <div className="min-w-0 rounded-xl border border-ink-700 bg-ink-950 p-4">
           <div className="flex items-center justify-between border-b border-ink-800 pb-2 font-mono text-xs">
             <span className="text-star font-bold">2. Google Quantum AI Cirq Python Script</span>
             <button
