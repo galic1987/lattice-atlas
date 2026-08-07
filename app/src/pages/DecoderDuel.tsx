@@ -97,7 +97,32 @@ function DuelLattice({
         const { x, y } = qPoint(lat.d, q);
         const hidden = round.hidden[q];
         return (
-          <g key={q} onClick={() => onQubitClick(q)} className="cursor-pointer">
+          <g
+            key={q}
+            role="button"
+            tabIndex={revealed ? -1 : 0}
+            aria-label={`Qubit ${q}, ${
+              g === 1 ? 'X correction' : g === 2 ? 'Z correction' : 'no correction'
+            }${revealed ? '' : ' — press Enter to paint'}`}
+            onClick={() => onQubitClick(q)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onQubitClick(q);
+              }
+            }}
+            className={`group/qb outline-none ${revealed ? '' : 'cursor-pointer'}`}
+          >
+            {/* keyboard focus ring */}
+            <circle
+              cx={x}
+              cy={y}
+              r={14}
+              fill="none"
+              stroke="#EAF0FB"
+              strokeWidth={2}
+              className="opacity-0 transition-opacity group-focus-visible/qb:opacity-100"
+            />
             {revealed && hidden !== 0 && (
               <circle cx={x} cy={y} r={15} fill="none" stroke={SYNDROME} strokeWidth={2} strokeDasharray="3 3" />
             )}
