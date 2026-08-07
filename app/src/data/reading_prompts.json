@@ -48,8 +48,8 @@
     "Follow one full syndrome-extraction cycle in their figures until you can redraw it from memory."
   ],
   "1209.0510": [
-    "How do triorthogonal codes beat the 15-to-1 protocol's ratio of noisy inputs to distilled outputs?",
-    "Find the overhead scaling: how does the cost per magic state grow as the target error rate falls, and why was that the number to beat?"
+    "What is the 'bridge' compression, and which resource does it trade — physical qubits or time — to lower the overhead of surface-code logical operations?",
+    "How much overhead reduction do Fowler and Devitt claim, and for which operations does the bridge help most?"
   ],
   "1210.4626": [
     "How do the authors compress a logical computation in the time direction, and what limits how far this goes?",

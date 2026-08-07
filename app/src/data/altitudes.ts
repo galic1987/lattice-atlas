@@ -331,14 +331,14 @@ export const ALTITUDE_CONCEPTS: AltitudeConcept[] = [
         title: 'Count the Bottles Yourself',
         revises: 'Every level so far asked for trust. This one doesn’t.',
         explanation:
-          'The claims here are quantitative — factory footprints, error-suppression exponents, T-counts — and they live in papers you can now read: the Bravyi–Haah overhead paper and the catalyzed-factory constructions. The Field Today page tracks cultivation as it reshapes the roadmaps in real time.',
+          'The claims here are quantitative — factory footprints, error-suppression exponents, T-counts — and they live in papers you can now read: the lower-overhead compilation and catalyzed-factory constructions. The Field Today page tracks cultivation as it reshapes the roadmaps in real time.',
         takeaway: 'Resource estimates are checkable arithmetic — check them.',
       },
     ],
     proLinks: [
       { label: 'Magic states on the map', to: '/map?topic=magic-states-distillation', external: false },
       { label: 'Cultivation (frontier)', to: '/map?topic=magic-state-cultivation', external: false },
-      { label: 'Bravyi–Haah overhead paper', to: '/papers#1209.0510', external: false },
+      { label: 'Bridge to lower overhead (Fowler–Devitt)', to: '/papers#1209.0510', external: false },
       { label: 'Catalyzed CCZ factories', to: '/papers#1812.01238', external: false },
       { label: 'Field Today: the bottleneck', to: '/field-today', external: false },
     ],
