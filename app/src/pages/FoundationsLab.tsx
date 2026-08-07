@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
 import {
   ArrowLeft,
   ArrowRight,
@@ -1216,6 +1217,7 @@ export default function FoundationsLab() {
             </header>
 
             <div className="space-y-6">
+              <MultiAgeCognitiveLens />
               <StageContent
                 stageId={activeStage.id}
                 answer={answers[activeStage.id]}
