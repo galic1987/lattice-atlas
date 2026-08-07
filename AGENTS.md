@@ -23,6 +23,22 @@ Keep PRs small and focused; two agents work here concurrently, and small PRs
 rebase cleanly. Never commit another agent's in-flight files into your PR
 (stage specific paths).
 
+## Shared machine, separate worktrees (added 2026-08-07)
+
+Both agents run on the same machine. Branches do NOT isolate you locally —
+there is one working directory per checkout, and simultaneous edits clobber
+each other (this happened repeatedly today). Use a dedicated git worktree:
+
+```bash
+git worktree add ../lattice-atlas-<agent> -b <branch> origin/main
+ln -s "$(pwd)/app/node_modules" ../lattice-atlas-<agent>/app/node_modules
+```
+
+Claude works in `../lattice-atlas-claude`. The main checkout
+(`Kimi_Agent_Prerequisite Knowledge Tool`) is Gemini's. Edit only inside
+your own worktree; integrate through PRs, never through the other agent's
+working directory.
+
 ## Hard rules (break these and production breaks)
 
 1. **Public assets in JSX must use the `asset()` helper** from `app/src/lib/asset.ts`:

@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
+import { ALTITUDE_CONCEPTS } from '@/data/altitudes';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -12,6 +13,10 @@ const EASE = [0.22, 1, 0.36, 1] as const;
  * simplification. The honest version of "explain it to a five-year-old."
  */
 export default function Altitudes() {
+  const [conceptId, setConceptId] = useState(ALTITUDE_CONCEPTS[0].id);
+  const concept =
+    ALTITUDE_CONCEPTS.find((c) => c.id === conceptId) ?? ALTITUDE_CONCEPTS[0];
+
   useEffect(() => {
     document.title = 'Five Altitudes — Lattice Atlas';
   }, []);
@@ -53,7 +58,26 @@ export default function Altitudes() {
       </header>
 
       <section className="mx-auto max-w-4xl px-6 py-10 md:px-8">
-        <MultiAgeCognitiveLens />
+        {/* Concept switcher */}
+        <div className="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Concept">
+          {ALTITUDE_CONCEPTS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              role="tab"
+              aria-selected={conceptId === c.id}
+              onClick={() => setConceptId(c.id)}
+              className={
+                conceptId === c.id
+                  ? 'rounded-full border border-magic bg-magic/15 px-4 py-1.5 text-sm font-semibold text-magic'
+                  : 'rounded-full border border-ink-600 bg-ink-800 px-4 py-1.5 text-sm text-text-mid transition-colors hover:border-ink-500 hover:text-text-hi'
+              }
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <MultiAgeCognitiveLens key={concept.id} concept={concept} />
       </section>
 
       <section className="mx-auto max-w-4xl px-6 pb-20 md:px-8">
