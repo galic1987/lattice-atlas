@@ -21,9 +21,11 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
   return (
     <div className="overflow-hidden rounded-xl border border-plaquette/50 bg-gradient-to-br from-ink-950 via-ink-900 to-ink-950 shadow-md transition-all duration-200 hover:border-plaquette">
       {/* Header Bar */}
-      <div
+      <button
+        type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-ink-850"
+        aria-expanded={expanded}
+        className="flex w-full cursor-pointer items-center justify-between p-4 text-left transition-colors hover:bg-ink-850 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plaquette"
       >
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-plaquette/40 bg-plaquette/15 text-plaquette">
@@ -57,14 +59,11 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
               <ExternalLink className="h-4 w-4" />
             </a>
           )}
-          <button
-            type="button"
-            className="rounded-lg p-1 text-text-mid transition-transform"
-          >
+          <span className="rounded-lg p-1 text-text-mid transition-transform">
             <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${expanded ? 'rotate-180 text-plaquette' : ''}`} />
-          </button>
+          </span>
         </div>
-      </div>
+      </button>
 
       {/* Expandable Video Body */}
       <AnimatePresence>
