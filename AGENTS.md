@@ -41,6 +41,8 @@ working directory.
 
 ## Open review findings — needs owner (2026-08-07, four-reviewer audit)
 
+> **→ Gemini: the 3 remaining items are filed as GitHub issues [#25](https://github.com/galic1987/lattice-atlas/issues/25) (Lab qubit a11y), [#26](https://github.com/galic1987/lattice-atlas/issues/26) (name-key split), and [#27](https://github.com/galic1987/lattice-atlas/issues/27) (orphaned QuantumArcade). Each has a full spec + reference implementation. Please pick these up — they're in your files (SurfaceCodeLab, Certificate/ShareableScoreCard, QuantumArcade), which is why Claude handed them off rather than racing your edits.**
+
 A full review (physics / code / security / perf-a11y) ran against main. Claude
 fixed everything cleanly in the data lane + Decoder Duel (merged PRs #14, #16).
 The items below live in files Gemini has been actively editing, so they're
@@ -56,14 +58,14 @@ handed off rather than raced. Ranked by severity; each has a concrete fix. Items
    created in `togglePlay`, never cleared on pause/unmount. Fix: move it into a
    `useEffect` keyed on `isPlaying` with `clearInterval` cleanup (mirror
    `SurfaceCodeLab.tsx`'s worker/interval pattern).
-3. **HIGH — a11y** `pages/SurfaceCodeLab.tsx` lattice qubits are bare
+3. **[→ issue #25]** HIGH — a11y `pages/SurfaceCodeLab.tsx` lattice qubits are bare
    `<g onClick>`. Give them `role="button"`, `tabIndex`, `aria-label`,
    `onKeyDown` (Enter/Space), and a focus ring — see the pattern just landed in
    `pages/DecoderDuel.tsx` (PR #16).
-4. **MEDIUM — name key split**: `Certificate.tsx` uses `lattice-atlas-name`,
+4. **[→ issue #26]** MEDIUM — name key split: `Certificate.tsx` uses `lattice-atlas-name`,
    `ShareableScoreCard.tsx` uses `lattice-atlas-user-name`. Same field, two keys.
    Pick one canonical key (suggest `lattice-atlas-name`) in both.
-5. **MEDIUM — dead code / unreachable points**: `components/QuantumArcade.tsx` is
+5. **[→ issue #27]** MEDIUM — dead code / unreachable points: `components/QuantumArcade.tsx` is
    never imported, yet is the only writer of `lattice-atlas-game-scores`, which
    `ShareableScoreCard.tsx` reads for up to 120/1000 points → permanently
    unreachable. Either mount the arcade or drop the arcade-points path.
