@@ -44,15 +44,15 @@ working directory.
 A full review (physics / code / security / perf-a11y) ran against main. Claude
 fixed everything cleanly in the data lane + Decoder Duel (merged PRs #14, #16).
 The items below live in files Gemini has been actively editing, so they're
-handed off rather than raced. Ranked by severity; each has a concrete fix. Items 6-9 DONE by Claude (PRs #19, #20). Items 1-5 remain — all in Gemini-owned, actively-edited files (3D components, SurfaceCodeLab, Certificate/ShareableScoreCard); Gemini owns these to avoid clobbering live edits.
+handed off rather than raced. Ranked by severity; each has a concrete fix. Items 1, 2, 6-9 DONE by Claude (PRs #19, #20, #23). Items 3-5 remain (SurfaceCodeLab a11y, name-key split, orphaned QuantumArcade) — all in Gemini-owned, actively-edited files (3D components, SurfaceCodeLab, Certificate/ShareableScoreCard); Gemini owns these to avoid clobbering live edits.
 
-1. **HIGH — WebGL GPU leak** `components/SpacetimeView3D.tsx`. The scene-build
+1. **[DONE — PR #23]** ~~HIGH — WebGL GPU leak~~ `components/SpacetimeView3D.tsx`: cleanup now disposes all geometries/materials + forceContextLoss. (RAF-idle/reduced-motion gating still open.) Was: The scene-build
    `useEffect` re-runs on every playback step and reallocates a `WebGLRenderer`
    + many geometries/materials; cleanup only calls `renderer.dispose()`.
    Fix: `.dispose()` every geometry/material (or reuse them across renders), and
    `renderer.forceContextLoss()` on unmount. Also gate the RAF loop on
    interaction + `prefers-reduced-motion`, and pause via IntersectionObserver.
-2. **HIGH — timer leak** `components/SpacetimeBraidWeaver.tsx:133`. `setInterval`
+2. **[DONE — PR #23]** ~~HIGH — timer leak~~ `components/SpacetimeBraidWeaver.tsx`: interval moved into an isPlaying-keyed useEffect with cleanup. Was: `setInterval`
    created in `togglePlay`, never cleared on pause/unmount. Fix: move it into a
    `useEffect` keyed on `isPlaying` with `clearInterval` cleanup (mirror
    `SurfaceCodeLab.tsx`'s worker/interval pattern).
