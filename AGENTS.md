@@ -4,6 +4,25 @@ Multiple AI agents (and humans) work in this repo. Read this before editing.
 **Every push to `main` auto-deploys to https://galic1987.github.io/lattice-atlas/ via
 `.github/workflows/deploy.yml`** — a broken commit goes live in ~60 seconds.
 
+## Workflow: pull requests only (as of 2026-08-07)
+
+`main` is branch-protected: direct pushes are rejected, and merging requires the
+`gates` check (CI: lint + verify-lattice + check-data + build) to pass. Deploys
+still happen automatically — on merge to `main`.
+
+```bash
+git checkout -b feat/<short-name>     # branch from up-to-date main
+# ...work, commit early and often...
+git push -u origin feat/<short-name>
+gh pr create --fill                   # CI runs automatically
+gh pr merge --squash --delete-branch  # once the gates check is green
+```
+
+No PR needs a human review approval — green gates are the merge requirement.
+Keep PRs small and focused; two agents work here concurrently, and small PRs
+rebase cleanly. Never commit another agent's in-flight files into your PR
+(stage specific paths).
+
 ## Hard rules (break these and production breaks)
 
 1. **Public assets in JSX must use the `asset()` helper** from `app/src/lib/asset.ts`:
