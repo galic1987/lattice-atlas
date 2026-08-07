@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useState, useId, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Box,
@@ -124,24 +124,20 @@ export default function SpacetimeBraidWeaver() {
   const [showStim, setShowStim] = useState<boolean>(false);
   const gradId = useId();
 
-  // Animation scrubber loop
+  // Animation scrubber loop — driven by an effect so the interval is always
+  // cleared on pause and on unmount (the old version leaked the timer).
   const togglePlay = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-    } else {
-      setIsPlaying(true);
-      const interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= 160) {
-            clearInterval(interval);
-            setIsPlaying(false);
-            return 160;
-          }
-          return prev + 4;
-        });
-      }, 50);
-    }
+    if (!isPlaying && currentTime >= 160) setCurrentTime(80); // restart from the top
+    setIsPlaying((p) => !p);
   };
+
+  useEffect(() => {
+    if (!isPlaying) return undefined;
+    const id = setInterval(() => {
+      setCurrentTime((prev) => (prev >= 160 ? 160 : prev + 4));
+    }, 50);
+    return () => clearInterval(id);
+  }, [isPlaying]);
 
   const resetRotation = () => {
     setRotX(25);
