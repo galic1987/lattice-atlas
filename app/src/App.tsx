@@ -10,6 +10,7 @@ const Papers = lazy(() => import('@/pages/Papers'));
 const FieldToday = lazy(() => import('@/pages/FieldToday'));
 const Glossary = lazy(() => import('@/pages/Glossary'));
 const Review = lazy(() => import('@/pages/Review'));
+const DecoderDuel = lazy(() => import('@/pages/DecoderDuel'));
 
 function PageFallback() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="field-today" element={lazyPage(<FieldToday />)} />
         <Route path="glossary" element={lazyPage(<Glossary />)} />
         <Route path="review" element={lazyPage(<Review />)} />
+        <Route path="duel" element={lazyPage(<DecoderDuel />)} />
         <Route path="*" element={lazyPage(<Home />)} />
       </Route>
     </Routes>

@@ -5,12 +5,14 @@ import { Menu, X } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
+import ShareableScoreCard from '@/components/ShareableScoreCard';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home' },
   { to: '/map', label: 'Map' },
   { to: '/path', label: 'Path' },
   { to: '/lab', label: 'Lab' },
+  { to: '/duel', label: 'Duel' },
   { to: '/papers', label: 'Papers' },
   { to: '/field-today', label: 'Field Today' },
   { to: '/glossary', label: 'Glossary' },
@@ -31,19 +33,28 @@ function Logo() {
   );
 }
 
-function ProgressPill() {
+function ProgressPill({ onShare }: { onShare: () => void }) {
   const { understoodCount } = useProgress();
   const pct = Math.round((understoodCount / topics.length) * 100);
   const filled = Math.round(pct / 20);
   return (
-    <Link
-      to="/path"
-      title={`${understoodCount} of ${topics.length} topics understood`}
-      className="hidden rounded-full border border-ink-600 bg-ink-800 px-3 py-1 font-mono text-xs text-text-mid transition-colors duration-200 hover:border-plaquette/50 hover:text-plaquette sm:block"
-    >
-      {'▓'.repeat(filled)}
-      {'░'.repeat(5 - filled)} {pct}%
-    </Link>
+    <div className="hidden items-center gap-2 sm:flex">
+      <Link
+        to="/path"
+        title={`${understoodCount} of ${topics.length} topics understood`}
+        className="rounded-full border border-ink-600 bg-ink-800 px-3 py-1 font-mono text-xs text-text-mid transition-colors duration-200 hover:border-plaquette/50 hover:text-plaquette"
+      >
+        {'▓'.repeat(filled)}
+        {'░'.repeat(5 - filled)} {pct}%
+      </Link>
+      <button
+        type="button"
+        onClick={onShare}
+        className="inline-flex items-center gap-1 rounded-full border border-plaquette/50 bg-plaquette/10 px-3 py-1 font-mono text-xs font-semibold text-plaquette transition-transform hover:scale-105"
+      >
+        🏆 Share Score
+      </button>
+    </div>
   );
 }
 
@@ -131,16 +142,18 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
       <UniversalExplainer />
+      <ShareableScoreCard isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
           <Logo />
           <div className="flex items-center gap-4">
             <DesktopNav />
-            <ProgressPill />
+            <ProgressPill onShare={() => setShareOpen(true)} />
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
