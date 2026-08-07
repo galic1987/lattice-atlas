@@ -1080,6 +1080,14 @@ function BottomCta() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </motion.div>
+        <p className="mt-6">
+          <Link
+            to="/altitudes"
+            className="link-slide font-mono text-[13px] text-text-mid hover:text-plaquette"
+          >
+            or see the whole idea at five altitudes →
+          </Link>
+        </p>
       </motion.div>
     </section>
   );
