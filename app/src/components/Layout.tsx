@@ -90,7 +90,7 @@ function DesktopNav() {
   );
 }
 
-function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+function MobileNav({ open, onClose, onShare }: { open: boolean; onClose: () => void; onShare: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -129,7 +129,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   if (!open) return null;
   return (
-    <div ref={dialogRef} className="fixed inset-0 z-50 bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div ref={dialogRef} className="fixed inset-0 z-50 overflow-y-auto bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
       <div className="flex h-16 items-center justify-between px-6">
         <Logo />
         <button
@@ -142,7 +142,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
           <X className="h-6 w-6" />
         </button>
       </div>
-      <nav className="flex flex-col gap-2 px-6 pt-10" aria-label="Main">
+      <nav className="flex flex-col gap-2 px-6 pb-8 pt-10" aria-label="Main">
         {NAV_ITEMS.map(({ to, label, ...item }, i) => (
           <NavLink
             key={to}
@@ -162,6 +162,16 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
             {label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onShare();
+          }}
+          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-plaquette/50 bg-plaquette/10 px-4 py-3 font-display text-base font-semibold text-plaquette"
+        >
+          <Share2 className="h-4 w-4" aria-hidden="true" /> Share progress
+        </button>
       </nav>
     </div>
   );
@@ -199,7 +209,11 @@ export default function Layout() {
         </div>
       </header>
 
-      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileNav
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onShare={() => setShareOpen(true)}
+      />
 
       <main id="main-content" className="flex-1 pt-16">
         <Outlet />
@@ -236,7 +250,8 @@ export default function Layout() {
                 23 papers · 26 topics · 6 tiers · 1998 → 2026
               </p>
               <p className="mt-3 text-sm leading-relaxed text-text-low">
-                Progress is stored locally in your browser. No account, no tracking.
+                Progress is stored locally in your browser. No account or analytics;
+                display fonts are fetched from Google Fonts.
               </p>
             </div>
           </div>

@@ -5,7 +5,7 @@
  * pattern and must paint a correction that clears it without creating a
  * logical error. Rounds are generated from a seeded PRNG so the daily
  * puzzle is identical for everyone (shareable, comparable scores), and
- * every judgment comes from the verified surface-code model.
+ * every judgment comes from the same invariant-tested local surface-code model.
  */
 import {
   buildLattice,
@@ -135,6 +135,7 @@ export function shareText(day: number, outcomes: RoundOutcome[], score: number):
     `Lattice Atlas — Decoder Duel #${day}`,
     outcomes.map((o) => OUTCOME_EMOJI[o]).join(''),
     `${score}/${max} vs the matching decoder`,
+    'Local, unverified browser result — no account, identity check, or server signature.',
     'https://galic1987.github.io/lattice-atlas/duel',
   ].join('\n');
 }

@@ -1,75 +1,149 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" width="960" height="720">
+  <title>Distance-3 rotated surface-code patch</title>
+  <desc>
+    Nine data qubits are checked by four X stabilizers and four Z stabilizers.
+    Four interior checks have weight four and four boundary checks have weight two.
+    A single X error on the center data qubit flips exactly the two adjacent Z checks.
+  </desc>
+
   <defs>
-    <radialGradient id="scRose" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FB7185" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#FB7185" stop-opacity="0"/>
-    </radialGradient>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+    <pattern id="microGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#263653" stroke-opacity="0.22" stroke-width="1"/>
+    </pattern>
   </defs>
-  <rect width="960" height="720" fill="#0A0F1C"/>
-  <!-- grid origin: 5x5 data qubits, spacing 130, origin (155,85) -->
-  <g>
-    <!-- plaquette faces (checkerboard: cyan Z, violet X) -->
-    <!-- row 0 -->
-    <rect x="155" y="85" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="415" y="85" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="285" y="85" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="545" y="85" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <!-- row 1 -->
-    <rect x="285" y="215" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="545" y="215" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="155" y="215" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="415" y="215" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <!-- row 2 -->
-    <rect x="155" y="345" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="415" y="345" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="285" y="345" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="545" y="345" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <!-- row 3 -->
-    <rect x="285" y="475" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="545" y="475" width="130" height="130" fill="#22D3EE" fill-opacity="0.14" stroke="#22D3EE" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="155" y="475" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <rect x="415" y="475" width="130" height="130" fill="#8B5CF6" fill-opacity="0.14" stroke="#8B5CF6" stroke-opacity="0.6" stroke-width="1.5"/>
-    <!-- boundary half-plaquettes -->
-    <rect x="155" y="-45" width="130" height="130" fill="#8B5CF6" fill-opacity="0.07" stroke="#8B5CF6" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="5 6"/>
-    <rect x="415" y="-45" width="130" height="130" fill="#8B5CF6" fill-opacity="0.07" stroke="#8B5CF6" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="5 6"/>
-    <rect x="285" y="605" width="130" height="130" fill="#8B5CF6" fill-opacity="0.07" stroke="#8B5CF6" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="5 6"/>
-    <rect x="545" y="605" width="130" height="130" fill="#8B5CF6" fill-opacity="0.07" stroke="#8B5CF6" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="5 6"/>
-  </g>
 
-  <!-- lattice edges -->
-  <g stroke="#3D5178" stroke-width="1.4">
-    <line x1="155" y1="85" x2="805" y2="85"/><line x1="155" y1="215" x2="805" y2="215"/>
-    <line x1="155" y1="345" x2="805" y2="345"/><line x1="155" y1="475" x2="805" y2="475"/>
-    <line x1="155" y1="605" x2="805" y2="605"/>
-    <line x1="155" y1="85" x2="155" y2="605"/><line x1="285" y1="85" x2="285" y2="605"/>
-    <line x1="415" y1="85" x2="415" y2="605"/><line x1="545" y1="85" x2="545" y2="605"/>
-    <line x1="675" y1="85" x2="675" y2="605"/><line x1="805" y1="85" x2="805" y2="605"/>
-  </g>
+  <rect width="960" height="720" rx="28" fill="#0A0F1C"/>
+  <rect width="960" height="720" rx="28" fill="url(#microGrid)"/>
 
-  <!-- error chain (rose) crossing two plaquettes -->
-  <g class="error-chain">
-    <path d="M285 215 L 285 345 L 415 345 L 415 475" fill="none" stroke="#FB7185" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="285" cy="215" r="30" fill="url(#scRose)"/>
-    <circle cx="415" cy="475" r="30" fill="url(#scRose)"/>
-    <path d="M273 203 L297 227 M297 203 L273 227" stroke="#FB7185" stroke-width="4" stroke-linecap="round"/>
-    <path d="M403 463 L427 487 M427 463 L403 487" stroke="#FB7185" stroke-width="4" stroke-linecap="round"/>
-  </g>
+  <g font-family="'JetBrains Mono', monospace">
+    <text x="48" y="48" fill="#EAF0FB" font-size="18" font-weight="700">DISTANCE 3 · ROTATED PATCH</text>
+    <text x="48" y="74" fill="#8491AD" font-size="14">9 data qubits · 8 stabilizer checks</text>
 
-  <!-- data qubits (circles on vertices) -->
-  <g fill="#0E1526" stroke="#EAF0FB" stroke-width="2.2">
-    <circle cx="155" cy="85" r="13"/><circle cx="285" cy="85" r="13"/><circle cx="415" cy="85" r="13"/><circle cx="545" cy="85" r="13"/><circle cx="675" cy="85" r="13"/><circle cx="805" cy="85" r="13"/>
-    <circle cx="155" cy="215" r="13"/><circle cx="285" cy="215" r="13"/><circle cx="415" cy="215" r="13"/><circle cx="545" cy="215" r="13"/><circle cx="675" cy="215" r="13"/><circle cx="805" cy="215" r="13"/>
-    <circle cx="155" cy="345" r="13"/><circle cx="285" cy="345" r="13"/><circle cx="415" cy="345" r="13"/><circle cx="545" cy="345" r="13"/><circle cx="675" cy="345" r="13"/><circle cx="805" cy="345" r="13"/>
-    <circle cx="155" cy="475" r="13"/><circle cx="285" cy="475" r="13"/><circle cx="415" cy="475" r="13"/><circle cx="545" cy="475" r="13"/><circle cx="675" cy="475" r="13"/><circle cx="805" cy="475" r="13"/>
-    <circle cx="155" cy="605" r="13"/><circle cx="285" cy="605" r="13"/><circle cx="415" cy="605" r="13"/><circle cx="545" cy="605" r="13"/><circle cx="675" cy="605" r="13"/><circle cx="805" cy="605" r="13"/>
-  </g>
+    <!-- Interior weight-4 check regions. -->
+    <g stroke-width="1.5">
+      <path d="M180 180H360V360H180Z" fill="#8B5CF6" fill-opacity="0.09" stroke="#8B5CF6" stroke-opacity="0.28"/>
+      <path d="M360 180H540V360H360Z" fill="#22D3EE" fill-opacity="0.09" stroke="#22D3EE" stroke-opacity="0.28"/>
+      <path d="M180 360H360V540H180Z" fill="#22D3EE" fill-opacity="0.09" stroke="#22D3EE" stroke-opacity="0.28"/>
+      <path d="M360 360H540V540H360Z" fill="#8B5CF6" fill-opacity="0.09" stroke="#8B5CF6" stroke-opacity="0.28"/>
+    </g>
 
-  <!-- minimal labels -->
-  <g font-family="'JetBrains Mono', monospace" font-size="16" fill="#64708E">
-    <text x="220" y="155" fill="#22D3EE">Z</text>
-    <text x="350" y="155" fill="#8B5CF6">X</text>
-    <text x="480" y="285" fill="#22D3EE">Z</text>
-    <text x="220" y="285" fill="#8B5CF6">X</text>
-    <text x="350" y="545" fill="#FB7185">error chain</text>
+    <!-- Boundary weight-2 check regions: top/bottom X, left/right Z. -->
+    <g stroke-width="1.5" stroke-dasharray="6 6">
+      <path d="M360 180V112Q450 70 540 112V180Z" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-opacity="0.52"/>
+      <path d="M180 180H112Q70 270 112 360H180Z" fill="#22D3EE" fill-opacity="0.08" stroke="#22D3EE" stroke-opacity="0.52"/>
+      <path d="M180 540V608Q270 650 360 608V540Z" fill="#8B5CF6" fill-opacity="0.08" stroke="#8B5CF6" stroke-opacity="0.52"/>
+      <path d="M540 360H608Q650 450 608 540H540Z" fill="#22D3EE" fill-opacity="0.08" stroke="#22D3EE" stroke-opacity="0.52"/>
+    </g>
+
+    <!-- Each spoke terminates at a data qubit in that stabilizer's support. -->
+    <g fill="none" stroke-linecap="round" stroke-width="2" opacity="0.68">
+      <!-- X1: top boundary, weight 2 -->
+      <path d="M450 90L360 180M450 90L540 180" stroke="#8B5CF6"/>
+      <!-- X2: upper-left interior, weight 4 -->
+      <path d="M270 270L180 180M270 270L360 180M270 270L180 360M270 270L360 360" stroke="#8B5CF6"/>
+      <!-- X3: lower-right interior, weight 4 -->
+      <path d="M450 450L360 360M450 450L540 360M450 450L360 540M450 450L540 540" stroke="#8B5CF6"/>
+      <!-- X4: bottom boundary, weight 2 -->
+      <path d="M270 630L180 540M270 630L360 540" stroke="#8B5CF6"/>
+
+      <!-- Z1: left boundary, weight 2 -->
+      <path d="M90 270L180 180M90 270L180 360" stroke="#22D3EE"/>
+      <!-- Z2: upper-right interior, weight 4 -->
+      <path d="M450 270L360 180M450 270L540 180M450 270L360 360M450 270L540 360" stroke="#22D3EE"/>
+      <!-- Z3: lower-left interior, weight 4 -->
+      <path d="M270 450L180 360M270 450L360 360M270 450L180 540M270 450L360 540" stroke="#22D3EE"/>
+      <!-- Z4: right boundary, weight 2 -->
+      <path d="M630 450L540 360M630 450L540 540" stroke="#22D3EE"/>
+    </g>
+
+    <!-- Stabilizer measurement nodes. Violet = X; cyan = Z. -->
+    <g text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700">
+      <g fill="#17102D" stroke="#8B5CF6" stroke-width="2">
+        <rect x="430" y="70" width="40" height="40" rx="8"/>
+        <rect x="250" y="250" width="40" height="40" rx="8"/>
+        <rect x="430" y="430" width="40" height="40" rx="8"/>
+        <rect x="250" y="610" width="40" height="40" rx="8"/>
+      </g>
+      <g fill="#C4B5FD">
+        <text x="450" y="90">X1</text>
+        <text x="270" y="270">X2</text>
+        <text x="450" y="450">X3</text>
+        <text x="270" y="630">X4</text>
+      </g>
+
+      <g fill="#071E2A" stroke="#22D3EE" stroke-width="2">
+        <rect x="70" y="250" width="40" height="40" rx="8"/>
+        <rect x="430" y="250" width="40" height="40" rx="8"/>
+        <rect x="250" y="430" width="40" height="40" rx="8"/>
+        <rect x="610" y="430" width="40" height="40" rx="8"/>
+      </g>
+      <g fill="#67E8F9">
+        <text x="90" y="270">Z1</text>
+        <text x="450" y="270">Z2</text>
+        <text x="270" y="450">Z3</text>
+        <text x="630" y="450">Z4</text>
+      </g>
+    </g>
+
+    <!-- Rose rings identify the only two -1 syndrome outcomes. -->
+    <g fill="none" stroke="#FB7185">
+      <circle cx="450" cy="270" r="30" stroke-opacity="0.22" stroke-width="14" filter="url(#softGlow)"/>
+      <circle cx="270" cy="450" r="30" stroke-opacity="0.22" stroke-width="14" filter="url(#softGlow)"/>
+      <circle cx="450" cy="270" r="29" stroke-width="3"/>
+      <circle cx="270" cy="450" r="29" stroke-width="3"/>
+      <path d="M390 330L424 296M330 390L296 424" stroke-width="2.5" stroke-dasharray="5 6"/>
+    </g>
+    <g fill="#FB7185" font-size="16" font-weight="800" text-anchor="middle">
+      <text x="450" y="230">−1</text>
+      <text x="270" y="410">−1</text>
+    </g>
+
+    <!-- Nine data qubits, numbered in the same row-major order as surfaceCode.ts. -->
+    <g stroke="#EAF0FB" stroke-width="2.5">
+      <circle cx="180" cy="180" r="17" fill="#0E1526"/>
+      <circle cx="360" cy="180" r="17" fill="#0E1526"/>
+      <circle cx="540" cy="180" r="17" fill="#0E1526"/>
+      <circle cx="180" cy="360" r="17" fill="#0E1526"/>
+      <circle cx="360" cy="360" r="23" fill="#391522" stroke="#FB7185" stroke-width="3.5"/>
+      <circle cx="540" cy="360" r="17" fill="#0E1526"/>
+      <circle cx="180" cy="540" r="17" fill="#0E1526"/>
+      <circle cx="360" cy="540" r="17" fill="#0E1526"/>
+      <circle cx="540" cy="540" r="17" fill="#0E1526"/>
+    </g>
+    <g fill="#B9C3D8" font-size="11" text-anchor="middle">
+      <text x="180" y="184">D0</text><text x="360" y="184">D1</text><text x="540" y="184">D2</text>
+      <text x="180" y="364">D3</text><text x="540" y="364">D5</text>
+      <text x="180" y="544">D6</text><text x="360" y="544">D7</text><text x="540" y="544">D8</text>
+    </g>
+    <text x="360" y="366" fill="#FFE4E8" font-size="17" font-weight="900" text-anchor="middle">X</text>
+    <text x="360" y="398" fill="#FB7185" font-size="12" text-anchor="middle">error on D4</text>
+
+    <!-- Explanatory legend. -->
+    <g transform="translate(700 118)">
+      <rect width="220" height="486" rx="18" fill="#0E1526" stroke="#2A3A5F"/>
+      <text x="24" y="42" fill="#EAF0FB" font-size="15" font-weight="700">WHAT IS SHOWN</text>
+
+      <rect x="24" y="70" width="28" height="28" rx="6" fill="#17102D" stroke="#8B5CF6" stroke-width="2"/>
+      <text x="66" y="90" fill="#C4B5FD" font-size="13">X stabilizer</text>
+      <rect x="24" y="112" width="28" height="28" rx="6" fill="#071E2A" stroke="#22D3EE" stroke-width="2"/>
+      <text x="66" y="132" fill="#67E8F9" font-size="13">Z stabilizer</text>
+      <circle cx="38" cy="168" r="12" fill="#0E1526" stroke="#EAF0FB" stroke-width="2"/>
+      <text x="66" y="173" fill="#B9C3D8" font-size="13">data qubit</text>
+
+      <path d="M24 208H196" stroke="#2A3A5F"/>
+      <text x="24" y="240" fill="#EAF0FB" font-size="14" font-weight="700">CHECK WEIGHTS</text>
+      <text x="24" y="270" fill="#B9C3D8" font-size="13">4 interior × weight 4</text>
+      <text x="24" y="296" fill="#B9C3D8" font-size="13">4 boundary × weight 2</text>
+
+      <path d="M24 326H196" stroke="#2A3A5F"/>
+      <text x="24" y="358" fill="#FB7185" font-size="14" font-weight="700">SYNDROME EXAMPLE</text>
+      <text x="24" y="389" fill="#EAF0FB" font-size="13">X on center D4</text>
+      <text x="24" y="416" fill="#B9C3D8" font-size="13">anticommutes with:</text>
+      <text x="24" y="444" fill="#FB7185" font-size="13" font-weight="700">Z2 = −1 · Z3 = −1</text>
+      <text x="24" y="472" fill="#8491AD" font-size="12">all other checks = +1</text>
+    </g>
   </g>
 </svg>

@@ -1,5 +1,5 @@
 /**
- * Glossary data (design/glossary.md §4 — 29 terms, 5 categories).
+ * Glossary data (design/glossary.md §4 — 46 terms, 6 categories).
  * Lives here (not in the page) so the review deck, inline term popovers,
  * and the selection explainer share it, and scripts/check-data.mjs
  * validates it.
@@ -22,6 +22,7 @@ export function matchGlossaryTerm(text: string): GlossaryTerm | undefined {
 }
 
 export type Category =
+  | 'foundations'
   | 'code theory'
   | 'topology & anyons'
   | 'computation'
@@ -41,6 +42,7 @@ export interface GlossaryTerm {
 }
 
 export const CATEGORIES: Category[] = [
+  'foundations',
   'code theory',
   'topology & anyons',
   'computation',
@@ -49,6 +51,7 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const CATEGORY_COLORS: Record<Category, string> = {
+  foundations: '#60A5FA',
   'code theory': '#22D3EE',
   'topology & anyons': '#8B5CF6',
   computation: '#F5B83D',
@@ -58,13 +61,234 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 
 export const TERMS: GlossaryTerm[] = [
   {
+    term: 'basis',
+    slug: 'basis',
+    category: 'foundations',
+    short:
+      'A complete set of independent reference vectors used as coordinates for writing states; measurement bases are normally orthonormal.',
+    long:
+      'A basis is the quantum analogue of choosing coordinate axes. Once a basis is chosen, a state vector has one complex amplitude for each basis vector. For an ideal projective measurement, the basis vectors are orthonormal and label the possible outcomes. Changing coordinates does not change the physical state, and saying that a state is a “superposition” is therefore incomplete unless the basis is named.',
+    notation: '{|0⟩, |1⟩}',
+    related_terms: ['state-vector', 'inner-product', 'superposition'],
+    related_topics: ['linear-algebra', 'complex-numbers-dirac-notation'],
+    related_papers: [],
+  },
+  {
+    term: 'Born rule',
+    slug: 'born-rule',
+    category: 'foundations',
+    short:
+      'The rule that turns a quantum amplitude into an outcome probability by taking the squared magnitude of the relevant projection.',
+    long:
+      'For a normalized pure state |ψ⟩ measured in an orthonormal basis {|i⟩}, the probability of outcome i is |⟨i|ψ⟩|². More generally, projectors or POVM elements describe measurements, and density operators describe mixed states. The Born rule maps the state and measurement to probabilities; it does not mean the amplitudes themselves are probabilities or that the system secretly carried one definite basis answer before measurement.',
+    notation: 'p(i) = |⟨i|ψ⟩|²',
+    related_terms: ['complex-amplitude', 'inner-product', 'observable'],
+    related_topics: ['quantum-mechanics-basics'],
+    related_papers: [],
+  },
+  {
+    term: 'bra-ket notation (Dirac notation)',
+    slug: 'bra-ket-notation',
+    category: 'foundations',
+    short:
+      'A compact notation in which |ψ⟩ is a vector (ket), ⟨ψ| is its conjugate dual (bra), and ⟨φ|ψ⟩ is an inner product.',
+    long:
+      'Dirac notation keeps vectors, dual vectors, inner products, and operators visually distinct. Taking the adjoint of |ψ⟩ produces ⟨ψ|; the bra is not an unrelated second state. Joining a bra and ket in one order gives a complex number, while reversing the order gives an outer-product operator. The brackets are notation for linear algebra, not a physical container around a particle.',
+    notation: '|ψ⟩, ⟨ψ|, ⟨φ|ψ⟩, |ψ⟩⟨ψ|',
+    related_terms: ['state-vector', 'inner-product', 'complex-amplitude'],
+    related_topics: ['complex-numbers-dirac-notation', 'linear-algebra'],
+    related_papers: [],
+  },
+  {
+    term: 'commute (anticommute)',
+    slug: 'commute-anticommute',
+    category: 'foundations',
+    short:
+      'Two operators commute when order does not matter, AB = BA; they anticommute when swapping the order contributes a minus sign, AB = −BA.',
+    long:
+      'Commuting Hermitian operators in finite dimensions can be represented with a common eigenbasis, which is why compatible stabilizer checks can have simultaneous definite values. Anticommuting Pauli operators cannot share an eigenstate: applying one flips the eigenvalue associated with the other, letting a stabilizer reveal an error. Noncommutation by itself does not imply entanglement, and it does not force uncertainty for every possible state; those conclusions require the state and observables too.',
+    notation: '[A,B] = 0; {A,B} = 0',
+    related_terms: ['pauli-operator', 'observable', 'stabilizer'],
+    related_topics: ['linear-algebra', 'stabilizer-formalism'],
+    related_papers: ['quant-ph/0110143'],
+  },
+  {
+    term: 'complex amplitude (probability amplitude)',
+    slug: 'complex-amplitude',
+    category: 'foundations',
+    short:
+      'A complex coefficient of a basis state whose magnitude and phase determine probabilities and interference.',
+    long:
+      'In a pure state |ψ⟩ = Σᵢ αᵢ|i⟩, each αᵢ is a complex amplitude. Its squared magnitude contributes the Born-rule probability for outcome i in that basis, while its phase matters only relative to other amplitudes and can change interference. An amplitude is not a probability: it can be negative or complex, and amplitudes combine before squared magnitudes are taken. A single state vector and its amplitudes describe a pure state; general statistical mixtures require a density operator.',
+    notation: 'αᵢ ∈ ℂ; Σᵢ|αᵢ|² = 1',
+    related_terms: ['born-rule', 'relative-phase', 'state-vector'],
+    related_topics: ['complex-numbers-dirac-notation', 'quantum-mechanics-basics'],
+    related_papers: [],
+  },
+  {
+    term: 'eigenstate (eigenvalue)',
+    slug: 'eigenstate-eigenvalue',
+    category: 'foundations',
+    short:
+      'An eigenstate is a nonzero vector whose direction an operator leaves unchanged; the corresponding scale factor is its eigenvalue.',
+    long:
+      'The equation A|a⟩ = a|a⟩ says that |a⟩ is an eigenstate of A with eigenvalue a. For an ideal measurement of an observable, its eigenvalues label possible results, and a state wholly inside one eigenspace gives that result with certainty. Degenerate eigenvalues may correspond to more than one independent eigenstate. An eigenvalue is a number, not a state, and being an eigenstate of one observable does not make the state definite for every other observable.',
+    notation: 'A|a⟩ = a|a⟩',
+    related_terms: ['observable', 'basis', 'unitary'],
+    related_topics: ['linear-algebra', 'quantum-mechanics-basics'],
+    related_papers: [],
+  },
+  {
+    term: 'entanglement',
+    slug: 'entanglement',
+    category: 'foundations',
+    short:
+      'A property of a joint quantum state that cannot be assembled from independent states of its parts, even with shared classical randomness.',
+    long:
+      'A pure bipartite state is entangled when it cannot be factored as |ψ⟩A ⊗ |φ⟩B. For mixed states, the stricter test is whether the density operator can be written as a probabilistic mixture of product states; if it can, it is separable. Correlation alone is not evidence of entanglement because ordinary shared randomness can also correlate outcomes, and Bell-inequality violation is a stronger condition than entanglement. Entanglement does not allow controllable faster-than-light communication.',
+    notation: '|Ψ⟩AB ≠ |ψ⟩A ⊗ |φ⟩B',
+    related_terms: ['tensor-product', 'state-vector', 'superposition'],
+    related_topics: ['quantum-mechanics-basics', 'cluster-states-mbqc'],
+    related_papers: ['quant-ph/0510135'],
+  },
+  {
+    term: 'Hilbert space',
+    slug: 'hilbert-space',
+    category: 'foundations',
+    short:
+      'A complex vector space with an inner product and the completeness needed for limits; quantum state vectors live in it.',
+    long:
+      'For a finite register of n qubits, the state space is the 2ⁿ-dimensional complex Hilbert space (ℂ²)⊗ⁿ. Its inner product defines lengths, angles, orthogonality, and ultimately measurement probabilities. “Space” here is mathematical state space, not the three-dimensional room around the device. Physical pure states are normalized rays in the Hilbert space, while mixed states are density operators on it rather than additional state vectors.',
+    notation: 'ℋ; ℋₙ = (ℂ²)⊗ⁿ',
+    related_terms: ['state-vector', 'inner-product', 'tensor-product'],
+    related_topics: ['linear-algebra', 'complex-numbers-dirac-notation'],
+    related_papers: [],
+  },
+  {
+    term: 'inner product',
+    slug: 'inner-product',
+    category: 'foundations',
+    short:
+      'A complex-valued overlap between two vectors that defines their angle, norm, and orthogonality.',
+    long:
+      'In Dirac notation, ⟨φ|ψ⟩ is conjugate-linear in the bra and linear in the ket. Orthogonal vectors have zero overlap, and a normalized vector has ⟨ψ|ψ⟩ = 1. For normalized pure states, |⟨φ|ψ⟩|² is the probability of projecting |ψ⟩ onto |φ⟩. It resembles a dot product but complex conjugation is essential, so treating it as an ordinary component-by-component product gives wrong phases and probabilities.',
+    notation: '⟨φ|ψ⟩; ‖ψ‖² = ⟨ψ|ψ⟩',
+    related_terms: ['bra-ket-notation', 'hilbert-space', 'born-rule'],
+    related_topics: ['linear-algebra', 'complex-numbers-dirac-notation'],
+    related_papers: [],
+  },
+  {
+    term: 'observable',
+    slug: 'observable',
+    category: 'foundations',
+    short:
+      'A Hermitian operator whose eigenvalues represent the possible outcomes of an ideal projective measurement.',
+    long:
+      'An observable A has real eigenvalues and orthogonal eigenspaces. The state and the associated projectors determine outcome probabilities through the Born rule, while ⟨ψ|A|ψ⟩ is the expectation value for a pure state—not necessarily a result seen in one trial. Not every operator is an observable: unitary gates describe reversible evolution, and general laboratory measurements may require POVMs rather than a single projective observable.',
+    notation: 'A = A†; ⟨A⟩ψ = ⟨ψ|A|ψ⟩',
+    related_terms: ['eigenstate-eigenvalue', 'born-rule', 'unitary'],
+    related_topics: ['quantum-mechanics-basics', 'linear-algebra'],
+    related_papers: [],
+  },
+  {
+    term: 'Pauli operator (Pauli)',
+    slug: 'pauli-operator',
+    category: 'foundations',
+    short:
+      'One of I, X, Y, and Z: four single-qubit operators that form a basis for qubit operators and label standard error components.',
+    long:
+      'X swaps |0⟩ and |1⟩, Z changes their relative sign, and Y combines both actions with phases; I does nothing. Pauli products provide the language of stabilizers, logical operators, and many noise models because any qubit operator can be expanded in this operator basis. Calling X a “bit flip” and Z a “phase flip” refers to the computational basis and is not a claim that every physical noise event is literally one discrete Pauli fault.',
+    notation: 'I, X, Y, Z; Y = iXZ',
+    related_terms: ['qubit', 'commute-anticommute', 'stabilizer'],
+    related_topics: ['qubits-pauli-operators', 'stabilizer-formalism'],
+    related_papers: ['quant-ph/0110143'],
+  },
+  {
+    term: 'qubit',
+    slug: 'qubit',
+    category: 'foundations',
+    short:
+      'A quantum two-level degree of freedom whose pure state is a normalized combination of two basis states.',
+    long:
+      'Relative to a chosen basis, a pure qubit state is α|0⟩ + β|1⟩ with |α|² + |β|² = 1. The two complex amplitudes contain a measurable population balance and relative phase; a shared global phase changes no predictions. A qubit is not a classical bit secretly holding 0 or 1: coherent superpositions can interfere. Nor does one vector describe every qubit preparation—classical uncertainty and a subsystem of an entangled state generally require a density matrix.',
+    notation: '|ψ⟩ = α|0⟩ + β|1⟩',
+    related_terms: ['complex-amplitude', 'relative-phase', 'superposition'],
+    related_topics: ['quantum-mechanics-basics', 'qubits-pauli-operators'],
+    related_papers: [],
+  },
+  {
+    term: 'relative phase',
+    slug: 'relative-phase',
+    category: 'foundations',
+    short:
+      'The difference between the complex phases of state components—the phase information that can affect interference.',
+    long:
+      'For α|0⟩ + β|1⟩, the phase difference arg(β) − arg(α) can change probabilities after the components are recombined or measured in another basis. Multiplying the entire state vector by one common phase leaves every physical prediction unchanged, so global phase is not observable for an isolated state. Relative phase is not a separately readable label attached to one component; it is revealed through comparisons and interference.',
+    notation: 'Δφ = arg(β) − arg(α)',
+    related_terms: ['complex-amplitude', 'superposition', 'unitary'],
+    related_topics: ['complex-numbers-dirac-notation', 'quantum-gates-circuits'],
+    related_papers: [],
+  },
+  {
+    term: 'state vector (ket)',
+    slug: 'state-vector',
+    category: 'foundations',
+    short:
+      'A normalized vector that represents a pure quantum state, with physically equivalent vectors differing only by global phase.',
+    long:
+      'A state vector collects the complex amplitudes for every basis state and lets inner products, unitary evolution, and the Born rule be expressed as linear algebra. Normalization makes total probability one, while an overall complex phase has no observable effect, so a physical pure state is technically a ray rather than one unique vector. State vectors do not represent every physical state: a probabilistic mixture or a subsystem entangled with an environment requires a density operator.',
+    notation: '|ψ⟩ ∈ ℋ; ⟨ψ|ψ⟩ = 1',
+    related_terms: ['hilbert-space', 'complex-amplitude', 'bra-ket-notation'],
+    related_topics: ['complex-numbers-dirac-notation', 'quantum-mechanics-basics'],
+    related_papers: [],
+  },
+  {
+    term: 'superposition',
+    slug: 'superposition',
+    category: 'foundations',
+    short:
+      'A coherent linear combination of basis states whose amplitudes can interfere.',
+    long:
+      'Because quantum states form a vector space, α|0⟩ + β|1⟩ is a valid pure state whenever it is normalized. Superposition is basis-dependent: |+⟩ is a superposition in the Z basis but a single basis state in the X basis. It is not merely classical ignorance about a hidden definite alternative; a coherent superposition can produce interference that the corresponding statistical mixture cannot. Saying “both at once” is a memory aid, not a literal classical picture.',
+    notation: '|ψ⟩ = Σᵢ αᵢ|i⟩',
+    related_terms: ['basis', 'complex-amplitude', 'relative-phase'],
+    related_topics: ['quantum-mechanics-basics', 'qubits-pauli-operators'],
+    related_papers: [],
+  },
+  {
+    term: 'tensor product',
+    slug: 'tensor-product',
+    category: 'foundations',
+    short:
+      'The operation that builds the state space of a composite quantum system from the state spaces of its parts.',
+    long:
+      'If systems A and B have state spaces ℋA and ℋB, their joint state space is ℋA ⊗ ℋB, so dimensions multiply. Product states factor as |ψ⟩A ⊗ |φ⟩B, but the tensor-product space also contains entangled states that cannot be factored. The tensor product is not an ordinary scalar multiplication or a Cartesian list of two pre-existing local states; a joint state need not assign either subsystem its own pure state.',
+    notation: 'ℋAB = ℋA ⊗ ℋB',
+    related_terms: ['hilbert-space', 'entanglement', 'state-vector'],
+    related_topics: ['linear-algebra', 'quantum-mechanics-basics'],
+    related_papers: ['quant-ph/0510135'],
+  },
+  {
+    term: 'unitary',
+    slug: 'unitary',
+    category: 'foundations',
+    short:
+      'A reversible linear operator that preserves inner products, normalization, and therefore total probability.',
+    long:
+      'A unitary U obeys U†U = UU† = I. Ideal gates and the closed-system time evolution of pure states are unitary, so distinct inputs remain distinct and the operation has inverse U†. Measurement, reset, and noisy evolution of an observed subsystem are not generally unitary maps on that subsystem, even though a larger closed system can model them with unitary evolution plus an environment.',
+    notation: 'U†U = I; |ψ′⟩ = U|ψ⟩',
+    related_terms: ['state-vector', 'inner-product', 'observable'],
+    related_topics: ['quantum-gates-circuits', 'quantum-mechanics-basics'],
+    related_papers: [],
+  },
+  {
     term: 'ancilla qubit',
     slug: 'ancilla-qubit',
     category: 'hardware & experiment',
     short:
-      'A helper qubit that stores no logical information but mediates the stabilizer measurements of the data qubits around it.',
+      'A helper qubit prepared and measured to extract information such as a stabilizer value without intentionally storing the logical state.',
     long:
-      'In every syndrome-extraction round, the circuit entangles each ancilla with its neighboring data qubits and then measures it. Each measurement reads out one stabilizer and never touches the encoded state directly. Ancillas sit in the middle of the extraction circuit, so their own faults are a primary source of correlated errors. Flag qubits and careful measurement schedules keep those faults contained.',
+      'In a standard syndrome-extraction round, gates couple an ancilla to neighboring data qubits before the ancilla is measured. Ideally this reveals a stabilizer eigenvalue while preserving every superposition inside the corresponding eigenspace, so it does not reveal the encoded logical amplitudes. The interaction is real, however: an ancilla fault can propagate to several data qubits. Gate ordering, repeated rounds, verification, and flag qubits are tools for limiting or exposing that propagation.',
     related_terms: ['syndrome', 'stabilizer', 'flag-qubit'],
     related_topics: ['syndrome-extraction-circuits'],
     related_papers: ['1208.0928'],
@@ -74,9 +298,9 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'anyon',
     category: 'topology & anyons',
     short:
-      'A quasiparticle of a two-dimensional system whose exchange statistics are neither bosonic nor fermionic.',
+      'A quasiparticle in two dimensions whose exchanges and windings can imprint topological phases or transformations on the quantum state.',
     long:
-      'Swapping two anyons, or winding one around another, transforms the quantum state in ways that depend only on the topology of the path — not its details. In the toric and surface codes, the e and m anyons are exactly the endpoint excitations of error chains, and braiding them is the original route to logical gates. This path-independence is the physical origin of topological protection.',
+      'In the toric-code model, an e excitation is a violated star at the end of a Z-error string, while an m excitation is a violated plaquette at the end of an X-error string. Winding e around m contributes a −1 phase: they have nontrivial mutual statistics even though e and m each have bosonic self-statistics in this model (their composite is fermionic). The result is insensitive to smooth path deformations that avoid other excitations, not to every physical imperfection. Toric-code anyons are Abelian, and their braiding alone is not a universal gate set.',
     related_terms: ['braiding', 'topological-order', 'toric-code'],
     related_topics: ['topological-order-anyons', 'toric-code'],
     related_papers: ['quant-ph/0110143'],
@@ -235,7 +459,7 @@ export const TERMS: GlossaryTerm[] = [
     short:
       'The protected qubit encoded collectively across many noisy physical qubits of an error-correcting code.',
     long:
-      'No single physical qubit holds the logical state — it lives in the correlations of the whole lattice, invisible to local errors. The goal of the field is a logical qubit whose error rate falls below that of its physical constituents. Adding more physical qubits then makes the rate fall exponentially. Recent below-threshold experiments crossed the first of those milestones.',
+      'A logical qubit is a two-dimensional degree of freedom inside a larger code space, so no designated physical qubit alone carries its full state. Errors below the code\'s correctable weight cannot implement a nontrivial logical operation, but local faults can accumulate into a logical error and syndrome measurements can themselves be faulty. For suitable code families operated below their noise threshold, increasing distance can suppress logical error rapidly—often exponentially in distance under a specified model. That behavior is conditional, not an automatic consequence of using more physical qubits.',
     related_terms: ['logical-operator', 'code-distance', 'stabilizer'],
     related_topics: ['quantum-codes-basics', 'below-threshold-experiments'],
     related_papers: ['2207.06431', '2408.13687'],
@@ -247,8 +471,8 @@ export const TERMS: GlossaryTerm[] = [
     short:
       'A specially prepared resource state that, consumed by gate teleportation, supplies the non-Clifford power a surface code lacks natively.',
     long:
-      'Clifford operations plus magic states are universal. Injected magic states are noisy, so distillation factories purify them. These circuits turn many noisy copies into a few high-quality ones. A newer method, cultivation, grows magic states directly on the lattice at much lower overhead. Magic-state production is usually the single largest cost center of a fault-tolerant algorithm.',
-    notation: '|T⟩',
+      'One common convention uses |A⟩ = T|+⟩ = (|0⟩ + e^{iπ/4}|1⟩)/√2; names such as “T state” vary across sources. A Clifford gate-teleportation circuit consumes the state to implement a non-Clifford operation. Noisy injected states can be distilled, turning many imperfect copies into fewer higher-fidelity copies. Cultivation is a newer family of protocols that grows an encoded magic state while checking it; its advantage depends on the physical noise model, target fidelity, and architecture rather than guaranteeing lower overhead in every regime.',
+    notation: '|A⟩ = T|+⟩',
     related_terms: ['non-clifford-gate', 'clifford-gate'],
     related_topics: ['magic-states-distillation', 'magic-state-cultivation'],
     related_papers: ['1812.01238'],
@@ -270,9 +494,9 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'mwpm-decoder',
     category: 'decoding',
     short:
-      'A decoder that pairs up syndrome defects by minimum-weight perfect matching, reconstructing the most likely error chains.',
+      'A decoder that pairs detection events (or boundaries) with minimum total weight and uses those paths to propose a correction.',
     long:
-      'Minimum-weight perfect matching, implemented with Edmonds\' blossom algorithm, treats the syndrome as a graph problem: connect the detection events in pairs with the shortest total chain length. It achieves thresholds near the theoretical optimum and decodes in near-linear time in practice. Researchers still measure every faster, smarter, or more correlated decoder against it.',
+      'Minimum-weight perfect matching turns a syndrome history into a weighted graph, then chooses a perfect matching of detection events and eligible boundaries. Edge weights encode an assumed noise model, and paths associated with the matching define a correction or Pauli-frame update. The selected chain need not be the fault chain that actually occurred; many chains have the same syndrome, and successful decoding only requires the combined fault and correction to be logically trivial. Performance, threshold, and runtime depend on graph construction and noise correlations, so correlated-noise variants may need richer models than basic MWPM.',
     related_terms: ['error-chain', 'syndrome', 'real-time-decoding'],
     related_topics: ['decoding-mwpm'],
     related_papers: ['1110.5133', '1307.1740'],
@@ -294,9 +518,9 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'real-time-decoding',
     category: 'decoding',
     short:
-      'Decoding fast enough to keep pace with the hardware\'s measurement stream, so the backlog of undecoded syndromes never grows.',
+      'Decoding with enough sustained throughput and bounded-enough latency to keep pace with a live stream of syndrome data.',
     long:
-      'A superconducting device produces a syndrome round about every microsecond; the decoder must average one round per microsecond forever, or the backlog grows exponentially (the "backlog problem"). Real-time decoding demands streaming, parallelized algorithms on FPGAs or ASICs sitting next to the cryostat — one of the hardest classical-engineering challenges on the road to large machines.',
+      'Fast hardware can emit a new syndrome round on a microsecond-scale cadence, although the number is platform- and experiment-dependent. A decoder needs average throughput at least as high as the arrival rate; a persistent deficit makes the backlog grow without bound, approximately linearly with time rather than exponentially. It must also deliver decisions before the control operation that consumes them, so a high-throughput decoder can still fail a latency deadline. Streaming CPUs, GPUs, FPGAs, ASICs, and hierarchical schemes are engineering options, not parts of the definition.',
     related_terms: ['mwpm-decoder', 'syndrome', 'space-time-diagram'],
     related_topics: ['real-time-decoding-control'],
     related_papers: ['2408.13687'],
@@ -342,9 +566,9 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'surface-code',
     category: 'topology & anyons',
     short:
-      'Kitaev\'s toric code flattened onto a planar patch with boundaries — the leading architecture for fault-tolerant quantum computing.',
+      'A family of two-dimensional topological stabilizer codes with local checks and boundaries that can encode logical qubits.',
     long:
-      'The surface code needs only nearest-neighbor gates on a 2D grid, and it tolerates error rates just below one percent. Initialization, measurement, lattice surgery, and magic-state injection all use the same repeated stabilizer circuit. These properties are why essentially every serious hardware roadmap, from superconducting qubits to neutral atoms, converges on some flavor of surface code.',
+      'The surface code is closely related to Kitaev\'s toric code but replaces the closed surface with boundaries or defects, producing planar patches suitable for devices. Its checks can be measured using geometrically local interactions on a two-dimensional layout, and logical operations can be built with deformations or lattice surgery. Threshold values are not universal constants: they depend on the noise model, circuit, decoder, leakage, and connectivity, with order-one-percent figures applying only to particular common circuit-level models. The code is prominent across several hardware roadmaps, but it is not the only fault-tolerant architecture.',
     related_terms: ['toric-code', 'plaquette', 'rotated-surface-code'],
     related_topics: ['surface-code'],
     related_papers: ['quant-ph/9811052', '1208.0928'],
@@ -354,9 +578,9 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'syndrome',
     category: 'code theory',
     short:
-      'The pattern of stabilizer outcomes that report −1, revealing where errors struck without collapsing the logical information.',
+      'The pattern of stabilizer measurement values that constrains which errors may have occurred without directly measuring the encoded logical observable.',
     long:
-      'The syndrome is the code\'s error report. It tells you that an error happened, and roughly where. It commutes with the logical state, so the measurement itself does no harm. Decoders consume streams of syndromes — comparing rounds to find detection events — and infer the underlying error chains. Everything in quantum error correction is downstream of getting the syndrome out cleanly and quickly.',
+      'For an ideal stabilizer code, an error that anticommutes with a check flips that check\'s eigenvalue. The resulting syndrome does not uniquely identify the physical fault: errors that differ by a stabilizer can have the same action on the code, and distinct logical classes can share a trivial syndrome. In repeated noisy extraction, decoders usually consume changes between outcomes—detection events—rather than treating every −1 as a fresh fault. Ideal check measurement preserves coherence within a syndrome subspace, but faulty extraction can still damage data and must itself be decoded.',
     related_terms: ['stabilizer', 'error-chain', 'mwpm-decoder'],
     related_topics: ['decoding-mwpm', 'syndrome-extraction-circuits'],
     related_papers: ['1110.5133'],
@@ -366,10 +590,10 @@ export const TERMS: GlossaryTerm[] = [
     slug: 'threshold-theorem',
     category: 'code theory',
     short:
-      'If the physical error rate is below a threshold, growing the code distance suppresses the logical error rate without bound.',
+      'Under stated assumptions, noise below a nonzero threshold permits arbitrarily reliable and long quantum computation with scalable error correction.',
     long:
-      'The threshold theorem converts error correction from a delaying tactic into a scalable solution: below p_th, each increment of distance gives exponential protection. For the surface code with realistic circuit-level noise the threshold sits around 0.5–1% — the famous "one percent" that set the target for two decades of hardware development.',
-    notation: 'p_th ≈ 1%',
+      'A threshold result specifies a code or fault-tolerant construction, a noise model, and assumptions about operations and correlations. Below its threshold, increasing the protection level can make logical failure arbitrarily small with controlled overhead; above it, simply increasing code size need not help. Surface-code thresholds are often of order one percent in simplified circuit-level depolarizing models, but coherent noise, leakage, biased noise, connectivity, and decoder choice can move the number substantially. There is therefore no hardware-independent universal “one-percent threshold.”',
+    notation: 'p < p_th',
     related_terms: ['fault-tolerance', 'code-distance'],
     related_topics: ['fault-tolerance-thresholds'],
     related_papers: ['1206.0800', '2408.13687'],
@@ -381,7 +605,7 @@ export const TERMS: GlossaryTerm[] = [
     short:
       'A phase of matter characterized not by symmetry but by topology-dependent ground-state degeneracy and anyonic excitations.',
     long:
-      'A topologically ordered system encodes information in global, non-local degrees of freedom, so no local perturbation can distinguish or corrupt the encoded states. This is the deep reason topological codes protect quantum information. The topology of the many-body ground state hides the logical qubit exactly where small errors cannot reach it.',
+      'In an ideal gapped topological phase, ground states can depend on the topology of the space and support excitations with anyonic statistics. Local operators cannot distinguish the ground states in the thermodynamic limit; in finite systems the protection is approximate, and sequences of local faults can form a nonlocal logical operator. This structure motivates topological quantum codes, but an actively measured surface-code device is an engineered error-correcting system and need not be a passive equilibrium topological material. “Topological” therefore means robust to specified local deformations or errors, not immune to all noise.',
     related_terms: ['anyon', 'toric-code', 'surface-code'],
     related_topics: ['topological-order-anyons'],
     related_papers: ['quant-ph/0110143'],

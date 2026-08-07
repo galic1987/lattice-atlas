@@ -14,7 +14,7 @@ import {
 } from '@/data/glossary';
 
 /* ------------------------------------------------------------------ */
-/* Glossary data (design/glossary.md §4 — 29 terms, 5 categories)      */
+/* Glossary data (design/glossary.md §4 — 46 terms, 6 categories)      */
 /* ------------------------------------------------------------------ */
 
 

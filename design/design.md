@@ -41,13 +41,13 @@ The visual identity is built from the subject itself: **the surface code lattice
 |---|---|---|
 | `--text-hi` | `#EAF0FB` | Headings, primary text |
 | `--text-mid` | `#A9B4CC` | Body text, descriptions |
-| `--text-low` | `#64708E` | Captions, metadata, placeholders |
+| `--text-low` | `#7B89A7` | Captions, metadata, placeholders (4.87:1 on `ink-800`) |
 
 ### Accents (semantic — tied to physics)
 | Token | Hex | Meaning / Usage |
 |---|---|---|
 | `--plaquette` (cyan) | `#22D3EE` | Primary accent. Z-plaquettes, links, primary CTAs, knowledge-map nodes, progress fill |
-| `--star` (violet) | `#8B5CF6` | Secondary accent. X-stars, papers, timeline markers, complementary highlights |
+| `--star` (violet) | `#9B7BFA` | Secondary accent. X-stars, papers, timeline markers, complementary highlights; readable as normal text on dark cards |
 | `--magic` (amber) | `#F5B83D` | Frontier content, magic states, "field today", warnings, difficulty peaks |
 | `--syndrome` (rose) | `#FB7185` | Errors, syndrome flashes, destructive states, "not yet understood" markers |
 | `--stabilizer` (green) | `#34D399` | Success, "understood" checkmarks, completed progress |
@@ -213,7 +213,7 @@ All content ships as static JSON in the app bundle (no backend). Progress in `lo
 - `topics.resources` is an array of **plain strings** (e.g. `"Dennis, Kitaev, Landahl & Preskill, 'Topological quantum memory', arXiv:quant-ph/0110143"`) — parse the `arXiv:<id>` substring to build the link; render the string as the title and infer the type tag (`PAPER` when an arXiv id is present, else `REFERENCE`).
 - `papers.prerequisites` contains **informal topic names** (e.g. `"qubits & gates"`, `"surface code"`), not ids — build a normalized name→id lookup (lowercase, strip punctuation) with a small manual alias map for mismatches, so PrereqChips resolve to real topic ids.
 
-**`glossary.json`** — 28 terms: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }` (see glossary.md for the full term list and categories).
+**`src/data/glossary.ts`** — 46 terms across 6 categories: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }` (see glossary.md for the derived list and categories).
 
 **`localStorage` schema**: `lattice-atlas-progress = { understood: topicId[], papersRead: arxivId[] }`. Cross-page reactivity via a small context/store that syncs on `storage` events. (The path page derives "current step" from the first not-understood topic, so no separate `lastVisitedPath` field is stored.)
 

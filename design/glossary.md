@@ -2,7 +2,7 @@
 
 **Purpose**: A searchable, cross-linked reference of key TQEC terms. Fast, dense, keyboard-friendly. Every term links back to related topics (knowledge map) and papers. Supports deep links (`/glossary#stabilizer`) from other pages.
 
-**Data**: `glossary.json` — 28 terms: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }`. Categories: `code theory` · `topology & anyons` · `computation` · `decoding` · `hardware & experiment`.
+**Data**: `app/src/data/glossary.ts` — 46 terms: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }`. Categories: `foundations` · `code theory` · `topology & anyons` · `computation` · `decoding` · `hardware & experiment`.
 
 ---
 
@@ -12,7 +12,7 @@
 - Eyebrow (mono, cyan): `// REFERENCE`
 - H1 (display-lg): `Glossary`
 - Lead (body-lg, `text-mid`, max-w-2xl): *"The vocabulary of topological quantum error correction, defined plainly. Terms cross-link to the knowledge map and the paper canon, so a definition is never a dead end."*
-- Stat row (mono-sm): `26 TERMS` · `5 CATEGORIES`
+- Stat row (mono-sm): `46 TERMS` · `6 CATEGORIES`
 
 **Animation**: H1 + lead block-stagger (24px rise, 0.08s); stat row fades +0.3s.
 
@@ -22,8 +22,8 @@
 
 **Layout**: Sticky `top-16`, z-30, `ink-900/90 backdrop-blur`, border-bottom, `py-3`, `max-w-6xl` flex gap-3 wrap.
 - **Search input** (flex-1, min 240px): icon Search, mono placeholder `search terms… ( / to focus )`. Live-filters as you type (matches term, short, long; matched substring highlighted cyan in results). Keyboard `/` focuses input (documented hint kbd-style chip: `/`).
-- **Category chips** (toggle, rounded-full body-sm): `All` + five categories, each with a distinct dot color (code theory = cyan, topology & anyons = violet, computation = amber, decoding = rose, hardware & experiment = emerald). Multi-select.
-- Right: count (mono-sm `text-low`): `SHOWING n OF 24`.
+- **Category chips** (toggle, rounded-full body-sm): `All` + six categories, each with a distinct dot color (foundations, code theory, topology & anyons, computation, decoding, hardware & experiment). Multi-select.
+- Right: count (mono-sm `text-low`): `SHOWING n OF 46`.
 
 **Animation**: input focus ring expands (border + glow 200ms); chips toggle 200ms; result count cross-fade.
 
@@ -50,8 +50,8 @@
 
 **Deep-link behavior**: loading `/glossary#stabilizer` scrolls the term to center, expands it automatically, and pulses a cyan outline (2 pulses, 1.2s).
 
-**Full term list** (28 terms, with notation where applicable — final copy in `glossary.json`; implementers should write 1–2 sentence `short` + 1 paragraph `long` for each):
-`ancilla qubit` · `anyon` · `braiding` · `Clifford gate` · `non-Clifford gate` (notation: `T`) · `code distance` (`d`) · `CSS code` · `defect / hole` · `error chain` · `fault tolerance` · `flag qubit` · `hook error` · `lattice surgery` · `logical operator` · `logical qubit` · `magic state` (`|T⟩`) · `measurement-based QC (MBQC)` · `MWPM decoder` · `plaquette` · `real-time decoding` · `rotated surface code` · `space-time diagram` · `stabilizer` · `surface code` · `syndrome` · `threshold theorem` (`p_th ≈ 1%`) · `topological order` · `toric code` · `ZX-calculus`.
+**Full term list** (46 terms; definitions and notation are authoritative in `app/src/data/glossary.ts`):
+`basis` · `Born rule` · `bra-ket notation` · `commute / anticommute` · `complex amplitude` · `eigenstate / eigenvalue` · `entanglement` · `Hilbert space` · `inner product` · `observable` · `Pauli operator` · `qubit` · `relative phase` · `state vector` · `superposition` · `tensor product` · `unitary` · `ancilla qubit` · `anyon` · `braiding` · `Clifford gate` · `non-Clifford gate` · `code distance` · `CSS code` · `defect / hole` · `error chain` · `fault tolerance` · `flag qubit` · `hook error` · `lattice surgery` · `logical operator` · `logical qubit` · `magic state` · `measurement-based QC (MBQC)` · `MWPM decoder` · `plaquette` · `real-time decoding` · `rotated surface code` · `space-time diagram` · `stabilizer` · `surface code` · `syndrome` · `threshold theorem` · `topological order` · `toric code` · `ZX-calculus`.
 
 **Animation**: Letter groups reveal with 0.05s row stagger (rise 16px + fade, trigger 15% viewport). Ghost letter parallaxes slightly (0.9× scroll). Expand: height-auto 250ms + chevron rotate. Search filtering uses Framer Motion `layout` springs so rows reflow smoothly (400/35).
 

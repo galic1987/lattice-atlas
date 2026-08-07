@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { papers, topics } from '@/data';
 
 /**
  * localStorage schema (design.md §8):
@@ -35,7 +36,7 @@ export interface ProgressContextValue {
   understoodCount: number;
   /** Number of read papers (out of 23). */
   readCount: number;
-  /** Clear all progress. */
+  /** Clear topic-understanding marks while preserving paper history and lens preference. */
   resetProgress: () => void;
   /** Active cognitive lens mode: 'intuition' (analogies) vs 'rigor' (formal physics). */
   lensMode: LensMode;
@@ -46,6 +47,13 @@ export interface ProgressContextValue {
 }
 
 const EMPTY: PersistedProgress = { understood: [], papersRead: [], lensMode: 'intuition' };
+const VALID_TOPIC_IDS = new Set(topics.map((topic) => topic.id));
+const VALID_PAPER_IDS = new Set(papers.map((paper) => paper.arxiv_id));
+
+function cleanIds(value: unknown, valid: ReadonlySet<string>): string[] {
+  if (!Array.isArray(value)) return [];
+  return [...new Set(value.filter((item): item is string => typeof item === 'string' && valid.has(item)))];
+}
 
 function loadProgress(): PersistedProgress {
   try {
@@ -60,8 +68,8 @@ function loadProgress(): PersistedProgress {
     ) {
       const p = parsed as PersistedProgress;
       return {
-        understood: p.understood.filter((x): x is string => typeof x === 'string'),
-        papersRead: p.papersRead.filter((x): x is string => typeof x === 'string'),
+        understood: cleanIds(p.understood, VALID_TOPIC_IDS),
+        papersRead: cleanIds(p.papersRead, VALID_PAPER_IDS),
         lensMode: p.lensMode === 'rigor' ? 'rigor' : 'intuition',
       };
     }
@@ -95,6 +103,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleUnderstood = useCallback((id: string) => {
+    if (!VALID_TOPIC_IDS.has(id)) return;
     setProgress((prev) => ({
       ...prev,
       understood: prev.understood.includes(id)
@@ -104,6 +113,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleRead = useCallback((arxivId: string) => {
+    if (!VALID_PAPER_IDS.has(arxivId)) return;
     setProgress((prev) => ({
       ...prev,
       papersRead: prev.papersRead.includes(arxivId)
@@ -123,7 +133,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const resetProgress = useCallback(() => setProgress(EMPTY), []);
+  const resetProgress = useCallback(() => {
+    setProgress((prev) => ({ ...prev, understood: [] }));
+  }, []);
 
   const value = useMemo<ProgressContextValue>(
     () => ({

@@ -6,10 +6,9 @@ import {
   X,
   BookOpen,
   ArrowRight,
-  Cpu
 } from 'lucide-react';
 import { resolveTopic, shortName } from '@/data';
-import { TERMS, matchGlossaryTerm, type GlossaryTerm } from '@/data/glossary';
+import { matchGlossaryTerm } from '@/data/glossary';
 import { TOPIC_COGNITIVE_LENS } from '@/data/cognitive_lens';
 import { useProgress } from '@/store/progress';
 
@@ -19,6 +18,57 @@ interface SelectionState {
   x: number;
   y: number;
 }
+
+const FOUNDATION_QUERIES = new Set([
+  'amplitude',
+  'amplitudes',
+  'complex amplitude',
+  'complex amplitudes',
+  'probability amplitude',
+  'probability amplitudes',
+  'phase',
+  'phases',
+  'relative phase',
+  'global phase',
+  'interference',
+  'vector',
+  'vectors',
+  'state vector',
+  'state vectors',
+  'basis',
+  'basis vector',
+  'basis vectors',
+  'matrix',
+  'matrices',
+  'inner product',
+  'inner products',
+  'tensor product',
+  'tensor products',
+  'eigenvalue',
+  'eigenvalues',
+  'eigenstate',
+  'eigenstates',
+  'superposition',
+  'superpositions',
+  'measurement',
+  'measurements',
+  'born rule',
+  'complex number',
+  'complex numbers',
+  'dirac notation',
+  'bra ket notation',
+  'ket',
+  'kets',
+  'entanglement',
+  'qubit',
+  'qubits',
+]);
+
+const normalizeQuery = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 
 /** Small relationship diagrams for the concept families this site can explain. */
 function ConceptSuperVisual({ term }: { term: string }) {
@@ -297,14 +347,16 @@ export default function UniversalExplainer() {
     setSelection(null);
   };
 
-  // Resolve matching glossary term or topic with alias awareness
-  const matchingGlossary: GlossaryTerm | undefined = activeQuery
-    ? matchGlossaryTerm(activeQuery) || TERMS.find((g: GlossaryTerm) => g.term.toLowerCase() === activeQuery.toLowerCase())
-    : undefined;
+  // Both resolvers are normalized exact matches; neither performs substring guessing.
+  const matchingGlossary = activeQuery ? matchGlossaryTerm(activeQuery) : undefined;
 
   const matchingTopic = activeQuery ? resolveTopic(activeQuery) : undefined;
 
   const topicLens = matchingTopic ? TOPIC_COGNITIVE_LENS[matchingTopic.id] : undefined;
+  const isFoundationConcept = Boolean(
+    matchingTopic?.tier === 1 || (activeQuery && FOUNDATION_QUERIES.has(normalizeQuery(activeQuery))),
+  );
+  const visualTerm = matchingGlossary?.term ?? matchingTopic?.name;
 
   return (
     <>
@@ -313,10 +365,10 @@ export default function UniversalExplainer() {
         {selection && (
           <motion.div
             id="universal-explain-trigger"
-            initial={{ opacity: 0, scale: 0.9, y: 5 }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.9, y: 5 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 5 }}
-            transition={{ duration: 0.15 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 5 }}
+            transition={{ duration: reduceMotion ? 0 : 0.15 }}
             style={{
               position: 'fixed',
               left: `${selection.x}px`,
@@ -328,9 +380,9 @@ export default function UniversalExplainer() {
             <button
               type="button"
               onClick={() => openExplainer(selection.text)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-plaquette/60 bg-ink-900/95 px-3 py-1.5 text-xs font-semibold text-plaquette shadow-glow-cyan backdrop-blur-md transition-transform hover:scale-105 hover:bg-ink-850"
+              className={`inline-flex items-center gap-1.5 rounded-full border border-plaquette/60 bg-ink-900/95 px-3 py-1.5 text-xs font-semibold text-plaquette shadow-glow-cyan backdrop-blur-md hover:bg-ink-850 ${reduceMotion ? '' : 'transition-transform hover:scale-105'}`}
             >
-              <Sparkles className="h-3.5 w-3.5 text-plaquette animate-pulse" />
+              <Sparkles className={reduceMotion ? 'h-3.5 w-3.5 text-plaquette' : 'h-3.5 w-3.5 animate-pulse text-plaquette'} />
               Explain &ldquo;{selection.text.length > 20 ? selection.text.slice(0, 20) + '…' : selection.text}&rdquo;
             </button>
           </motion.div>
@@ -376,13 +428,6 @@ export default function UniversalExplainer() {
 
               {/* Body Content */}
               <div className="mt-6 flex-1 space-y-6">
-                {/* Visual Explanation Diagram */}
-                <div>
-                  <h3 className="mb-2 font-mono text-xs uppercase tracking-wider text-plaquette">// SUPER VISUAL EXPLANATION</h3>
-                  <ConceptSuperVisual term={activeQuery} />
-                </div>
-
-                {/* Direct Definition / Analysis */}
                 {matchingGlossary ? (
                   <div className="rounded-xl border border-ink-600 bg-ink-800 p-4">
                     <div className="flex items-center justify-between">
@@ -396,38 +441,81 @@ export default function UniversalExplainer() {
                     <p className="mt-3 text-sm leading-relaxed text-text-hi">{matchingGlossary.short}</p>
                     <p className="mt-2 text-xs leading-relaxed text-text-mid">{matchingGlossary.long}</p>
                   </div>
+                ) : matchingTopic ? (
+                  <div className="rounded-xl border border-ink-600 bg-ink-800 p-4">
+                    <span className="font-mono text-[11px] uppercase tracking-wider text-star">
+                      Atlas topic · tier {matchingTopic.tier}
+                    </span>
+                    <h3 className="mt-2 font-display text-lg font-semibold text-text-hi">
+                      {matchingTopic.name}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-text-hi">{matchingTopic.short}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-text-mid">{matchingTopic.detail}</p>
+                  </div>
                 ) : (
                   <div className="rounded-xl border border-ink-700 bg-ink-800 p-4">
                     <div className="flex items-center gap-2 text-xs font-bold text-text-low uppercase tracking-wider font-mono">
-                      <span>Vocabulary Note</span>
+                      <span>Not indexed in Atlas</span>
                     </div>
                     <p className="mt-2 text-sm leading-relaxed text-text-mid">
-                      <span className="font-semibold text-text-hi">&ldquo;{activeQuery}&rdquo;</span> is not directly indexed in the Lattice Atlas core vocabulary. Explore our curated glossary to search related topological concepts.
+                      Lattice Atlas does not currently have a glossary definition or exact topic match for{' '}
+                      <span className="font-semibold text-text-hi">&ldquo;{activeQuery}&rdquo;</span>. No generic quantum-error-correction explanation has been substituted.
                     </p>
                     <Link
-                      to={`/glossary`}
+                      to={isFoundationConcept ? '/foundations' : '/glossary'}
                       onClick={() => setActiveQuery(null)}
                       className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-plaquette hover:underline"
                     >
-                      Browse Atlas Glossary <ArrowRight className="h-3 w-3" />
+                      {isFoundationConcept ? 'Open the foundation workbench' : 'Search the Atlas glossary'}{' '}
+                      <ArrowRight className="h-3 w-3" />
                     </Link>
                   </div>
                 )}
 
-                {/* Dual Mode Cognitive Lens Insight (Analogy vs Rigor) */}
-                <div className="rounded-xl border border-plaquette/30 bg-ink-850 p-4">
-                  <div className="flex items-center justify-between border-b border-ink-700 pb-2">
-                    <span className="font-mono text-[11px] text-stabilizer">
-                      {lensMode === 'intuition' ? '💡 INTUITION & ANALOGY LENS' : '🔬 PHYSICS RIGOR LENS'}
-                    </span>
-                    <span className="font-mono text-[10px] text-text-low">active mode</span>
+                {visualTerm && (
+                  <div>
+                    <h3 className="mb-2 font-mono text-xs uppercase tracking-wider text-plaquette">
+                      // VISUAL RELATIONSHIP
+                    </h3>
+                    <ConceptSuperVisual term={visualTerm} />
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-text-mid">
-                    {lensMode === 'intuition'
-                      ? (topicLens?.intuition.description || `Think of ${activeQuery} as a protective shield that checks for mistakes among neighboring qubits without looking directly inside the secret quantum value.`)
-                      : (topicLens?.rigor.description || `Formally, ${activeQuery} operates in the stabilizer subspace V_C = {|ψ⟩ : S_i|ψ⟩ = +|ψ⟩}, preserving quantum code distance d.`)}
-                  </p>
-                </div>
+                )}
+
+                {topicLens && (
+                  <div className="rounded-xl border border-plaquette/30 bg-ink-850 p-4">
+                    <div className="flex items-center justify-between border-b border-ink-700 pb-2">
+                      <span className="font-mono text-[11px] text-stabilizer">
+                        {lensMode === 'intuition' ? '💡 INTUITION & ANALOGY LENS' : '🔬 PHYSICS RIGOR LENS'}
+                      </span>
+                      <span className="font-mono text-[10px] text-text-low">curated topic lens</span>
+                    </div>
+                    {lensMode === 'intuition' ? (
+                      <>
+                        <h3 className="mt-3 font-display text-base font-semibold text-text-hi">
+                          {topicLens.intuition.analogyTitle}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-text-mid">
+                          {topicLens.intuition.description}
+                        </p>
+                        <p className="mt-2 text-xs leading-relaxed text-stabilizer">
+                          {topicLens.intuition.takeaway}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="mt-3 font-display text-base font-semibold text-text-hi">
+                          {topicLens.rigor.formalismTitle}
+                        </h3>
+                        <p className="mt-2 overflow-x-auto rounded bg-ink-950 px-2 py-1.5 font-mono text-xs text-plaquette">
+                          {topicLens.rigor.mathExpression}
+                        </p>
+                        <p className="mt-2 text-sm leading-relaxed text-text-mid">
+                          {topicLens.rigor.description}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 {/* Context Snippet where user clicked */}
                 {contextSnippet && (
@@ -439,40 +527,40 @@ export default function UniversalExplainer() {
                   </div>
                 )}
 
-                {/* Quantum Stack Location */}
-                <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">// QUANTUM SYSTEM STACK LOCATION</span>
-                  <div className="mt-3 flex items-center justify-between gap-1 text-[11px] font-mono text-text-low">
-                    <span className="rounded bg-ink-800 px-2 py-1 text-text-mid">Physical Qubits</span>
-                    <ArrowRight className="h-3 w-3" />
-                    <span className="rounded bg-plaquette/20 px-2 py-1 text-plaquette font-bold">Stabilizers</span>
-                    <ArrowRight className="h-3 w-3" />
-                    <span className="rounded bg-ink-800 px-2 py-1 text-text-mid">Decoder</span>
-                    <ArrowRight className="h-3 w-3" />
-                    <span className="rounded bg-ink-800 px-2 py-1 text-text-mid">Logical Qubit</span>
-                  </div>
-                </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="mt-6 flex flex-col gap-2 border-t border-ink-700 pt-4">
-                {matchingTopic && (
-                  <Link
-                    to="/map"
-                    onClick={() => setActiveQuery(null)}
-                    className="btn-primary w-full justify-center text-xs"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" /> Explore {shortName(matchingTopic)} in Knowledge Map
-                  </Link>
-                )}
-                <Link
-                  to="/lab"
-                  onClick={() => setActiveQuery(null)}
-                  className="btn-ghost w-full justify-center text-xs"
-                >
-                  <Cpu className="h-3.5 w-3.5" /> Test in Surface Code Lab
-                </Link>
-              </div>
+              {(matchingTopic || matchingGlossary) && (
+                <div className="mt-6 flex flex-col gap-2 border-t border-ink-700 pt-4">
+                  {isFoundationConcept && (
+                    <Link
+                      to="/foundations"
+                      onClick={() => setActiveQuery(null)}
+                      className="btn-primary w-full justify-center text-xs"
+                    >
+                      <BookOpen className="h-3.5 w-3.5" /> Open the foundation workbench
+                    </Link>
+                  )}
+                  {matchingTopic && (
+                    <Link
+                      to={`/map?topic=${matchingTopic.id}`}
+                      onClick={() => setActiveQuery(null)}
+                      className={`${isFoundationConcept ? 'btn-secondary' : 'btn-primary'} w-full justify-center text-xs`}
+                    >
+                      <BookOpen className="h-3.5 w-3.5" /> Explore {shortName(matchingTopic)} in Knowledge Map
+                    </Link>
+                  )}
+                  {matchingGlossary && !matchingTopic && (
+                    <Link
+                      to={`/glossary#${matchingGlossary.slug}`}
+                      onClick={() => setActiveQuery(null)}
+                      className={`${isFoundationConcept ? 'btn-secondary' : 'btn-primary'} w-full justify-center text-xs`}
+                    >
+                      <BookOpen className="h-3.5 w-3.5" /> Open the glossary entry
+                    </Link>
+                  )}
+                </div>
+              )}
             </motion.aside>
           </div>
         )}

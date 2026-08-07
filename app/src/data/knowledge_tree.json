@@ -470,13 +470,13 @@
     "name": "Real-Time Decoding & Classical Control",
     "tier": 6,
     "short": "Logical computation stalls if the classical decoder can't keep up: real-time decoding demands microsecond-scale throughput, parallelism, and tight hardware integration with the qubit control stack.",
-    "detail": "Every syndrome round (about 1 microsecond on superconducting hardware) produces defect data. This data must be decoded before measurement-dependent operations — Pauli frame updates, lattice-surgery branch choices, magic-state feed-forward — can proceed. Otherwise the backlog grows exponentially: the notorious backlog problem. Solutions include parallel/windowed decoding (partitioning the 3D syndrome volume into overlapping windows processed concurrently) and FPGA/ASIC implementations. Hierarchical decoders handle most errors locally and escalate hard cases. Google's 2024 experiment demonstrated real-time decoding operating alongside the quantum processor. The broader control problem — cryogenic wiring limits, latency budgets, decoder-quantum co-design — is now a central systems challenge on the road to millions of qubits. It sits at the intersection of computer architecture and quantum error correction.",
+    "detail": "Every syndrome round (on a microsecond-scale cadence in some superconducting experiments) produces detector data. A streaming decoder needs sustained throughput at least as high as that arrival rate; otherwise its queue grows without bound, approximately linearly in time when the rate deficit is steady. Latency is a separate constraint: Pauli-frame bookkeeping can often be deferred, while lattice-surgery branches and magic-state feed-forward need decisions before their control deadlines. Solutions include parallel/windowed decoding (partitioning the 3D syndrome volume into overlapping windows processed concurrently) and FPGA/ASIC implementations. Hierarchical decoders handle most errors locally and escalate hard cases. Google's 2024 experiment demonstrated real-time decoding operating alongside the quantum processor, reporting 63 microsecond average decoder latency while sustaining a 1.1 microsecond cycle stream. The broader control problem — cryogenic wiring limits, latency budgets, decoder-quantum co-design — is now a central systems challenge on the road to large-scale systems. It sits at the intersection of computer architecture and quantum error correction.",
     "key_points": [
-      "Backlog problem: undecoded syndromes accumulate and exponentially blow up required classical memory",
-      "Latency budget: ~1 microsecond per syndrome round on superconducting qubits",
-      "Parallel/windowed decoding partitions space-time volume with overlap to preserve accuracy",
-      "FPGA/ASIC and streaming architectures deliver the required throughput at scale",
-      "Pauli-frame tracking: most corrections are deferred in software, but non-Clifford feed-forward is latency-critical"
+      "Sustained aggregate throughput must meet the detector-round arrival rate; a steady deficit makes the queue grow approximately linearly",
+      "Throughput and latency are distinct: Google reported 63 microsecond average latency while sustaining a pipelined 1.1 microsecond cycle stream",
+      "Parallel/windowed decoding partitions space-time volume with overlap so multiple rounds can be processed concurrently",
+      "Pauli-frame tracking can often be deferred, but lattice-surgery and non-Clifford feed-forward decisions have control deadlines",
+      "Queue behavior, decision latency, and decoding accuracy are separate properties that must be measured for a declared architecture"
     ],
     "depends_on": [
       "advanced-decoding"

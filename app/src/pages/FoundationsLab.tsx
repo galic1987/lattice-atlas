@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -11,6 +12,9 @@ import {
   Sparkles,
   Waves,
 } from 'lucide-react';
+import ConceptDepthLens from '@/components/ConceptDepthLens';
+import { asset } from '@/lib/asset';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const STORAGE_KEY = 'lattice-atlas-waves-to-qubits-practice-v1';
@@ -168,6 +172,86 @@ function HeroBridge() {
         <text x="68" y="148" textAnchor="middle" fill="#A9B4CC" fontSize="12">1</text>
       </g>
     </svg>
+  );
+}
+
+const MEMORY_ANCHORS = [
+  {
+    number: '01',
+    title: 'Rail switch',
+    relation: 'A classical bit follows one definite branch: 0 or 1.',
+    boundary: 'A qubit is not secretly riding one unknown rail.',
+    color: 'text-magic',
+  },
+  {
+    number: '02',
+    title: 'Ripple tank',
+    relation: 'Alternative wave amplitudes reinforce or cancel before intensity is read.',
+    boundary: 'Water waves are classical, lossy, and directly visible.',
+    color: 'text-plaquette',
+  },
+  {
+    number: '03',
+    title: 'Paired arrows',
+    relation: 'The angle between complex amplitudes carries relative phase.',
+    boundary: 'The arrows are coordinates, not little hands inside a qubit.',
+    color: 'text-star',
+  },
+  {
+    number: '04',
+    title: 'Joint tray',
+    relation: 'A 2×2 amplitude table records the four outcomes of two qubits.',
+    boundary: 'Glow alone cannot show complex phase or diagnose mixed-state entanglement.',
+    color: 'text-stabilizer',
+  },
+] as const;
+
+function PhysicalMemoryPalace() {
+  return (
+    <section className="relative py-16 md:py-24" aria-labelledby="memory-palace-title">
+      <div className="mx-auto max-w-6xl px-6 md:px-8">
+        <div className="max-w-3xl">
+          <p className="eyebrow">Physical memory palace</p>
+          <h2 id="memory-palace-title" className="mt-3 font-display text-3xl font-semibold tracking-tight text-text-hi md:text-4xl">
+            Four objects. One conceptual ladder.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-text-mid">
+            Use the exhibit as a retrieval path: definite choice → interference → relative phase → joint state. The generated scene makes the sequence memorable; the labels below carry the science.
+          </p>
+        </div>
+
+        <figure className="mt-8 overflow-hidden rounded-2xl border border-ink-500 bg-ink-950 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+          <img
+            src={asset('foundations-memory-lab-v1.webp')}
+            alt="A museum exhibit arranged left to right: a two-way rail switch, a ripple tank with two wave sources, two arrows sharing one circular dial, and a two-by-two glass tray with opposite cells glowing"
+            width="1672"
+            height="941"
+            loading="lazy"
+            decoding="async"
+            className="aspect-[16/9] w-full object-cover"
+          />
+          <figcaption className="border-t border-ink-600 bg-ink-900/95 px-4 py-3 text-xs leading-5 text-text-low md:px-6">
+            Memory anchor, not literal apparatus. The switch is deliberately classical; the other stations represent mathematical relationships, not machinery hidden inside a quantum processor.
+          </figcaption>
+        </figure>
+
+        <ol className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {MEMORY_ANCHORS.map((anchor) => (
+            <li key={anchor.number} className="rounded-xl border border-ink-600 bg-ink-850/80 p-4">
+              <div className="flex items-center gap-2">
+                <span className={`font-mono text-[10px] font-semibold ${anchor.color}`}>{anchor.number}</span>
+                <h3 className="font-display text-sm font-semibold text-text-hi">{anchor.title}</h3>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-text-mid">{anchor.relation}</p>
+              <p className="mt-3 border-l border-syndrome/60 pl-3 text-[11px] leading-5 text-text-low">
+                <span className="font-mono uppercase tracking-wider text-syndrome">Boundary</span>{' '}
+                {anchor.boundary}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
   );
 }
 
@@ -463,8 +547,8 @@ function PhaseVisual() {
   };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
-      <section className="rounded-xl border border-ink-600 bg-ink-900/70 p-5" aria-labelledby="phase-clock-title">
+    <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+      <section className="min-w-0 rounded-xl border border-ink-600 bg-ink-900/70 p-5" aria-labelledby="phase-clock-title">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p id="phase-clock-title" className="font-display font-semibold text-text-hi">Two-hand phase clock</p>
@@ -489,7 +573,7 @@ function PhaseVisual() {
           <circle cx={origin.x} cy={origin.y} r="7" fill="#EAF0FB" />
           <text x={zeroTip.x + 9} y={zeroTip.y - 7} fill="#22D3EE" fontSize="12" fontFamily="JetBrains Mono">|0⟩</text>
           <text x={oneTip.x + 9} y={oneTip.y - 7} fill="#A78BFA" fontSize="12" fontFamily="JetBrains Mono">|1⟩</text>
-          <text x={origin.x} y="256" textAnchor="middle" fill="#64708E" fontSize="11" fontFamily="JetBrains Mono">Only the angle between the hands reaches the mixer</text>
+          <text x={origin.x} y="256" textAnchor="middle" fill="#7B89A7" fontSize="11" fontFamily="JetBrains Mono">Relative angle reaches the mixer</text>
         </svg>
 
         <div className="space-y-5">
@@ -510,7 +594,7 @@ function PhaseVisual() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-star/25 bg-ink-900/70 p-5" aria-labelledby="phase-mixer-title">
+      <section className="min-w-0 rounded-xl border border-star/25 bg-ink-900/70 p-5" aria-labelledby="phase-mixer-title">
         <p id="phase-mixer-title" className="font-display font-semibold text-text-hi">Send the state through H</p>
         <p className="mt-1 text-sm leading-6 text-text-low">A Hadamard mixes the two basis paths, turning relative phase into a countable output.</p>
         <div className="mt-5 overflow-x-auto rounded-lg border border-ink-600 bg-ink-950/60 p-4 font-mono text-xs leading-7 text-text-mid" aria-live="polite">
@@ -519,7 +603,7 @@ function PhaseVisual() {
           <p className="text-star">= {percent(pAfterH)}</p>
         </div>
         <div className="mt-6 rounded-xl border border-ink-600 bg-ink-850 p-5">
-          <div className="flex items-center gap-3 font-mono text-xs text-text-mid">
+          <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-text-mid">
             <span className="rounded-md border border-star/30 bg-star/10 px-3 py-2 text-star">relative φ</span>
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
             <span className="rounded-md border border-plaquette/30 bg-plaquette/10 px-3 py-2 text-plaquette">H mixer</span>
@@ -972,12 +1056,13 @@ function PracticeScore({
   const share = async () => {
     const marks = STAGES.map((stage) => answers[stage.id].selected === QUESTIONS[stage.id].answer ? '●' : answers[stage.id].submitted ? '○' : '·').join('');
     const text = `Waves to Qubits — ${score}/100 local practice points ${marks}\n${correct}/${STAGES.length} predictions matched. Practice result only; not independently verified.`;
+    const url = window.location.href.split(/[?#]/)[0];
     try {
       if (typeof navigator.share === 'function') {
-        await navigator.share({ title: 'Waves to Qubits practice result', text });
+        await navigator.share({ title: 'Waves to Qubits practice result', text, url });
         setShareStatus('Share sheet opened.');
       } else {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(`${text}\n${url}`);
         setShareStatus('Practice result copied.');
       }
     } catch (error) {
@@ -1044,6 +1129,7 @@ function PracticeScore({
 }
 
 export default function FoundationsLab() {
+  useDocumentTitle('Waves to Qubits');
   const reduce = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>(loadAnswers);
@@ -1124,6 +1210,7 @@ export default function FoundationsLab() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </button>
             <a href="#practice-transcript" className="btn-secondary">See practice model</a>
+            <Link to="/altitudes" className="btn-ghost">See one truth at five depths</Link>
           </div>
         </motion.div>
 
@@ -1158,7 +1245,9 @@ export default function FoundationsLab() {
         </div>
       </section>
 
-      <section id="foundations-experiment" className="relative scroll-mt-20 py-16 md:py-24">
+      <PhysicalMemoryPalace />
+
+      <section id="foundations-experiment" className="relative scroll-mt-20 border-t border-ink-600 bg-ink-950/30 py-16 md:py-24">
         <div className="mx-auto max-w-6xl px-6 md:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -1216,6 +1305,7 @@ export default function FoundationsLab() {
             </header>
 
             <div className="space-y-6">
+              <ConceptDepthLens concept={activeStage.id} />
               <StageContent
                 stageId={activeStage.id}
                 answer={answers[activeStage.id]}

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, BookOpen, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import { CATEGORY_COLORS, TERMS, type GlossaryTerm } from '@/data/glossary';
-import { useProgress } from '@/store/progress';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { useProgress } from '@/store/progress';
 
 /**
  * Spaced review of glossary terms. Cards unlock as their related topics
@@ -13,6 +13,8 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle';
  */
 
 const REVIEW_KEY = 'lattice-atlas-review';
+const FOUNDATION_PRACTICE_KEY = 'lattice-atlas-waves-to-qubits-practice-v1';
+const FOUNDATION_STAGE_IDS = ['bit-amplitude', 'interference', 'ket-born', 'phase', 'two-qubit'] as const;
 
 interface ReviewRecord {
   due: string; // ISO date
@@ -38,26 +40,39 @@ function loadRecords(): Record<string, ReviewRecord> {
   }
 }
 
+function foundationPracticeComplete(): boolean {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(FOUNDATION_PRACTICE_KEY) ?? '{}');
+    if (typeof parsed !== 'object' || parsed === null) return false;
+    const answers = parsed as Record<string, { submitted?: unknown }>;
+    return FOUNDATION_STAGE_IDS.every((id) => answers[id]?.submitted === true);
+  } catch {
+    return false;
+  }
+}
+
 const TERM_BY_SLUG = new Map(TERMS.map((t) => [t.slug, t]));
 
 export default function Review() {
   useDocumentTitle('Daily Review');
   const { isUnderstood, understoodCount } = useProgress();
   const [records, setRecords] = useState<Record<string, ReviewRecord>>(loadRecords);
+  const foundationReady = foundationPracticeComplete();
 
-  // Terms whose backing topics the learner has studied; with zero progress,
-  // the whole glossary is open so the deck is still usable.
-  const reviewingEverything = understoodCount === 0;
-  const unlocked = reviewingEverything
-    ? TERMS
-    : TERMS.filter((t) => t.related_topics.some((id) => isUnderstood(id)));
+  // Only review vocabulary the learner has encountered in marked topics.
+  // New learners begin in Foundations instead of receiving the full expert deck.
+  const unlocked = TERMS.filter((term) =>
+    (foundationReady && term.category === 'foundations')
+    || term.related_topics.some((id) => isUnderstood(id)),
+  );
 
   const [queue, setQueue] = useState<string[]>(() => {
     const recs = loadRecords();
     const now = todayIso();
-    return (understoodCount === 0
-      ? TERMS
-      : TERMS.filter((t) => t.related_topics.some((id) => isUnderstood(id)))
+    const foundationComplete = foundationPracticeComplete();
+    return TERMS.filter((term) =>
+      (foundationComplete && term.category === 'foundations')
+      || term.related_topics.some((id) => isUnderstood(id)),
     )
       .filter((t) => {
         const r = recs[t.slug];
@@ -133,7 +148,8 @@ export default function Review() {
               {remaining} due now
             </span>
             <span>{scheduled} scheduled</span>
-            {reviewingEverything && <span>(no progress yet — reviewing everything)</span>}
+            {understoodCount === 0 && !foundationReady && <span>(finish Foundations to unlock the core deck)</span>}
+            {understoodCount === 0 && foundationReady && <span>(foundation deck active)</span>}
           </p>
         </div>
       </header>
@@ -234,13 +250,19 @@ export default function Review() {
               </h2>
               <p className="mx-auto mt-3 max-w-md leading-relaxed text-text-mid">
                 {unlocked.length === 0
-                  ? 'Mark topics as understood on the map or path and their vocabulary starts appearing here.'
+                  ? 'Complete the Foundations practice or mark topics understood; their vocabulary then starts appearing here.'
                   : 'Cards return as their intervals expire. Learning more topics unlocks more of the deck.'}
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                <Link to="/path" className="btn-primary">
-                  <RouteIcon className="h-4 w-4" /> Continue the path
-                </Link>
+                {unlocked.length === 0 ? (
+                  <Link to="/foundations" className="btn-primary">
+                    Start Waves to Qubits <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <Link to="/path" className="btn-primary">
+                    <RouteIcon className="h-4 w-4" /> Continue the path
+                  </Link>
+                )}
                 <Link to="/map" className="btn-secondary">
                   <MapIcon className="h-4 w-4" /> Open the map
                 </Link>

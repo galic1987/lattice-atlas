@@ -13,6 +13,8 @@
  *  6. Monte-Carlo sanity: below threshold, logical failure decreases with d
  *  7. the Stim export is structurally sound (and semantically validated
  *     via `python3 -c "import stim"` when available)
+ *  8. Decoder Duel generation is deterministic and exact hidden corrections
+ *     are accepted by the same model used in the game
  */
 import { build } from 'esbuild';
 import { execFileSync } from 'node:child_process';
@@ -25,6 +27,7 @@ import { pathToFileURL } from 'node:url';
 const appRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const workDir = mkdtempSync(join(tmpdir(), 'lattice-verify-'));
 const bundle = join(workDir, 'surfaceCode.mjs');
+const duelBundle = join(workDir, 'duel.mjs');
 
 await build({
   entryPoints: [join(appRoot, 'src/lib/surfaceCode.ts')],
@@ -34,6 +37,15 @@ await build({
   logLevel: 'silent',
 });
 const sc = await import(pathToFileURL(bundle).href);
+
+await build({
+  entryPoints: [join(appRoot, 'src/lib/duel.ts')],
+  bundle: true,
+  format: 'esm',
+  outfile: duelBundle,
+  logLevel: 'silent',
+});
+const duel = await import(pathToFileURL(duelBundle).href);
 
 let failures = 0;
 const check = (cond, msg) => {
@@ -177,6 +189,29 @@ print("stim: circuit parses, detectors deterministic, DEM decomposes")
       process.stdout.write(out);
     }
   }
+}
+
+// 8. Decoder Duel integration: reproducible rounds and honest scoring/share output.
+{
+  for (const day of [20_000, 20_001, 20_002]) {
+    for (let roundIndex = 0; roundIndex < duel.DAILY_PLAN.length; roundIndex++) {
+      const plan = duel.DAILY_PLAN[roundIndex];
+      const seed = day * 7919 + roundIndex * 104729;
+      const a = duel.generateRound(plan, duel.mulberry32(seed));
+      const b = duel.generateRound(plan, duel.mulberry32(seed));
+      check(JSON.stringify(a.hidden) === JSON.stringify(b.hidden), `duel day ${day} round ${roundIndex} is not deterministic`);
+      check([...a.syndrome].sort().join('|') === [...b.syndrome].sort().join('|'), `duel day ${day} round ${roundIndex} syndrome changed for one seed`);
+      check(a.syndrome.size > 0, `duel day ${day} round ${roundIndex} has no playable syndrome`);
+
+      const exact = duel.judge(a, a.hidden);
+      check(exact.cleared, `duel day ${day} round ${roundIndex} rejects the exact hidden correction`);
+      check(!exact.logicalX && !exact.logicalZ, `duel day ${day} round ${roundIndex} exact correction creates a logical flip`);
+      check(exact.points > 0, `duel day ${day} round ${roundIndex} exact correction earns no points`);
+    }
+  }
+  const disclosure = duel.shareText(20_000, ['clean'], duel.POINTS.clean);
+  check(disclosure.includes('Local, unverified browser result'), 'duel share text omits its local/unverified boundary');
+  console.log('Decoder Duel: deterministic rounds, exact corrections, and share disclosure pass');
 }
 
 rmSync(workDir, { recursive: true, force: true });

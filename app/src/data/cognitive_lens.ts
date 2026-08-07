@@ -33,22 +33,22 @@ export const ACT_NARRATIVES: Record<number, ActNarrative> = {
     actTitle: 'ACT I — The Vector Canvas & Hilbert Frontier',
     actSubtitle: 'Before you protect quantum information, you must lay down the geometric space where state vectors live.',
     keyFocus: 'Vector Spaces, Inner Products & State Kinematics',
-    metaphor: 'The Multidimensional Compass & Wave Interference',
+    metaphor: 'A Phasor Mixing Board & Interference',
     intuitionText:
-      'Imagine an infinite multidimensional room where every quantum state is an arrow pointing from the origin. Linear operators are smooth rotations of these arrows, and complex amplitudes represent interfering waves. You cannot fix quantum errors until you understand how to navigate this geometric canvas.',
+      'Picture a mixing board whose channels are basis states. Each channel carries an arrow: its length and angle map to an amplitude magnitude and phase, and arrows for indistinguishable alternatives can reinforce or cancel. The map is useful for addition and interference; it breaks if you imagine literal sound or a room in ordinary space. For n qubits the pure-state vector has 2^n complex coordinates, and closed-system gates preserve its norm.',
     rigorText:
-      'State space H = C^(2^n) under unitary transformations U in U(2^n). Complex inner products ⟨φ|ψ⟩ determine projection probabilities via the Born rule. Entanglement corresponds to non-factorable tensor product states in H_A ⊗ H_B.',
+      'A pure n-qubit state is a normalized ray represented in H = C^(2^n), with closed-system gates U satisfying U†U = I. Complex inner products ⟨φ|ψ⟩ determine rank-one projection probabilities through the Born rule. A pure bipartite state is entangled when its vector does not factor across H_A ⊗ H_B.',
   },
   2: {
     tier: 2,
     actTitle: 'ACT II — The Fragile Superposition & The Measurement Paradox',
-    actSubtitle: 'Single qubits hold infinite possibilities—and collapse the instant a whisper of environment noise strikes.',
+    actSubtitle: 'Relative phase changes interference; measurement and environmental decoherence are related but distinct processes.',
     keyFocus: 'Bloch Kinematics, Pauli Algebra & Gate Universality',
-    metaphor: 'Spinning Coins & Indirect Whispers',
+    metaphor: 'Two Ripple Paths & An Interference Screen',
     intuitionText:
-      'A spinning coin in mid-air holds heads and tails at once. Touch it with a finger and it collapses instantly to one flat outcome. To compute reliably, we must manipulate these spinning coins in unison without looking directly at their faces.',
+      'Send two synchronized ripples around an obstacle and let them meet: aligned peaks reinforce while opposite peaks cancel. Path amplitude and timing map to quantum amplitude and relative phase; bright and dark regions map to outcome probabilities accumulated over repeated trials. The analogy stops at the water: amplitudes are not material waves, and one measurement gives one sample rather than displaying the whole pattern. Uncontrolled coupling can wash out phase coherence without being a deliberate readout.',
     rigorText:
-      'Qubit kinematics on the Bloch sphere S^2 with single-qubit states |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩. Pauli algebra {I, X, Y, Z} generates single-qubit errors. Clifford operations conjugate Paulis into Paulis (HXH = Z, CNOT). Non-Clifford T gate breaks Gottesman-Knill classical simulation.',
+      'A pure qubit may be written |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩ on the Bloch sphere. Projective measurement samples Born probabilities and updates the state; decoherence is open-system loss of phase information. Pauli operators {I, X, Y, Z} span single-qubit errors, Clifford gates conjugate Paulis to Paulis, and a non-Clifford resource such as T enables universality.',
   },
   3: {
     tier: 3,
@@ -57,20 +57,20 @@ export const ACT_NARRATIVES: Record<number, ActNarrative> = {
     keyFocus: 'Stabilizer Subgroups, Parity Check Matrices & Syndrome Algebra',
     metaphor: 'Smoke Detectors & Silent Room Sensors',
     intuitionText:
-      'Think of smoke detectors installed in ceiling tiles of adjacent rooms. When a fire breaks out, the smoke alarm sounds off without anyone having to open the door and expose the delicate artwork inside. Stabilizer checks act as silent room sensors that sound alarms only when an error occurs.',
+      'Treat each parity check as an alarm that compares a group of rooms without reading the artwork stored across them. An alarm maps to a changed stabilizer outcome, and the hidden artwork maps to logical information. The boundary matters: an alarm constrains possible faults but does not uniquely locate one, some logical faults trigger no alarm, and a faulty extraction circuit can create an alarm itself.',
     rigorText:
-      'Abelian stabilizer subgroup S ⊂ P_n without -I. Code space V_S = {|ψ⟩ in H : S_i|ψ⟩ = |ψ⟩, ∀ S_i in S}. Error E in P_n produces syndrome vector s_i = 0 if [E, S_i]=0 and s_i = 1 if {E, S_i}=0. Code distance d = min wt(G in N(S) \\ S).',
+      'For an Abelian stabilizer subgroup S ⊂ P_n excluding -I, the code space is the joint +1 eigenspace of its generators. A Pauli error E flips check i when {E,S_i}=0. The syndrome identifies a coset, not a unique physical history: errors differing by a stabilizer share a syndrome, while a nontrivial logical in N(S) \\ S can have trivial syndrome.',
   },
   4: {
     tier: 4,
     actTitle: 'ACT IV — The Topological Realm of Anyons & Toric Geometry',
-    actSubtitle: 'Storing fragile quantum secrets inside global geometric shape, immune to local corruption.',
+    actSubtitle: 'Storing quantum information non-locally so sufficiently short local fault chains remain correctable.',
     keyFocus: 'Toric/Surface Code Hamiltonians, Anyon Braiding & Topological Invariants',
     metaphor: 'Donut Holes, Fabric Loops & Topological Invariants',
     intuitionText:
-      'Cut a hole through a donut. A tiny scratch on the surface of the pastry cannot undo the presence of the hole in the middle. Information in topological codes is stored in non-local loops winding around the lattice—local noise scratches the surface, but cannot alter the global topology.',
+      'A short scratch on a stitched fabric patch maps to a low-weight error chain; a seam crossing the whole patch maps to a logical operator. Small scratches usually create detectable endpoints and can be repaired. The metaphor breaks at “immune”: a long or correlated chain can span the code and change the logical state, so protection grows with distance rather than becoming absolute.',
     rigorText:
-      '2D spin lattice on torus or planar surface. Star operators A_s = ∏_{i∈v} X_i and plaquette operators B_p = ∏_{j∈p} Z_j. Anyonic excitations: electric charges e (star violation) and magnetic fluxes m (plaquette violation). Non-trivial mutual statistics θ_{e,m} = π. Ground state degeneracy 2^(2g) topologically protected.',
+      'For the toric convention A_s = ∏_{i∈s} X_i and B_p = ∏_{j∈p} Z_j. A Z-string anticommutes with X-type stars at its endpoints, creating e excitations; an X-string anticommutes with Z-type plaquettes at its endpoints, creating m excitations. Their mutual winding phase is π. Noncontractible strings act logically, and finite-distance protection is not immunity to arbitrary local-noise histories.',
   },
   5: {
     tier: 5,
@@ -79,9 +79,9 @@ export const ACT_NARRATIVES: Record<number, ActNarrative> = {
     keyFocus: 'MWPM Graph Decoding, Spacetime Syndromes & Lattice Surgery',
     metaphor: 'Emergency Flare Trackers & Quantum Fabric Velcro',
     intuitionText:
-      'Imagine an emergency control center tracking glowing distress flares on a grid map. As errors pop up, an automated algorithm pairs neighboring flares to find the shortest path of faults. Simultaneously, quantum lattice surgery merges and snips patches of quantum fabric to perform logical logic gates.',
+      'Imagine a control center pairing distress flares using a map of likely routes. Flares map to detection events, route weights map to a noise model, and a chosen route maps to a correction class. The map cannot reveal the actual trail: many fault histories share the same endpoints. Lattice-surgery seams separately map to joint logical-parity measurements between patches.',
     rigorText:
-      'Syndrome decoding via Minimum Weight Perfect Matching (MWPM) on 3D spacetime graph G=(V,E) with edge weights w_e = ln((1-p)/p). Fault-tolerant measurement of logical operators via lattice surgery patch merging/splitting (ZZ and XX parity measurements). Magic state distillation (15-to-1 Reed-Muller gadget) pumps high-fidelity |T⟩ states.',
+      'Syndrome decoding can use MWPM on a spacetime detector graph G=(V,E), with weights derived from a noise model, often as negative log-likelihoods. Lattice-surgery merges and splits measure logical ZZ or XX parities. A 15-to-1 Reed-Muller distillation gadget can produce a higher-fidelity T-type state |A⟩ = T|+⟩; some sources instead call this state |T⟩.',
   },
   6: {
     tier: 6,
@@ -90,19 +90,19 @@ export const ACT_NARRATIVES: Record<number, ActNarrative> = {
     keyFocus: 'Threshold Scaling, qLDPC Architectures & Experimental Milestones',
     metaphor: 'The Sub-Threshold Shield & Exponential Suppression',
     intuitionText:
-      'When individual physical components fail 1 in 100 times, our collective lattice suppresses errors exponentially—allowing a 10,000-qubit computer to run for days without a single uncorrectable fault. This is the promised land of fault-tolerant quantum supremacy.',
+      'Think of increasing code distance as adding depth to a filter: in a specified below-threshold noise regime, each larger layer can reduce logical failure. Filter depth maps to distance and leakage through it maps to logical error. The boundary is essential: the crossover and suppression factor depend on the code, circuit, decoder, correlations, and task; distance alone promises no universal runtime or machine size.',
     rigorText:
-      'Fault-tolerant threshold theorem η < p_th ≈ 1%. Exponential sub-threshold logical error scaling P_L ~ A (p/p_th)^((d+1)/2). Frontier implementations spanning 2D/3D color codes, high-rate qLDPC codes (bipartite Tanner graphs), neutral-atom shuttling, and real-time FPGA decoding architectures.',
+      'Under a specified sufficiently local or weak noise model and fault-tolerant construction, operation below a scheme-specific p_th permits arbitrarily low logical error with increasing overhead. Surface-code families often exhibit P_L ≈ A(p/p_th)^((d+1)/2) in fitted regimes, but p_th and A are not universal constants.',
   },
 };
 
 export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
   'linear-algebra': {
     intuition: {
-      analogyTitle: 'Multidimensional Room & Rotating Arrows',
+      analogyTitle: 'Coordinate Room & Rigid Arrow Motions',
       description:
-        'Think of a state as an arrow pointing somewhere in a multi-dimensional room. Matrix multiplication smoothly turns and stretches this arrow, while tensor products combine two separate rooms into a single vast space.',
-      takeaway: 'Vector directions store quantum state combinations; rotations represent reversible operations.',
+        'An arrow’s coordinates map to amplitudes in a chosen basis, and changing axes maps to a basis change. Tensor products combine subsystem coordinate spaces. The picture is not ordinary 3D space, and quantum gates on a closed system are rigid unitary motions—they do not stretch norms or inner products.',
+      takeaway: 'Coordinates represent pure states; unitary gates preserve their norm and inner products.',
     },
     rigor: {
       formalismTitle: 'Complex Hilbert Space H & Unitary Maps',
@@ -115,7 +115,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     intuition: {
       analogyTitle: 'Wave Phases & Bra-Ket Bracket Shorthand',
       description:
-        'Complex numbers represent wave height and phase timing. Bra-ket notation |ψ⟩ is shorthand for an arrow vector, while ⟨φ| represents the receiver screen checking how much arrow |ψ⟩ matches screen ⟨φ|.',
+        'A rotating phasor’s length and angle map to amplitude magnitude and phase; only relative angles affect interference. A ket |ψ⟩ maps to a column vector and a bra ⟨φ| to its dual probe. The boundary: these arrows are abstract complex coordinates, not little waves inside a qubit.',
       takeaway: 'Interference comes from phase angles; inner product ⟨φ|ψ⟩ measures overlap.',
     },
     rigor: {
@@ -127,23 +127,23 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
   },
   'quantum-mechanics-basics': {
     intuition: {
-      analogyTitle: 'Spinning Coins & The Unshakeable Glance',
+      analogyTitle: 'Two Paths & An Interference Screen',
       description:
-        'A quantum state is like a spinning coin displaying a blur of heads and tails. Looking directly at it forces it to instantly drop into heads or tails, destroying the spinning blur forever.',
-      takeaway: 'Measurement collapses superpositions; information must be measured indirectly.',
+        'Two indistinguishable paths contribute amplitude arrows to the same detector. Aligned arrows raise the detection probability; opposed arrows cancel. Paths map to basis alternatives and arrow angle maps to relative phase. The analogy stops before material waves: each measurement gives one outcome, while the pattern appears only across repeated preparations.',
+      takeaway: 'Relative phase controls interference; measurement samples an outcome and updates the state.',
     },
     rigor: {
       formalismTitle: 'Born Rule & Projective Measurement Postulates',
       mathExpression: 'P(i) = |⟨i|ψ⟩|^2,  |ψ′⟩ = P_i|ψ⟩ / ||P_i|ψ⟩||',
       description:
-        'Projective measurement with Hermitian observables A = ∑ λ_i P_i yields eigenvalue λ_i with Born probability |⟨i|ψ⟩|^2 and projects state to non-unitary eigenspace.',
+        'A projective measurement A = ∑_i λ_i P_i returns λ_i with probability ⟨ψ|P_i|ψ⟩ and updates the state to its normalized projection. Environmental decoherence is an open-system process and should not be equated with a deliberate projective readout.',
     },
   },
   'qubits-pauli-operators': {
     intuition: {
       analogyTitle: 'Bloch Sphere Globe & The Error Trio (X, Y, Z)',
       description:
-        'Picture a qubit as a location on a globe. X flips North and South poles (bit flip), Z spins the equator phase (phase flip), and Y does both at once.',
+        'A point on the Bloch-sphere surface maps to one pure, isolated qubit. X, Y, and Z are half-turns about its coordinate axes up to global phase. The globe cannot represent multi-qubit entanglement, and noisy mixed states sit inside rather than on its surface.',
       takeaway: 'Bit flips (X) and phase flips (Z) are the two fundamental quantum errors.',
     },
     rigor: {
@@ -185,14 +185,14 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     intuition: {
       analogyTitle: 'Silent Room Alarms & Parity Check Balance Scales',
       description:
-        'Imagine a balance scale that checks if two boxes weigh the same without opening either box. Stabilizer generators test whether qubit pairs match without revealing their individual contents.',
-      takeaway: 'Stabilizers measure error syndromes while keeping logical data secret.',
+        'A balance alarm maps to a parity-check eigenvalue, while the unopened contents map to logical information. A changed alarm constrains which faults are possible without identifying a unique fault; the picture also assumes an ideal alarm, whereas a real ancilla circuit can fail.',
+      takeaway: 'Stabilizer outcomes constrain error classes without directly measuring logical observables.',
     },
     rigor: {
       formalismTitle: 'Abelian Group Generators & Projection to Code Space',
       mathExpression: 'S = ⟨S_1, ..., S_{n-k}⟩,  P_{code} = (1/|S|) ∑_{g ∈ S} g',
       description:
-        'Code space V_S is the joint +1 eigenspace of commuting Pauli generators S_i. Errors E anticommuting with S_i flip the eigenvalue to -1, producing syndrome s_i = 1.',
+        'Code space V_S is the joint +1 eigenspace of commuting Pauli generators S_i. An error E that anticommutes with S_i flips its eigenvalue. Errors differing by a stabilizer share a syndrome, so decoding also needs a noise model.',
     },
   },
   'quantum-codes-basics': {
@@ -213,22 +213,22 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     intuition: {
       analogyTitle: 'Vaccine Immunity & The Contagion Tipping Point',
       description:
-        'If physical error rate is below a critical threshold, adding more code layers suppresses errors exponentially—like herd immunity stopping a virus.',
-      takeaway: 'Below the threshold, larger code distance drastically reduces logical failure rates.',
+        'Within one specified code, circuit, decoder, and noise model, distance acts like added filter depth: below the model’s crossover, larger filters can pass fewer logical faults. The boundary is that there is no universal threshold percentage, and correlations or leakage can change the scaling.',
+      takeaway: 'Below a scheme-specific threshold, a suitable code family can suppress logical failure as distance grows.',
     },
     rigor: {
       formalismTitle: 'Threshold Scaling & Sub-Threshold Power Law',
       mathExpression: 'P_L(p) ≈ A (p / p_{th})^((d+1)/2),  p < p_{th}',
       description:
-        'Fault-tolerance guarantees that provided physical error rate p < p_th, logical error rate P_L decays exponentially with code distance d.',
+        'For suitable local stochastic noise and a specified fault-tolerant surface-code construction, P_L is often fit by an exponential-in-distance form below p_th. The threshold and fit parameters depend on the circuit, decoder, metric, and noise model.',
     },
   },
   'topological-order-anyons': {
     intuition: {
       analogyTitle: 'Knots in a Rope & Non-Local Memory',
       description:
-        'Tying a knot in a rope creates a property that cannot be undone by wiggling a small local segment. Topological order stores quantum memory in global knot geometry.',
-      takeaway: 'Topological state memory is immune to local physical noise.',
+        'A local wiggle maps to a short error operator, while a noncontractible loop maps to a logical action. Short faults cannot act logically by themselves, but the rope analogy breaks for long or correlated chains that span the code.',
+      takeaway: 'Increasing distance raises the minimum weight of a logical fault; it does not create absolute immunity.',
     },
     rigor: {
       formalismTitle: 'Degenerate Ground Space & Anyonic Exchange Phases',
@@ -241,56 +241,56 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     intuition: {
       analogyTitle: '2D Grid Fabric & Plaquette Smoke Detectors',
       description:
-        'Imagine a woven grid on a donut surface. Cross-hair star detectors check vertex intersections, while square plaquette detectors monitor tile windows.',
-      takeaway: 'Star checks detect bit flips (X); plaquette checks detect phase flips (Z).',
+        'On a woven torus, an X-type star check sits at each vertex and a Z-type plaquette check surrounds each face. A Z string ends on violated X stars; an X string ends on violated Z plaquettes. The fabric is a connectivity map, not literal material protection.',
+      takeaway: 'X stars detect Z components; Z plaquettes detect X components.',
     },
     rigor: {
       formalismTitle: 'Toric Code Hamiltonian & Star/Plaquette Generators',
       mathExpression: 'H = -J_e ∑_v A_v - J_m ∑_p B_p,  A_v = ∏_{i ∈ v} X_i,  B_p = ∏_{j ∈ p} Z_j',
       description:
-        'Exactly solvable 2D spin model on a torus grid with 4-qubit star and plaquette commuting Pauli operators. Ground state subspace has dimension 2^2 = 4.',
+        'The ideal toric code places qubits on edges. Z-string endpoints violate X-star generators and create e excitations; X-string endpoints violate Z-plaquette generators and create m excitations. On a torus the ground space encodes two logical qubits.',
     },
   },
   'surface-code': {
     intuition: {
       analogyTitle: 'Planar Patch Cloth & Boundary Trim',
       description:
-        'Planar surface codes flatten the toric donut onto a square cloth patch with rough and smooth borders, creating a practical 2D chip layout.',
+        'Flattening maps noncontractible toric loops to strings that join compatible patch boundaries. The cloth edge maps to a boundary where one excitation type can condense; it is not a physical tear, and rough/smooth naming conventions vary between sources.',
       takeaway: 'Planar boundaries allow logical qubits to fit on flat 2D physical hardware grids.',
     },
     rigor: {
       formalismTitle: 'Planar Surface Code Boundaries & Logical Operators L_X, L_Z',
       mathExpression: 'L_X = ∏_{i ∈ C_X} X_i,  L_Z = ∏_{j ∈ C_Z} Z_j,  d = min(|C_X|, |C_Z|)',
       description:
-        'Planar code uses alternating 3-qubit boundary checks and 4-qubit interior checks. Logical L_X stretches between smooth boundaries; L_Z stretches between rough boundaries.',
+        'A planar surface-code patch uses lower-weight boundary checks and weight-4 bulk checks, with exact weights depending on layout. Logical strings join or connect the appropriate boundary types. Rough/smooth labels and which axis is drawn horizontal are convention-dependent, so operator supports should be stated explicitly.',
     },
   },
   'syndrome-extraction-circuits': {
     intuition: {
       analogyTitle: 'Ancilla Helper Messenger Qubits',
       description:
-        'Helper ancilla qubits touch data qubits briefly, collect error warning signals, and report to sensors without touching data qubit values directly.',
-      takeaway: 'Ancilla qubits extract parity checks without collapsing data superposition.',
+        'An ancilla is a parity meter: its final measurement maps to one multi-data-qubit check, not to any individual data value. This ideal meter picture breaks when ancilla faults propagate through later gates, which is why CNOT direction and ordering matter.',
+      takeaway: 'X- and Z-check meters use different preparations, CNOT directions, and measurement bases.',
     },
     rigor: {
       formalismTitle: 'Ancilla-Assisted Parity Check Circuits & Hook Errors',
-      mathExpression: 'CNOT_{data→ancilla},  |0⟩ → H → CNOTs → H → Measure',
+      mathExpression: 'Z check: |0⟩_a, CNOT_{data→a}, M_Z;  X check: |+⟩_a, CNOT_{a→data}, M_X',
       description:
-        'Syndrome extraction executes CNOT/CZ sequences between data qubits and ancilla qubits. Fault-tolerant design prevents single ancilla errors from propagating into weight-2 data errors.',
+        'In the standard CNOT construction, a Z-product check prepares |0⟩ on the ancilla, applies data-controlled CNOTs, then measures Z. An X-product check prepares |+⟩, applies ancilla-controlled CNOTs, then measures X. Equivalent CZ-based circuits exist. Gate order is chosen to orient hook errors so one fault does not reduce the intended effective distance.',
     },
   },
   'decoding-mwpm': {
     intuition: {
       analogyTitle: 'Connecting Distress Flares with Shortest Strings',
       description:
-        'When error flares light up across a grid, the decoder connects pairs of flares with shortest string paths to identify where errors likely occurred.',
-      takeaway: 'Minimum Weight Perfect Matching pairs syndrome defects to reverse physical errors.',
+        'Detection events are flares; graph-edge weights are the map’s model of plausible fault mechanisms; a matching chooses a low-cost pairing or boundary connection. The selected paths are a correction hypothesis, not a reconstruction of the unique faults that occurred.',
+      takeaway: 'MWPM chooses a likely correction class consistent with the detector data and noise model.',
     },
     rigor: {
       formalismTitle: 'Blossom V Algorithm on Spacetime Syndrome Graph G(V,E)',
-      mathExpression: 'min ∑_{(u,v) ∈ M} w_{uv},  w_{uv} = ln((1-p)/p) · dist(u,v)',
+      mathExpression: 'M* = argmin_M ∑_{e∈M} w_e,  w_e often ≈ -log P(e)',
       description:
-        'MWPM constructs a complete graph of syndrome defect vertices and finds a minimum-weight matching M in polynomial O(V^3) time using Edmonds Blossom algorithm.',
+        'A detector error model supplies weighted edges linking detection events and permitted boundaries in spacetime. MWPM minimizes total weight over compatible pairings. Implementations and graph constructions vary, and matching does not distinguish error histories in the same logical equivalence class.',
     },
   },
   'defects-braiding': {
@@ -316,9 +316,9 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     },
     rigor: {
       formalismTitle: 'Boundary Patch Merging, Splitting & Parity Measurements M_XX, M_ZZ',
-      mathExpression: 'M_{ZZ} = ∏_{i ∈ boundary} Z_i Z_{i+1},  Code(d) ⊕ Code(d) → Code(2d)',
+      mathExpression: 'Measure L_{Z,1}L_{Z,2} or L_{X,1}L_{X,2}; repeat checks for O(d) rounds',
       description:
-        'Merging two planar code patches measures joint logical operators L_{Z,1} L_{Z,2} or L_{X,1} L_{X,2} in d clock cycles without moving physical qubits.',
+        'A merge introduces boundary-spanning checks whose repeated outcomes determine a joint logical parity; a split restores separate patches. A distance-d implementation typically repeats the new checks for order-d rounds, with exact scheduling and boundary conventions depending on the protocol.',
     },
   },
   'cluster-states-mbqc': {
@@ -339,14 +339,14 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     intuition: {
       analogyTitle: 'Purifying Rough Ore into Pure Gold (15-to-1 Distillation)',
       description:
-        'Clifford operations cannot execute non-Clifford T gates directly. Distillation takes 15 noisy helper states and refines them into 1 ultra-pure magic state.',
-      takeaway: 'Magic state distillation supplies high-fidelity T gates for universal QEC.',
+        'Treat distillation as a quality-control batch: fifteen noisy T-type resources map to inputs, stabilizer checks map to rejection tests, and one accepted output can have lower error. The boundary is that acceptance is probabilistic and the advertised suppression assumes a particular input-error model.',
+      takeaway: 'Accepted |A⟩ resources let Clifford-and-measurement gadgets enact logical T gates.',
     },
     rigor: {
       formalismTitle: 'Bravyi-Kitaev 15-to-1 Reed-Muller Distillation Routine',
-      mathExpression: '|T⟩ = cos(π/8)|0⟩ + sin(π/8)|1⟩,  ϵ_out = 35 ϵ_in^3',
+      mathExpression: '|A⟩ ≡ T|+⟩ = (|0⟩ + e^(iπ/4)|1⟩)/√2,  p_out = 35p_in^3 + O(p_in^4)',
       description:
-        '15-to-1 distillation gadget uses the [[15, 1, 3]] Reed-Muller code to measure error syndromes on noisy input |T⟩ states, suppressing error rate cubicly.',
+        'Under the standard independent input-error model, the [[15, 1, 3]] punctured Reed-Muller protocol detects lower-weight faults and gives cubic leading-order suppression on acceptance. This atlas calls T|+⟩ the |A⟩ state; literature that calls it |T⟩ is using a different naming convention.',
     },
   },
   'flag-fault-tolerance': {
@@ -393,30 +393,30 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
   },
   'real-time-decoding-control': {
     intuition: {
-      analogyTitle: 'Sub-Microsecond FPGA Traffic Controller',
+      analogyTitle: 'Streaming Dispatch Queue & Urgent Feed-Forward',
       description:
-        'Quantum errors happen in nanoseconds. Real-time control hardware must decode syndrome flares and calculate corrections before the next gate cycle.',
-      takeaway: 'Real-time decoding requires ultra-low latency hardware stream processing.',
+        'A dispatch center must process reports at least as fast as they arrive so backlog does not grow; that maps to decoder throughput. A particular ambulance may also need an answer before a deadline; that maps to latency. The analogy breaks if every correction is assumed urgent—Pauli-frame updates can often wait, while some feed-forward operations cannot.',
+      takeaway: 'Sustained throughput and decision latency are separate decoder requirements.',
     },
     rigor: {
       formalismTitle: 'FPGA Stream Processing & Low-Latency Pipeline Architectures',
-      mathExpression: 'Latency < t_{coherence} ≈ 1 µs,  Throughput > 10^6 syndromes/sec',
+      mathExpression: 'R_decode ≥ R_syndrome;  L_decode + L_control ≤ L_feed-forward when feedback is required',
       description:
-        'Hardware control stacks deploy streaming decoders on FPGAs/ASICs to achieve sub-microsecond syndrome processing and feed-forward corrections.',
+        'A streaming decoder needs aggregate throughput at least equal to detector-data production across the code. Separately, end-to-end latency must meet the relevant logical feed-forward deadline, which need not equal one QEC cycle or a qubit coherence time. CPUs, GPUs, FPGAs, or ASICs may implement different points in this trade space.',
     },
   },
   'magic-state-cultivation': {
     intuition: {
-      analogyTitle: 'High-Yield Magic State Factories',
+      analogyTitle: 'Grow, Inspect, Reject, Then Transplant',
       description:
-        'Modern architectures build compact, high-yield magic state factories that cultivate pure T states with 10x less physical qubit space.',
-      takeaway: 'Cultivation gadgets drastically reduce surface-code hardware overhead.',
+        'A seed maps to a rough low-distance encoded |A⟩ state; repeated inspections and growth map to cross-checks plus postselection; transplanting maps to the escape stage into a larger code. The boundary is that failed inspections are discarded, so yield is below one and the cost advantage depends strongly on physical noise and target fidelity.',
+      takeaway: 'Cultivation trades retries and postselection for low estimated |A⟩-state cost in studied regimes.',
     },
     rigor: {
-      formalismTitle: 'Block-Code Distillation & Low-Overhead State Cultivation',
-      mathExpression: 'Overhead: O(d^3) → O(d^2),  Yield η_{distill} > 99%',
+      formalismTitle: 'Injection, Cultivation & Escape',
+      mathExpression: '|A⟩ injection → check/grow/postselect → escape to a larger code,  P_accept < 1',
       description:
-        'Advanced state cultivation protocols replace traditional 15-to-1 factories with auto-correcting block codes and synthification gadgets.',
+        'The original cultivation construction injects a rough T-type state into a small triangular color code, raises its fault distance through cross-checks and growth with postselection, then escapes or code-switches into a larger matchable surface-code-style encoding. It is an alternative to batch distillation, not a generic block-code replacement with guaranteed yield or asymptotic advantage.',
     },
   },
   'tqec-compilers-automation': {
@@ -449,16 +449,16 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
   },
   'below-threshold-experiments': {
     intuition: {
-      analogyTitle: 'The Sound Barrier Breakthrough (Supersonic QEC)',
+      analogyTitle: 'A Larger Net Lets Fewer Faults Through',
       description:
-        'In recent laboratory milestones, superconducting and neutral-atom quantum processors officially crossed below the error threshold, demonstrating logical qubits that outlive their physical parts.',
-      takeaway: 'Real physical hardware has officially proven logical error suppression in labs.',
+        'For one Willow memory experiment, increasing distance by two reduced error per cycle by a factor above two. Net size maps to code distance and escaped faults map to logical errors. This is evidence for below-threshold memory scaling in that experiment—not proof that all gates, algorithms, or hardware platforms are fault tolerant.',
+      takeaway: 'Willow reported Λ = 2.14 ± 0.02 for its tested surface-code memories, with Λ > 1 meaning suppression.',
     },
     rigor: {
-      formalismTitle: 'Experimental Logical Qubit Lifetime Milestones (Google, Quantinuum, IBM)',
-      mathExpression: 'Λ = Λ_{logical} / Λ_{physical} < 1,  P_L(d=5) < P_L(d=3)',
+      formalismTitle: 'Willow Surface-Code Memory Scaling',
+      mathExpression: 'Λ = ε_d / ε_(d+2) = 2.14 ± 0.02 > 1;  ε_7 = 0.143% ± 0.003% per cycle',
       description:
-        'Landmark physical experiments (Google Sycamore, Quantinuum H-series, Harvard/QuEra) demonstrate logical error suppression with d=3 and d=5 surface/color codes.',
+        'Google Quantum AI defined the suppression factor as Λ = ε_d/ε_(d+2), so larger-than-one values mean lower logical error at the larger distance. Reciprocal conventions exist and must be labeled. The reported result is for an error-corrected memory and does not alone establish a universal fault-tolerant gate set or end-to-end algorithm.',
     },
   },
 };

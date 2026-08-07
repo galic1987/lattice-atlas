@@ -7,6 +7,7 @@ import {
   animate,
   motion,
   useInView,
+  useReducedMotion,
   type Variants,
 } from 'framer-motion';
 import {
@@ -110,6 +111,7 @@ function SplitLine({
 
 function Hero() {
   const [tourOpen, setTourOpen] = useState(false);
+  const reduce = useReducedMotion();
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
@@ -117,11 +119,11 @@ function Hero() {
       <div className="absolute inset-0" aria-hidden>
         <motion.img
           src={asset('hero_quantum_lattice.jpg')}
-          alt="Topological Quantum Error Correction Torus Lattice"
+          alt=""
           className="h-full w-full object-cover opacity-60"
-          initial={{ scale: 1.02 }}
-          animate={{ scale: [1.02, 1.06, 1.02] }}
-          transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
+          initial={reduce ? false : { scale: 1.02 }}
+          animate={reduce ? { scale: 1.02 } : { scale: [1.02, 1.06, 1.02] }}
+          transition={reduce ? { duration: 0 } : { duration: 36, repeat: Infinity, ease: 'easeInOut' }}
         />
         {/* lattice texture overlay at 20% */}
         <div className="lattice-bg absolute inset-0 opacity-20" />
@@ -196,7 +198,7 @@ function Hero() {
               onClick={() => setTourOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-plaquette/50 bg-plaquette/10 px-5 py-3 font-display text-sm font-semibold text-plaquette transition-all duration-200 hover:border-plaquette hover:bg-plaquette/20"
             >
-              <Sparkles className="h-4 w-4 text-plaquette animate-pulse" />
+              <Sparkles className={`h-4 w-4 text-plaquette ${reduce ? '' : 'animate-pulse'}`} />
               60-Sec Guided Tour
             </button>
           </motion.div>
@@ -283,19 +285,21 @@ function WhatIsTqec() {
           <div className="overflow-hidden rounded-xl border border-ink-600 bg-ink-800">
             <img
               src={asset('surface-code-diagram.svg')}
-              alt="A distance-3 rotated surface code lattice with data qubits, stabilizer plaquettes, and an error chain"
-              className="w-full transition group-hover:animate-error-pulse"
+              alt="Distance-3 rotated surface-code patch: nine data qubits and eight checks. A center X error flips exactly the two adjacent Z checks, Z2 and Z3."
+              className="w-full transition group-hover:animate-error-pulse motion-reduce:animate-none"
             />
           </div>
           <motion.figcaption
-            className="mt-3 font-mono text-[13px] leading-relaxed text-text-low"
+            className="mt-3 font-mono text-[13px] leading-relaxed text-text-mid"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.4 }}
           >
-            A distance-3 rotated surface code. Data qubits (circles), stabilizer
-            plaquettes (cyan/violet), and an error chain (rose).
+            Exact distance-3 geometry used by the browser lab: 9 data qubits,
+            4 X checks, and 4 Z checks. Four boundary checks touch 2 data qubits;
+            four interior checks touch 4. Here one X error on D4 produces the
+            two rose-ringed outcomes Z2 = −1 and Z3 = −1.
           </motion.figcaption>
         </motion.figure>
       </div>

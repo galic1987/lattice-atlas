@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -81,9 +82,9 @@ function facePath(lat: Lattice, s: Stabilizer): string {
 const PLAYBACK_STEPS = [
   {
     step: 0,
-    title: 'Initial State',
-    subtitle: '|0⟩ Ground State',
-    description: 'Data qubits initialized to clean ground state |0⟩. Stabilizers measure +1 (no syndromes).',
+    title: 'Clean Error Frame',
+    subtitle: 'No Pauli errors',
+    description: 'The classical model starts with no Pauli errors, so every ideal stabilizer check returns +1.',
   },
   {
     step: 1,
@@ -93,27 +94,27 @@ const PLAYBACK_STEPS = [
   },
   {
     step: 2,
-    title: 'Stabilizer Compute',
-    subtitle: 'Ancilla Parity Readout',
-    description: 'Ancilla qubits execute CNOT parity measurement circuits. Stabilizers that anticommute with errors flip to -1 eigenvalue (rose syndrome).',
+    title: 'Ideal Check Readout',
+    subtitle: 'Parity from the error frame',
+    description: 'The model computes ideal stabilizer parities. Checks that anticommute with the painted Pauli errors return -1 (rose syndrome).',
   },
   {
     step: 3,
     title: 'Defect Identification',
-    subtitle: 'Graph Vertices',
-    description: 'Syndrome detection events are isolated as topological defect vertices in the MWPM decoding graph.',
+    subtitle: 'Matching-graph vertices',
+    description: 'The fired X- and Z-type checks become separate vertices in the built-in decoder’s spatial matching graphs.',
   },
   {
     step: 4,
-    title: 'MWPM Matching Path',
-    subtitle: 'Minimum Weight Matching',
-    description: 'PyMatching / Blossom V matching algorithm finds minimum-weight correction paths between defect pairs and boundaries.',
+    title: 'Built-in Matching',
+    subtitle: 'Exact small cases · greedy fallback',
+    description: 'The local model pairs same-type defects or boundaries by shortest graph paths. It uses exact dynamic programming up to 16 defects per type, then a greedy fallback—not PyMatching.',
   },
   {
     step: 5,
     title: 'Correction Applied',
-    subtitle: 'Pauli Recovery & Verification',
-    description: 'Matching Pauli correction operators are applied to data qubits. Stabilizers return to +1 and logical state recovery is verified.',
+    subtitle: 'Syndrome + logical-sector check',
+    description: 'The model combines error and candidate correction, confirms the residual syndrome clears, then tests whether the residual crosses a chosen logical support. This verifies the toy-model outcome, not hardware recovery.',
   },
 ] as const;
 
@@ -157,8 +158,8 @@ function LatticeView({
     <svg
       viewBox={`0 0 ${size} ${size}`}
       className="w-full"
-      role="img"
-      aria-label={`Distance-${lat.d} rotated surface code lattice`}
+      role="group"
+      aria-label={`Interactive distance-${lat.d} rotated surface code lattice`}
     >
       {/* stabilizer faces */}
       {lat.stabilizers.map((s) => {
@@ -247,7 +248,21 @@ function LatticeView({
         const activeError = showErrors ? e : 0;
 
         return (
-          <g key={q} onClick={() => onQubitClick(q)} className="cursor-pointer">
+          <g
+            key={q}
+            role="button"
+            tabIndex={0}
+            aria-label={`Data qubit ${q + 1}, ${e === 0 ? 'no painted error' : `painted ${PAULI_LABEL[e]} error`}`}
+            onClick={() => onQubitClick(q)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onQubitClick(q);
+              }
+            }}
+            className="group cursor-pointer outline-none"
+          >
+            <circle cx={x} cy={y} r={21} fill="transparent" />
             {corrected && (
               <circle cx={x} cy={y} r={16} fill="none" stroke={OK} strokeWidth={2} strokeDasharray="4 3" />
             )}
@@ -258,7 +273,7 @@ function LatticeView({
               fill={activeError === 0 ? '#1B2743' : PAULI_COLORS[activeError]}
               stroke={activeError === 0 ? '#3D5178' : PAULI_COLORS[activeError]}
               strokeWidth={1.5}
-              className="transition-[fill,stroke] duration-150 hover:stroke-[#EAF0FB]"
+              className="transition-[fill,stroke] duration-150 group-hover:stroke-[#EAF0FB] group-focus-visible:stroke-[#EAF0FB] group-focus-visible:stroke-[3px]"
             />
             {activeError !== 0 && (
               <text
@@ -490,10 +505,10 @@ function ThresholdSection() {
       >
         <p className="eyebrow !text-magic">{'// THE EXPERIMENT'}</p>
         <h2 className="mt-4 max-w-2xl font-display text-[32px] font-semibold leading-[1.1] text-text-hi md:text-[40px]">
-          Reproduce the scaling law.
+          Explore a finite-size scaling signal.
         </h2>
         <p className="mt-5 max-w-2xl leading-[1.7] text-text-mid">
-          This is the plot the whole field is built on. Sample random noise at
+          This is a browser-scale version of a canonical threshold diagnostic. Sample independent data-qubit Pauli noise at
           each physical error rate, decode, and count logical failures — live,
           in your browser. Below threshold, bigger codes win: the curves
           separate, with <span className="mono-pill">d = 7</span> below{' '}
@@ -641,7 +656,7 @@ function ThresholdSection() {
               <Link to="/papers#2408.13687" className="link-slide text-star hover:text-text-hi">
                 Google&apos;s 2024 experiment
               </Link>{' '}
-              measured Λ ≈ 2.1 on real hardware.
+              reported Λ ≈ 2.1 on its hardware experiment.
             </p>
           </div>
 
@@ -651,8 +666,14 @@ function ThresholdSection() {
               Here the curves cross near p ≈ 15% because this lab uses
               code-capacity noise: errors strike once and measurements are
               perfect. Real devices measure syndromes with noisy circuits,
-              which drops the threshold to the famous ~1%. The scaling law is
-              the same — only the crossing point moves.
+              producing a much lower, model-dependent crossing often near 1%.
+              The qualitative test—whether larger distances help—survives, but
+              this crossing value does not transfer to hardware.
+            </p>
+            <p className="mt-3 font-mono text-[11px] leading-relaxed text-text-low">
+              Decoder disclosure: exact shortest-path matching is used for up
+              to 16 defects per check type; larger cases use a greedy fallback.
+              This page does not execute PyMatching.
             </p>
           </div>
         </aside>
@@ -921,15 +942,15 @@ export default function SurfaceCodeLab() {
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
         {/* View Mode Toggle Bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-600 bg-ink-800 p-4">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center">
             <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-text-low">
               Visualization Mode:
             </span>
-            <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850">
+            <div className="grid w-full min-w-0 grid-cols-3 overflow-hidden rounded-lg border border-ink-600 bg-ink-850 sm:flex sm:w-auto">
               <button
                 type="button"
                 onClick={() => setLabViewMode('2d')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === '2d'
                     ? 'bg-plaquette/20 text-plaquette font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -940,7 +961,7 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={() => setLabViewMode('3d')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === '3d'
                     ? 'bg-magic/20 text-magic font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -951,7 +972,7 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={() => setLabViewMode('dual')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === 'dual'
                     ? 'bg-star/20 text-star font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -978,7 +999,7 @@ export default function SurfaceCodeLab() {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
               <button
                 type="button"
                 onClick={() => goToStep(Math.max(0, currentStep - 1))}
@@ -1016,7 +1037,7 @@ export default function SurfaceCodeLab() {
               </button>
 
               {/* Speed Selector */}
-              <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850 ml-2">
+              <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850">
                 {[0.5, 1, 2].map((spd) => (
                   <button
                     key={spd}
@@ -1036,7 +1057,7 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={clear}
-                className="btn-ghost !p-2 ml-2"
+                className="btn-ghost !p-2"
                 title="Reset to Initial State"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -1257,7 +1278,7 @@ export default function SurfaceCodeLab() {
                       result.success ? 'text-stabilizer' : 'text-syndrome'
                     }`}
                   >
-                    {result.success ? '✓ corrected — state recovered' : '✗ logical error'}
+                    {result.success ? '✓ corrected — logical sector preserved' : '✗ logical error'}
                   </p>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-text-mid">
                     {result.success
@@ -1366,16 +1387,11 @@ export default function SurfaceCodeLab() {
             <div className="rounded-xl border border-star/40 bg-star/[0.07] p-5">
               <p className="eyebrow mb-3 !text-star">{'// TAKE IT TO REAL SOFTWARE'}</p>
               <p className="text-[13px] leading-relaxed text-text-mid">
-                Download this d={d} lattice as a noisy memory experiment in{' '}
-                <span className="mono-pill">.stim</span> format — the simulator
-                used in the below-threshold experiments. Paste it into Crumble
-                to step through the circuit, or sample it with Stim + PyMatching.
-                The repo&apos;s{' '}
-                <span className="font-mono text-[12px] text-star">
-                  notebooks/first-threshold-curve.ipynb
-                </span>{' '}
-                walks the full pipeline and reproduces this page&apos;s plot with
-                circuit-level noise — where the threshold drops to the famous ~1%.
+                Download this d={d} lattice as a generated noisy-memory circuit
+                in <span className="mono-pill">.stim</span> format. This page does
+                not execute the file: inspect it in Crumble or run it separately
+                with Stim and a decoder such as PyMatching. Its circuit-level
+                noise model is different from the ideal-measurement browser sweep above.
               </p>
               <button type="button" onClick={downloadStim} className="btn-secondary mt-4 w-full !border-star/50 !text-star hover:!bg-star/10">
                 <Download className="h-4 w-4" /> Download .stim circuit
@@ -1445,6 +1461,10 @@ export default function SurfaceCodeLab() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-6 md:px-8">
+        <TorusTopologyViewer />
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">

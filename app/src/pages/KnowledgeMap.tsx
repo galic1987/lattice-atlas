@@ -173,6 +173,20 @@ function PageHeader({ understoodCount }: { understoodCount: number }) {
           explanation, key points, and curated resources. Mark topics as
           understood when you master them. The map saves your marks.
         </motion.p>
+        <motion.p
+          {...block(0.24)}
+          className="mt-5 inline-flex max-w-2xl flex-wrap items-baseline gap-x-2 rounded-lg border border-star/30 bg-star/10 px-3 py-2 text-sm leading-relaxed text-text-mid"
+        >
+          <span className="font-mono text-[12px] font-semibold uppercase tracking-wider text-star">
+            Toric-code braid
+          </span>
+          <span>
+            A full <span className="font-mono text-star">e</span> loop enclosing one{' '}
+            <span className="font-mono text-plaquette">m</span> contributes an amplitude
+            factor <span className="font-mono text-text-hi">−1</span> relative to a loop
+            enclosing none.
+          </span>
+        </motion.p>
         <motion.div
           {...block(0.4)}
           className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-[13px]"

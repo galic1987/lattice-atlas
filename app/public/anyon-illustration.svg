@@ -45,7 +45,4 @@
   <circle cx="150" cy="200" r="9" fill="#8B5CF6" fill-opacity="0.85"/>
   <text x="145" y="205" font-family="'JetBrains Mono', monospace" font-size="13" font-weight="700" fill="#EAF0FB">e</text>
   <path d="M163 225 C 195 290, 225 355, 242 405" fill="none" stroke="#8B5CF6" stroke-opacity="0.55" stroke-width="1.8" stroke-dasharray="5 7"/>
-
-  <!-- braiding annotation -->
-  <text x="470" y="130" font-family="'JetBrains Mono', monospace" font-size="14" fill="#64708E">braid: e around m → phase −1</text>
 </svg>
