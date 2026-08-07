@@ -101,7 +101,7 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
                 <span className="flex items-center gap-1 text-star">
                   <Sparkles className="h-3 w-3" /> Grant Sanderson / 3Blue1Brown Visual Mathematics
                 </span>
-                <span className="text-text-mid font-semibold">Full URL: {resource.link}</span>
+                <span className="text-text-mid font-semibold truncate max-w-[200px]" title={resource.link || undefined}>Full URL: {resource.link}</span>
               </div>
 
               {resource.link && (
