@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Check, Copy, Flag, Play, RotateCcw, Share2, Swords } from 'lucide-react';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import {
   DAILY_PLAN,
   POINTS,
@@ -136,6 +137,7 @@ type Mode = 'daily' | 'practice';
 type Phase = 'menu' | 'play' | 'post' | 'end';
 
 export default function DecoderDuel() {
+  useDocumentTitle('Decoder Duel');
   const day = dayNumber();
   const [record, setRecord] = useState(loadDuelRecord);
   const [mode, setMode] = useState<Mode>('daily');
