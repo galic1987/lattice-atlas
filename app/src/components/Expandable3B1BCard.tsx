@@ -14,8 +14,8 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
 
   const embedUrl = resource.youtubeId
     ? resource.isPlaylist
-      ? `https://www.youtube.com/embed/videoseries?list=${resource.youtubeId}`
-      : `https://www.youtube.com/embed/${resource.youtubeId}`
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${resource.youtubeId}`
+      : `https://www.youtube-nocookie.com/embed/${resource.youtubeId}`
     : null;
 
   return (
