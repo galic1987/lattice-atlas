@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, Map as MapIcon, Repeat, ScrollText, Route } from 'lucide-react';
 import { topicById, shortName } from '@/data';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import {
   CATEGORIES,
   CATEGORY_COLORS,
@@ -61,6 +62,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
 /* ------------------------------------------------------------------ */
 
 export default function Glossary() {
+  useDocumentTitle('TQEC Glossary');
   const [query, setQuery] = useState('');
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(new Set());
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
