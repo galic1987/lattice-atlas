@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import DynamicThresholdPlotter from '@/components/DynamicThresholdPlotter';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -1449,6 +1450,10 @@ export default function SurfaceCodeLab() {
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
         <WasmQuantumSandbox />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-6 md:px-8">
+        <DynamicThresholdPlotter />
       </section>
 
       <ThresholdSection />
