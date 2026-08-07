@@ -39,6 +39,53 @@ Claude works in `../lattice-atlas-claude`. The main checkout
 your own worktree; integrate through PRs, never through the other agent's
 working directory.
 
+## Open review findings — needs owner (2026-08-07, four-reviewer audit)
+
+A full review (physics / code / security / perf-a11y) ran against main. Claude
+fixed everything cleanly in the data lane + Decoder Duel (merged PRs #14, #16).
+The items below live in files Gemini has been actively editing, so they're
+handed off rather than raced. Ranked by severity; each has a concrete fix.
+
+1. **HIGH — WebGL GPU leak** `components/SpacetimeView3D.tsx`. The scene-build
+   `useEffect` re-runs on every playback step and reallocates a `WebGLRenderer`
+   + many geometries/materials; cleanup only calls `renderer.dispose()`.
+   Fix: `.dispose()` every geometry/material (or reuse them across renders), and
+   `renderer.forceContextLoss()` on unmount. Also gate the RAF loop on
+   interaction + `prefers-reduced-motion`, and pause via IntersectionObserver.
+2. **HIGH — timer leak** `components/SpacetimeBraidWeaver.tsx:133`. `setInterval`
+   created in `togglePlay`, never cleared on pause/unmount. Fix: move it into a
+   `useEffect` keyed on `isPlaying` with `clearInterval` cleanup (mirror
+   `SurfaceCodeLab.tsx`'s worker/interval pattern).
+3. **HIGH — a11y** `pages/SurfaceCodeLab.tsx` lattice qubits are bare
+   `<g onClick>`. Give them `role="button"`, `tabIndex`, `aria-label`,
+   `onKeyDown` (Enter/Space), and a focus ring — see the pattern just landed in
+   `pages/DecoderDuel.tsx` (PR #16).
+4. **MEDIUM — name key split**: `Certificate.tsx` uses `lattice-atlas-name`,
+   `ShareableScoreCard.tsx` uses `lattice-atlas-user-name`. Same field, two keys.
+   Pick one canonical key (suggest `lattice-atlas-name`) in both.
+5. **MEDIUM — dead code / unreachable points**: `components/QuantumArcade.tsx` is
+   never imported, yet is the only writer of `lattice-atlas-game-scores`, which
+   `ShareableScoreCard.tsx` reads for up to 120/1000 points → permanently
+   unreachable. Either mount the arcade or drop the arcade-points path.
+6. **MEDIUM (security) — supply chain**: remove `plugin-inspect-react-code`
+   (dev-only Vite plugin resolving from `npmmirror.com`, thin provenance; the
+   `inspectAttr()` in `vite.config.ts`). It's unnecessary. While there, prune the
+   ~40 unused scaffold deps in `package.json` (all `@radix-ui/*`,
+   `@react-three/*`, `gsap`, `lenis`, `recharts`, `zod`, `vaul`, …) — tree-shaken
+   out but bloating install/audit surface.
+7. **LOW — privacy**: `Expandable3B1BCard.tsx` embeds `youtube.com/embed`
+   (in-page Google frame). Switch to `youtube-nocookie.com` to honor "no tracking".
+8. **LOW — contrast**: `tailwind.config.js` `text-low #64708E` ≈ 4.0:1 (below AA
+   for small text). `design/design.md` already documents the intended fix to a
+   lighter value — apply it to the config.
+9. **LOW — perf**: `manualChunks` in `vite.config.ts` to split framer-motion
+   (~177KB gzip) out of the entry chunk; add `loading="lazy"` to below-fold
+   `<img>` in `Home.tsx`, `ActChapterCard.tsx`, `FieldToday.tsx`.
+
+Verified sound (no action): no tracking (source + bundle clean), no XSS surface,
+Three.js correctly code-split to /lab only, all routes lazy, worker bounded,
+mobile drawer exemplary, all 52 quiz answers correct.
+
 ## Hard rules (break these and production breaks)
 
 1. **Public assets in JSX must use the `asset()` helper** from `app/src/lib/asset.ts`:
