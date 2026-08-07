@@ -10,6 +10,11 @@ import {
   Play,
   RotateCcw,
   Sparkles,
+  SkipBack,
+  SkipForward,
+  Layers,
+  Grid,
+  Columns,
 } from 'lucide-react';
 import type { McCell, McCommand, McProgress } from '@/lib/threshold.worker';
 import {
@@ -26,6 +31,7 @@ import {
   type Stabilizer,
 } from '@/lib/surfaceCode';
 import { topicById, shortName } from '@/data';
+import SpacetimeView3D from '@/components/SpacetimeView3D';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -67,6 +73,49 @@ function facePath(lat: Lattice, s: Stabilizer): string {
 }
 
 /* ------------------------------------------------------------------ */
+/* Playback Pipeline Step Definition                                   */
+/* ------------------------------------------------------------------ */
+
+const PLAYBACK_STEPS = [
+  {
+    step: 0,
+    title: 'Initial State',
+    subtitle: '|0⟩ Ground State',
+    description: 'Data qubits initialized to clean ground state |0⟩. Stabilizers measure +1 (no syndromes).',
+  },
+  {
+    step: 1,
+    title: 'Error Injection',
+    subtitle: 'Pauli Noise (X, Z, Y)',
+    description: 'Environmental noise or manual painting injects Pauli X bit-flips, Z phase-flips, or Y combined errors on data qubits.',
+  },
+  {
+    step: 2,
+    title: 'Stabilizer Compute',
+    subtitle: 'Ancilla Parity Readout',
+    description: 'Ancilla qubits execute CNOT parity measurement circuits. Stabilizers that anticommute with errors flip to -1 eigenvalue (rose syndrome).',
+  },
+  {
+    step: 3,
+    title: 'Defect Identification',
+    subtitle: 'Graph Vertices',
+    description: 'Syndrome detection events are isolated as topological defect vertices in the MWPM decoding graph.',
+  },
+  {
+    step: 4,
+    title: 'MWPM Matching Path',
+    subtitle: 'Minimum Weight Matching',
+    description: 'PyMatching / Blossom V matching algorithm finds minimum-weight correction paths between defect pairs and boundaries.',
+  },
+  {
+    step: 5,
+    title: 'Correction Applied',
+    subtitle: 'Pauli Recovery & Verification',
+    description: 'Matching Pauli correction operators are applied to data qubits. Stabilizers return to +1 and logical state recovery is verified.',
+  },
+] as const;
+
+/* ------------------------------------------------------------------ */
 /* Lattice SVG                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -75,12 +124,14 @@ function LatticeView({
   errors,
   syndrome,
   result,
+  currentStep,
   onQubitClick,
 }: {
   lat: Lattice;
   errors: Pauli[];
   syndrome: Set<string>;
   result: DecodeResult | null;
+  currentStep: number;
   onQubitClick: (q: number) => void;
 }) {
   const reduce = useReducedMotion();
@@ -90,9 +141,15 @@ function LatticeView({
     [lat],
   );
   const correctedQubits = useMemo(() => {
-    if (!result) return new Set<number>();
+    if (!result || currentStep < 5) return new Set<number>();
     return new Set(result.correction.flatMap((p, q) => (p !== 0 ? [q] : [])));
-  }, [result]);
+  }, [result, currentStep]);
+
+  // Determine active display states based on current playback step
+  const showErrors = currentStep >= 1 && currentStep < 5;
+  const showSyndrome = currentStep >= 2 && currentStep < 5;
+  const showDefects = currentStep >= 3 && currentStep < 5;
+  const showMatches = currentStep >= 4 && result !== null;
 
   return (
     <svg
@@ -103,7 +160,7 @@ function LatticeView({
     >
       {/* stabilizer faces */}
       {lat.stabilizers.map((s) => {
-        const hot = syndrome.has(s.id);
+        const hot = showSyndrome && syndrome.has(s.id);
         const base = s.type === 'X' ? PAULI_COLORS[1] : PAULI_COLORS[2];
         return (
           <g key={s.id}>
@@ -127,39 +184,66 @@ function LatticeView({
             >
               {s.type}
             </text>
+
+            {/* Step 3 & 4 Defect Identification Overlays */}
+            {showDefects && hot && (
+              <g key={`defect-${s.id}`}>
+                <circle
+                  cx={faceCenter(s).x}
+                  cy={faceCenter(s).y}
+                  r={16}
+                  fill="none"
+                  stroke={SYNDROME}
+                  strokeWidth={1.5}
+                  strokeDasharray="4 2"
+                  className={!reduce ? 'animate-spin' : undefined}
+                />
+                <circle
+                  cx={faceCenter(s).x}
+                  cy={faceCenter(s).y}
+                  r={5}
+                  fill={SYNDROME}
+                  className={!reduce ? 'animate-ping' : undefined}
+                  opacity={0.8}
+                />
+              </g>
+            )}
           </g>
         );
       })}
 
-      {/* decoder correction chains */}
-      {result?.matches.map((m, i) => {
-        const a = stabById.get(m.a);
-        if (!a) return null;
-        const pts = [faceCenter(a), ...m.qubits.map((q) => qubitPoint(lat.d, q))];
-        if (m.b !== 'boundary') {
-          const b = stabById.get(m.b);
-          if (b) pts.push(faceCenter(b));
-        }
-        return (
-          <motion.polyline
-            key={i}
-            points={pts.map((p) => `${p.x},${p.y}`).join(' ')}
-            fill="none"
-            stroke={OK}
-            strokeWidth={2.5}
-            strokeDasharray="6 4"
-            strokeLinecap="round"
-            initial={reduce ? undefined : { pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.6, delay: i * 0.08, ease: [...EASE] }}
-          />
-        );
-      })}
+      {/* decoder correction chains (Step 4 & 5) */}
+      {showMatches &&
+        result?.matches.map((m, i) => {
+          const a = stabById.get(m.a);
+          if (!a) return null;
+          const pts = [faceCenter(a), ...m.qubits.map((q) => qubitPoint(lat.d, q))];
+          if (m.b !== 'boundary') {
+            const b = stabById.get(m.b);
+            if (b) pts.push(faceCenter(b));
+          }
+          return (
+            <motion.polyline
+              key={i}
+              points={pts.map((p) => `${p.x},${p.y}`).join(' ')}
+              fill="none"
+              stroke={OK}
+              strokeWidth={2.5}
+              strokeDasharray="6 4"
+              strokeLinecap="round"
+              initial={reduce ? undefined : { pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: [...EASE] }}
+            />
+          );
+        })}
 
       {/* data qubits */}
       {errors.map((e, q) => {
         const { x, y } = qubitPoint(lat.d, q);
         const corrected = correctedQubits.has(q);
+        const activeError = showErrors ? e : 0;
+
         return (
           <g key={q} onClick={() => onQubitClick(q)} className="cursor-pointer">
             {corrected && (
@@ -169,12 +253,12 @@ function LatticeView({
               cx={x}
               cy={y}
               r={11}
-              fill={e === 0 ? '#1B2743' : PAULI_COLORS[e]}
-              stroke={e === 0 ? '#3D5178' : PAULI_COLORS[e]}
+              fill={activeError === 0 ? '#1B2743' : PAULI_COLORS[activeError]}
+              stroke={activeError === 0 ? '#3D5178' : PAULI_COLORS[activeError]}
               strokeWidth={1.5}
               className="transition-[fill,stroke] duration-150 hover:stroke-[#EAF0FB]"
             />
-            {e !== 0 && (
+            {activeError !== 0 && (
               <text
                 x={x}
                 y={y + 4}
@@ -185,7 +269,7 @@ function LatticeView({
                 fill="#05080F"
                 pointerEvents="none"
               >
-                {PAULI_LABEL[e]}
+                {PAULI_LABEL[activeError]}
               </text>
             )}
           </g>
@@ -662,6 +746,12 @@ export default function SurfaceCodeLab() {
   const [result, setResult] = useState<DecodeResult | null>(null);
   const [score, setScore] = useState({ trials: 0, fails: 0 });
 
+  // Playback controller state
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const [labViewMode, setLabViewMode] = useState<'2d' | '3d' | 'dual'>('2d');
+
   const syndrome = useMemo(() => computeSyndrome(lat, errors), [lat, errors]);
   const errorCount = errors.filter((e) => e !== 0).length;
   const stimUrl = useRef<string | null>(null);
@@ -677,6 +767,27 @@ export default function SurfaceCodeLab() {
   });
   const activeChallenge = CHALLENGES.find((c) => c.id === challengeId) ?? null;
   const activeSolved = activeChallenge !== null && challengesDone.has(activeChallenge.id);
+
+  /** Playback auto-stepping interval effect */
+  useEffect(() => {
+    if (!isPlaying) return;
+    const speedMs = 1400 / playbackSpeed;
+    const timer = setInterval(() => {
+      setCurrentStep((prev) => {
+        if (prev >= 5) {
+          setIsPlaying(false);
+          return 5;
+        }
+        const next = prev + 1;
+        if (next >= 4 && !result) {
+          const res = decode(lat, errors);
+          setResult(res);
+        }
+        return next;
+      });
+    }, speedMs);
+    return () => clearInterval(timer);
+  }, [isPlaying, playbackSpeed, lat, errors, result]);
 
   /** Called from the event handlers with the freshly-computed state. */
   const checkChallenge = (nextErrors: Pauli[], nextResult: DecodeResult | null) => {
@@ -705,6 +816,8 @@ export default function SurfaceCodeLab() {
     setD(next);
     setErrors(new Array<Pauli>(next * next).fill(0));
     setResult(null);
+    setCurrentStep(1);
+    setIsPlaying(false);
   };
 
   const editQubit = (q: number) => {
@@ -712,6 +825,7 @@ export default function SurfaceCodeLab() {
     const next = [...errors];
     next[q] = (next[q] ^ brush) as Pauli;
     setErrors(next);
+    setCurrentStep(1);
     checkChallenge(next, null);
   };
 
@@ -719,6 +833,7 @@ export default function SurfaceCodeLab() {
     setResult(null);
     const next = sampleDepolarizing(lat.n, p);
     setErrors(next);
+    setCurrentStep(1);
     checkChallenge(next, null);
   };
 
@@ -726,12 +841,23 @@ export default function SurfaceCodeLab() {
     const res = decode(lat, errors);
     setResult(res);
     setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
+    setCurrentStep(4);
     checkChallenge(errors, res);
   };
 
   const clear = () => {
     setErrors(new Array<Pauli>(lat.n).fill(0));
     setResult(null);
+    setCurrentStep(0);
+    setIsPlaying(false);
+  };
+
+  const goToStep = (s: number) => {
+    if (s >= 4 && !result) {
+      const res = decode(lat, errors);
+      setResult(res);
+    }
+    setCurrentStep(s);
   };
 
   const startChallenge = (ch: LabChallenge) => {
@@ -751,6 +877,7 @@ export default function SurfaceCodeLab() {
   };
 
   const labTopics = ['surface-code', 'syndrome-extraction-circuits', 'decoding-mwpm'];
+  const activeStepMeta = PLAYBACK_STEPS[currentStep] ?? PLAYBACK_STEPS[0];
 
   return (
     <div className="bg-ink-900">
@@ -780,41 +907,238 @@ export default function SurfaceCodeLab() {
             className="mt-5 max-w-2xl text-[17px] leading-[1.7] text-text-mid"
           >
             A live distance-{d} rotated surface code. Click data qubits to inject
-            errors and watch the stabilizers light up. Then run the matching
-            decoder and see whether it recovers your state — or gets fooled into
-            a logical error. Export any configuration as a Stim circuit to
-            continue in real research software.
+            errors and watch the stabilizers light up. Step through error correction
+            with the interactive playback controller or toggle 3D spacetime view to
+            explore syndrome evolution across time rounds T=1..d.
           </motion.p>
         </div>
       </header>
 
       {/* lab */}
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-          {/* lattice card */}
-          <div className="rounded-xl border border-ink-600 bg-ink-850 p-4 md:p-6">
-            <LatticeView
-              lat={lat}
-              errors={errors}
-              syndrome={syndrome}
-              result={result}
-              onQubitClick={editQubit}
-            />
-            <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-ink-700 pt-3 font-mono text-[11px] text-text-low">
-              <span>
-                <span style={{ color: PAULI_COLORS[2] }}>■</span> Z plaquette
-              </span>
-              <span>
-                <span style={{ color: PAULI_COLORS[1] }}>■</span> X plaquette
-              </span>
-              <span>
-                <span style={{ color: SYNDROME }}>■</span> syndrome −1
-              </span>
-              <span>
-                <span style={{ color: OK }}>◌</span> correction chain
-              </span>
-              <span className="ml-auto">click a circle to paint {PAULI_LABEL[brush]}</span>
+        {/* View Mode Toggle Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-600 bg-ink-800 p-4">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-text-low">
+              Visualization Mode:
+            </span>
+            <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850">
+              <button
+                type="button"
+                onClick={() => setLabViewMode('2d')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                  labViewMode === '2d'
+                    ? 'bg-plaquette/20 text-plaquette font-bold'
+                    : 'text-text-mid hover:text-text-hi'
+                }`}
+              >
+                <Grid className="h-3.5 w-3.5" /> 2D Lattice
+              </button>
+              <button
+                type="button"
+                onClick={() => setLabViewMode('3d')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                  labViewMode === '3d'
+                    ? 'bg-magic/20 text-magic font-bold'
+                    : 'text-text-mid hover:text-text-hi'
+                }`}
+              >
+                <Layers className="h-3.5 w-3.5" /> 3D Spacetime
+              </button>
+              <button
+                type="button"
+                onClick={() => setLabViewMode('dual')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                  labViewMode === 'dual'
+                    ? 'bg-star/20 text-star font-bold'
+                    : 'text-text-mid hover:text-text-hi'
+                }`}
+              >
+                <Columns className="h-3.5 w-3.5" /> Dual View
+              </button>
             </div>
+          </div>
+
+          <div className="font-mono text-[12px] text-text-low">
+            Distance <span className="text-text-hi font-bold">d={d}</span> · {lat.n} Data Qubits · {lat.stabilizers.length} Stabilizers
+          </div>
+        </div>
+
+        {/* Step-by-Step Playback Controller Bar */}
+        <div className="mb-6 rounded-xl border border-ink-600 bg-ink-800 p-4 md:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink-700 pb-4">
+            <div>
+              <p className="eyebrow !text-magic mb-1">{'// PLAYBACK PIPELINE CONTROLLER'}</p>
+              <h3 className="font-display text-xl font-semibold text-text-hi">
+                Step-by-Step Error Correction Lifecycle
+              </h3>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => goToStep(Math.max(0, currentStep - 1))}
+                disabled={currentStep === 0}
+                className="btn-ghost !p-2 disabled:opacity-40"
+                title="Step Back"
+              >
+                <SkipBack className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsPlaying((prev) => !prev)}
+                className="btn-primary !px-4 !py-2"
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-4 w-4" /> Pause
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" /> Play Steps
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => goToStep(Math.min(5, currentStep + 1))}
+                disabled={currentStep === 5}
+                className="btn-ghost !p-2 disabled:opacity-40"
+                title="Step Forward"
+              >
+                <SkipForward className="h-4 w-4" />
+              </button>
+
+              {/* Speed Selector */}
+              <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850 ml-2">
+                {[0.5, 1, 2].map((spd) => (
+                  <button
+                    key={spd}
+                    type="button"
+                    onClick={() => setPlaybackSpeed(spd)}
+                    className={`px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                      playbackSpeed === spd
+                        ? 'bg-plaquette/20 text-plaquette font-bold'
+                        : 'text-text-low hover:text-text-mid'
+                    }`}
+                  >
+                    {spd}x
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={clear}
+                className="btn-ghost !p-2 ml-2"
+                title="Reset to Initial State"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Stepper Buttons */}
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-6">
+            {PLAYBACK_STEPS.map((s) => {
+              const active = currentStep === s.step;
+              const completed = currentStep > s.step;
+
+              return (
+                <button
+                  key={s.step}
+                  type="button"
+                  onClick={() => goToStep(s.step)}
+                  className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-all duration-150 ${
+                    active
+                      ? 'border-magic bg-magic/15 shadow-lg shadow-magic/10'
+                      : completed
+                        ? 'border-plaquette/50 bg-plaquette/[0.06] text-text-mid hover:border-plaquette'
+                        : 'border-ink-700 bg-ink-850 text-text-low hover:border-ink-600'
+                  }`}
+                >
+                  <span
+                    className={`font-mono text-[10px] font-bold uppercase tracking-wider ${
+                      active ? 'text-magic' : completed ? 'text-plaquette' : 'text-text-low'
+                    }`}
+                  >
+                    Step {s.step}
+                  </span>
+                  <span
+                    className={`mt-1 font-display text-[13px] font-semibold leading-tight ${
+                      active ? 'text-text-hi' : 'text-text-mid'
+                    }`}
+                  >
+                    {s.title}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Step Description Card */}
+          <div className="mt-4 rounded-lg border border-ink-700 bg-ink-850 p-4">
+            <div className="flex items-center gap-2 font-mono text-[12px] font-bold uppercase tracking-wider text-magic">
+              <span>Step {activeStepMeta.step}: {activeStepMeta.title}</span>
+              <span className="text-text-low">· {activeStepMeta.subtitle}</span>
+            </div>
+            <p className="mt-1.5 text-[14px] leading-relaxed text-text-mid">
+              {activeStepMeta.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          {/* Main Visualization Column */}
+          <div className="flex flex-col gap-6">
+            {/* 2D Lattice View */}
+            {(labViewMode === '2d' || labViewMode === 'dual') && (
+              <div className="rounded-xl border border-ink-600 bg-ink-850 p-4 md:p-6">
+                <div className="mb-2 flex items-center justify-between font-mono text-[12px] text-text-low">
+                  <span className="text-text-hi font-bold">2D Rotated Surface Code Lattice (Step {currentStep})</span>
+                  <span>Click data qubits to paint {PAULI_LABEL[brush]}</span>
+                </div>
+
+                <LatticeView
+                  lat={lat}
+                  errors={errors}
+                  syndrome={syndrome}
+                  result={result}
+                  currentStep={currentStep}
+                  onQubitClick={editQubit}
+                />
+
+                <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t border-ink-700 pt-3 font-mono text-[11px] text-text-low">
+                  <span>
+                    <span style={{ color: PAULI_COLORS[2] }}>■</span> Z plaquette
+                  </span>
+                  <span>
+                    <span style={{ color: PAULI_COLORS[1] }}>■</span> X plaquette
+                  </span>
+                  <span>
+                    <span style={{ color: SYNDROME }}>■</span> syndrome −1
+                  </span>
+                  <span>
+                    <span style={{ color: OK }}>◌</span> correction chain
+                  </span>
+                  <span className="ml-auto">click a circle to paint {PAULI_LABEL[brush]}</span>
+                </div>
+              </div>
+            )}
+
+            {/* 3D Spacetime View */}
+            {(labViewMode === '3d' || labViewMode === 'dual') && (
+              <SpacetimeView3D
+                lat={lat}
+                errors={errors}
+                result={result}
+                currentStep={currentStep}
+                p={p}
+              />
+            )}
           </div>
 
           {/* controls */}
@@ -904,7 +1228,7 @@ export default function SurfaceCodeLab() {
                 <button
                   type="button"
                   onClick={runDecoder}
-                  disabled={result !== null}
+                  disabled={result !== null && currentStep === 5}
                   className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Cpu className="h-4 w-4" /> Decode &amp; correct

@@ -14,9 +14,12 @@ import {
  */
 const STORAGE_KEY = 'lattice-atlas-progress';
 
+export type LensMode = 'intuition' | 'rigor';
+
 interface PersistedProgress {
   understood: string[];
   papersRead: string[];
+  lensMode?: LensMode;
 }
 
 export interface ProgressContextValue {
@@ -34,9 +37,15 @@ export interface ProgressContextValue {
   readCount: number;
   /** Clear all progress. */
   resetProgress: () => void;
+  /** Active cognitive lens mode: 'intuition' (analogies) vs 'rigor' (formal physics). */
+  lensMode: LensMode;
+  /** Set cognitive lens mode directly. */
+  setLensMode: (mode: LensMode) => void;
+  /** Toggle cognitive lens mode. */
+  toggleLensMode: () => void;
 }
 
-const EMPTY: PersistedProgress = { understood: [], papersRead: [] };
+const EMPTY: PersistedProgress = { understood: [], papersRead: [], lensMode: 'intuition' };
 
 function loadProgress(): PersistedProgress {
   try {
@@ -53,6 +62,7 @@ function loadProgress(): PersistedProgress {
       return {
         understood: p.understood.filter((x): x is string => typeof x === 'string'),
         papersRead: p.papersRead.filter((x): x is string => typeof x === 'string'),
+        lensMode: p.lensMode === 'rigor' ? 'rigor' : 'intuition',
       };
     }
     return EMPTY;
@@ -102,6 +112,17 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const setLensMode = useCallback((mode: LensMode) => {
+    setProgress((prev) => ({ ...prev, lensMode: mode }));
+  }, []);
+
+  const toggleLensMode = useCallback(() => {
+    setProgress((prev) => ({
+      ...prev,
+      lensMode: prev.lensMode === 'rigor' ? 'intuition' : 'rigor',
+    }));
+  }, []);
+
   const resetProgress = useCallback(() => setProgress(EMPTY), []);
 
   const value = useMemo<ProgressContextValue>(
@@ -113,8 +134,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       understoodCount: progress.understood.length,
       readCount: progress.papersRead.length,
       resetProgress,
+      lensMode: progress.lensMode ?? 'intuition',
+      setLensMode,
+      toggleLensMode,
     }),
-    [progress, toggleUnderstood, toggleRead, resetProgress],
+    [progress, toggleUnderstood, toggleRead, resetProgress, setLensMode, toggleLensMode],
   );
 
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;

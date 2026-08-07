@@ -38,6 +38,9 @@ import { useProgress } from '@/store/progress';
 import SelfCheck from '@/components/SelfCheck';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
+import { Intuition, Misconceptions } from '@/components/TopicInsights';
+import CognitiveLensToggle from '@/components/CognitiveLensToggle';
+import TopicLensInsight from '@/components/TopicLensInsight';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -257,6 +260,9 @@ function ControlsBar({
             className="w-full rounded-full border border-ink-600 bg-ink-800 py-1.5 pl-9 pr-4 font-mono text-[13px] text-text-hi placeholder:text-text-low focus:border-plaquette/60 focus:outline-none"
           />
         </label>
+
+        {/* Cognitive Lens Switcher */}
+        <CognitiveLensToggle compact />
 
         {/* Legend */}
         <div className="ml-auto hidden items-center gap-3 lg:flex" aria-hidden>
@@ -904,6 +910,9 @@ function TopicDrawer({
               </button>
 
               <div className="mt-8 flex flex-col gap-8">
+                <Intuition topicId={topic.id} />
+                <TopicLensInsight topicId={topic.id} />
+
                 <DrawerSection>
                   <p className="text-[17px] leading-[1.7] text-text-hi">
                     <GlossaryText text={topic.short} />
@@ -915,6 +924,8 @@ function TopicDrawer({
                     <GlossaryText text={topic.detail} />
                   </p>
                 </DrawerSection>
+
+                <Misconceptions topicId={topic.id} />
 
                 <SelfCheck topicId={topic.id} />
 

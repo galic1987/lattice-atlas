@@ -145,6 +145,25 @@ for (const [topicId, questions] of Object.entries(selfChecks)) {
 for (const id of topicIds)
   if (!(id in selfChecks)) err(`topic "${id}" has no self-check questions`);
 
+/* ---------------- topic insights (intuition + misconceptions) ---------------- */
+
+const insights = readJson('src/data/topic_insights.json');
+for (const [topicId, ins] of Object.entries(insights)) {
+  if (!topicIds.has(topicId)) err(`topic_insights key "${topicId}" is not a topic id`);
+  if (typeof ins.intuition !== 'string' || !ins.intuition.trim())
+    err(`topic_insights["${topicId}"] missing intuition`);
+  if (!Array.isArray(ins.misconceptions) || ins.misconceptions.length === 0)
+    err(`topic_insights["${topicId}"] has no misconceptions`);
+  for (const [i, m] of (ins.misconceptions ?? []).entries()) {
+    if (typeof m.myth !== 'string' || !m.myth.trim())
+      err(`topic_insights["${topicId}"].misconceptions[${i}] missing myth`);
+    if (typeof m.truth !== 'string' || !m.truth.trim())
+      err(`topic_insights["${topicId}"].misconceptions[${i}] missing truth`);
+  }
+}
+for (const id of topicIds)
+  if (!(id in insights)) err(`topic "${id}" has no entry in topic_insights.json`);
+
 /* ---------------- reading prompts ---------------- */
 
 const readingPrompts = readJson('src/data/reading_prompts.json');

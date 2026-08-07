@@ -46,6 +46,10 @@ import SelfCheck from '@/components/SelfCheck';
 import Diagnostic from '@/components/Diagnostic';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
+import { Intuition, Misconceptions } from '@/components/TopicInsights';
+import CognitiveLensToggle from '@/components/CognitiveLensToggle';
+import ActChapterCard from '@/components/ActChapterCard';
+import TopicLensInsight from '@/components/TopicLensInsight';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -284,9 +288,15 @@ function TopicDrawer({
             </div>
 
             <div className="flex-1 space-y-8 p-6">
+              <Intuition topicId={topic.id} />
+
               <p className="leading-relaxed text-text-mid">
                 <GlossaryText text={topic.detail} />
               </p>
+
+              <Misconceptions topicId={topic.id} />
+
+              <TopicLensInsight topicId={topic.id} />
 
               <div>
                 <p className="eyebrow mb-3">// KEY POINTS</p>
@@ -456,6 +466,8 @@ function StepCard({
             {shortName(topic)}
           </h3>
           <p className="mt-2 text-[15px] leading-relaxed text-text-mid">{topic.short}</p>
+
+          <TopicLensInsight topicId={topic.id} />
 
           {topic.depends_on.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -875,6 +887,10 @@ export default function LearningPath() {
           back any time.
         </p>
 
+        <div className="mt-8">
+          <CognitiveLensToggle />
+        </div>
+
         <Diagnostic ordered={data.ordered} />
 
         <motion.div
@@ -1020,6 +1036,8 @@ export default function LearningPath() {
                   transition={{ duration: 0.6, delay: 0.1, ease: [...EASE_OUT_EXPO] }}
                 />
               </motion.div>
+
+              <ActChapterCard tier={tier} />
 
               {tierTopics.map((topic) => {
                 const index = data.ordered.indexOf(topic);

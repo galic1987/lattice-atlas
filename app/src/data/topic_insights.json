@@ -1,0 +1,158 @@
+{
+  "linear-algebra": {
+    "intuition": "Quantum states are arrows in a high-dimensional space. Everything that happens to a qubit — gates, noise, even measurement — is some combination of rotating, projecting, and comparing arrows.",
+    "misconceptions": [
+      { "myth": "Quantum computing math needs calculus and differential equations.", "truth": "The daily toolkit is linear algebra: vectors, matrices, inner products. If you can multiply a 2×2 matrix by a column vector, you can follow most of this field." }
+    ]
+  },
+  "complex-numbers-dirac-notation": {
+    "intuition": "Dirac notation is typed shorthand: |ψ⟩ is a column vector, ⟨ψ| is its conjugate-transpose row, and ⟨φ|ψ⟩ is their inner product. The notation does the bookkeeping so you can think about the physics.",
+    "misconceptions": [
+      { "myth": "The imaginary parts of amplitudes are a mathematical trick with no physical meaning.", "truth": "Relative phase between amplitudes is physically real — it decides how computational paths interfere. Only the global phase of the whole state is unobservable." }
+    ]
+  },
+  "quantum-mechanics-basics": {
+    "intuition": "A qubit is less '0 and 1 at once' and more an arrow that only ever answers yes/no questions — and the act of answering reorients the arrow.",
+    "misconceptions": [
+      { "myth": "Measurement gently reads out what the state was.", "truth": "Measurement projects: it forces one outcome and deletes the amplitudes you did not see. This is exactly why error correction never reads its data qubits directly." }
+    ]
+  },
+  "qubits-pauli-operators": {
+    "intuition": "X, Y, and Z are the only ways a qubit can go wrong, and every complicated error is a combination of them. Correct those three and you have corrected everything.",
+    "misconceptions": [
+      { "myth": "Noise is continuous, so there are infinitely many different errors to correct.", "truth": "Measuring the stabilizers digitizes noise: any continuous error collapses onto I, X, Y, or Z. Error correction only ever fixes a four-letter alphabet." }
+    ]
+  },
+  "quantum-gates-circuits": {
+    "intuition": "A circuit diagram is sheet music: each wire a qubit, each gate a note, time flowing left to right. Syndrome extraction is a short riff the machine plays over and over, forever.",
+    "misconceptions": [
+      { "myth": "Information in a CNOT flows one way, from control to target.", "truth": "X errors copy control→target, but Z errors copy target→control. Errors flow both directions through a CNOT — which is why gate ordering is a safety decision." }
+    ]
+  },
+  "classical-error-correction": {
+    "intuition": "Send 0 as 000 and a single flip loses the vote two-to-one. All of error correction is this one idea — redundancy plus a majority — dressed in progressively better geometry.",
+    "misconceptions": [
+      { "myth": "Quantum codes made classical coding theory obsolete.", "truth": "CSS codes literally are two classical codes working together — one for bit flips, one for phase flips. The classical theory is load-bearing inside the quantum one." }
+    ]
+  },
+  "stabilizer-formalism": {
+    "intuition": "Describe the club by its rules, not its members: a stabilizer code is defined by the checks every valid state must pass, and errors reveal themselves by the rules they break.",
+    "misconceptions": [
+      { "myth": "Since S|ψ⟩ = |ψ⟩, measuring a stabilizer does nothing at all.", "truth": "It does nothing to code states. On an errored state it does something crucial: it returns −1, converting a quantum error into classical information without touching the encoded data." }
+    ]
+  },
+  "quantum-codes-basics": {
+    "intuition": "[[n, k, d]] is the spec sheet: n physical qubits rent space for k logical ones, and d says how much must go wrong before the tenant is harmed.",
+    "misconceptions": [
+      { "myth": "A distance-d code corrects d errors.", "truth": "It corrects ⌊(d−1)/2⌋ errors and merely detects up to d−1. Distance 3 fixes one error, not three." }
+    ]
+  },
+  "fault-tolerance-thresholds": {
+    "intuition": "Below threshold, error correction is compound interest: every distance step multiplies your protection. Above threshold, the correction machinery adds more noise than it removes.",
+    "misconceptions": [
+      { "myth": "The threshold is a property of the code alone.", "truth": "It is a property of code + circuits + decoder + noise model together. That is why 'the' surface-code threshold ranges from ~15% in the Lab's toy model down to ~1% with realistic noisy circuits." }
+    ]
+  },
+  "topological-order-anyons": {
+    "intuition": "Store the secret in the shape of the whole, not in any piece — like the number of holes in a pretzel. No local bite changes it; you would have to eat across the entire pretzel.",
+    "misconceptions": [
+      { "myth": "Anyons are exotic particles that must be discovered in nature.", "truth": "In these codes they are not fundamental particles at all — they are patterns of stabilizer violations, the endpoints of error strings. The lattice manufactures its own anyons." }
+    ]
+  },
+  "toric-code": {
+    "intuition": "Wrap a grid of qubits around a donut, and the two independent ways of circling it become two qubits of storage that no local disturbance can reach.",
+    "misconceptions": [
+      { "myth": "The toric code is what quantum hardware actually builds.", "truth": "Nobody fabricates donuts. The toric code is the theorist's cleanest classroom; hardware builds its planar descendant, the surface code, where boundaries replace the wrap-around topology." }
+    ]
+  },
+  "surface-code": {
+    "intuition": "A checkerboard of tiny referees: every square constantly asks its four qubits 'do you agree?' — and from nothing but those yes/no answers, the code locates damage it never looks at directly.",
+    "misconceptions": [
+      { "myth": "The surface code won because it protects best per qubit.", "truth": "Several codes beat it on overhead. It won on engineering: nearest-neighbor gates on a 2D chip and the highest practical threshold — it forgives imperfect hardware." }
+    ]
+  },
+  "syndrome-extraction-circuits": {
+    "intuition": "A stabilizer is measured like passing a collection plate: the ancilla visits its four neighbors via CNOTs, collects their parity, and only the plate is ever inspected.",
+    "misconceptions": [
+      { "myth": "Any CNOT ordering that computes the right parity is as good as any other.", "truth": "Orderings differ in how mid-circuit faults spread. A bad schedule turns one ancilla fault into a hook error that halves the effective distance — ordering is fault tolerance, not style." }
+    ]
+  },
+  "decoding-mwpm": {
+    "intuition": "The decoder plays connect-the-dots with alarms: errors leave endpoint clues, and the most probable explanation is the pairing of clues with the shortest total string length.",
+    "misconceptions": [
+      { "myth": "If the syndrome is cleared, the state was recovered.", "truth": "The syndrome always clears — that is guaranteed. Success is whether error + correction form a harmless loop or a lattice-crossing logical operator. Decoders fail silently, never loudly." }
+    ]
+  },
+  "defects-braiding": {
+    "intuition": "Switch off stabilizers in a region and you have drilled a hole whose edge stores a qubit. Dragging holes around one another computes — like braiding, where only the crossing pattern matters.",
+    "misconceptions": [
+      { "myth": "Braiding was abandoned because it turned out to be wrong.", "truth": "It works — it is just expensive in space and time. Lattice surgery achieves the same gates more cheaply. Braiding remains the clearest picture of why topological gates are protected." }
+    ]
+  },
+  "lattice-surgery": {
+    "intuition": "Logical qubits live on tiles. Computing is zipping two tiles together — which asks exactly one joint question — then cutting them apart. An algorithm becomes a floor plan unfolding in time.",
+    "misconceptions": [
+      { "myth": "Merging two patches destroys and rebuilds the logical qubits.", "truth": "A merge is a measurement of one joint operator (like Z⊗Z) and nothing else; the split preserves the rest. It is computation by careful asking, not by touching." }
+    ]
+  },
+  "cluster-states-mbqc": {
+    "intuition": "Bake all the entanglement up front into one big lattice cake, then compute purely by slicing: each measurement consumes a layer and steers what remains.",
+    "misconceptions": [
+      { "myth": "MBQC is a rival architecture that the surface code defeated.", "truth": "Run a surface code through time and you get exactly a 3D cluster state — the same physics in two languages. The best known thresholds were first found from the cluster-state side." }
+    ]
+  },
+  "magic-states-distillation": {
+    "intuition": "Clifford gates are a piano missing one key — and that key (T) is what makes the instrument worth playing. Magic states are pre-recorded T-notes; distillation is remastering many noisy recordings into one clean take.",
+    "misconceptions": [
+      { "myth": "Magic states are a niche optimization detail.", "truth": "Non-Clifford resources historically dominated the entire cost of a fault-tolerant computer — in older architectures, most physical qubits existed solely to produce magic states." }
+    ]
+  },
+  "flag-fault-tolerance": {
+    "intuition": "Instead of guarding the vault with an army, hire one witness: a flag qubit cannot stop the dangerous fault, but it always sees it happen — and telling the decoder is enough.",
+    "misconceptions": [
+      { "myth": "More ancillas always means more fault tolerance.", "truth": "Older schemes used large verified ancilla blocks; flags achieve the same guarantee with one or two extra qubits. The insight is detecting dangerous faults, not preventing them." }
+    ]
+  },
+  "zx-calculus-basics": {
+    "intuition": "Circuits redrawn as plumbing: green and red spiders joined by wires, plus a small rulebook for sliding and fusing them. It is algebra you do by redrawing pictures.",
+    "misconceptions": [
+      { "myth": "Diagram-pushing is informal hand-waving compared to matrix algebra.", "truth": "The ZX rewrite rules are complete: every equality of linear maps provable with matrices is provable with diagrams. It is fully rigorous — and compilers exploit it." }
+    ]
+  },
+  "advanced-decoding": {
+    "intuition": "MWPM is the meticulous detective; union-find is the fast one who is right almost as often and never keeps the hardware waiting.",
+    "misconceptions": [
+      { "myth": "Decoder choice just trades away a little accuracy.", "truth": "It trades accuracy against latency — and latency is correctness at the system level. A perfect decoder that falls behind loses to backlog; the best decoder is the best one that keeps up." }
+    ]
+  },
+  "real-time-decoding-control": {
+    "intuition": "The processor produces a fresh syndrome every microsecond, forever. Decoding is drinking from a firehose where falling behind compounds like unpaid interest.",
+    "misconceptions": [
+      { "myth": "Decoding can be batched and run after the computation finishes.", "truth": "For a memory experiment, maybe. For computation, no: non-Clifford gates need decoding results as feed-forward during the run. Real-time is a requirement, not an optimization." }
+    ]
+  },
+  "magic-state-cultivation": {
+    "intuition": "Instead of building a refinery to purify truckloads of crude magic, grow one flawless crystal in place — then enlarge the fortress walls around it.",
+    "misconceptions": [
+      { "myth": "Cultivation is a modest percentage improvement over distillation.", "truth": "It attacked the single largest line item in the machine's budget. Whole-computer resource estimates changed, which is why one technique reshaped hardware roadmaps." }
+    ]
+  },
+  "tqec-compilers-automation": {
+    "intuition": "From gate list to factory floor plan: the compiler turns an algorithm into shaped blocks of space-time — patches, pipes, and factories — then packs them together like Tetris.",
+    "misconceptions": [
+      { "myth": "Compilation is a solved afterthought, like emitting machine code.", "truth": "Layout and scheduling change total qubit-hours by large factors. The compiler is a first-class research frontier, not plumbing." }
+    ]
+  },
+  "clifford-simulation-hybrid": {
+    "intuition": "Simulating quantum mechanics is exponentially hard — except the Clifford part, which is free. Hybrid simulators pay only for the few non-Clifford drops in an ocean of Clifford.",
+    "misconceptions": [
+      { "myth": "Circuits big enough to matter cannot be classically verified.", "truth": "QEC circuits are almost entirely Clifford, so stabilizer and hybrid methods verify them exactly over billions of shots — that is how designs are validated before hardware exists." }
+    ]
+  },
+  "below-threshold-experiments": {
+    "intuition": "The one plot that matters bends downward: make the code bigger and the logical error falls. 2024 was the year real hardware finally drew that curve.",
+    "misconceptions": [
+      { "myth": "Crossing the threshold means fault-tolerant quantum computing is finished.", "truth": "It means scaling now helps instead of hurts. Λ ≈ 2 must grow much larger, and one protected memory must become thousands of computing qubits — the race started; it did not end." }
+    ]
+  }
+}

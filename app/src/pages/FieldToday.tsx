@@ -8,10 +8,40 @@ import {
   useReducedMotion,
   useScroll,
 } from 'framer-motion';
-import { ArrowRight, BookOpen, Check, ExternalLink, FlaskConical } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  ExternalLink,
+  FlaskConical,
+  Gauge,
+  Layers,
+  Sliders,
+  Sparkles,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 import { papers, topics, topicById, shortName } from '@/data';
 import { useProgress } from '@/store/progress';
 import DifficultyMeter from '@/components/DifficultyMeter';
+
+function formatSci(val: number): string {
+  if (val === 0) return '0';
+  if (val >= 0.01) return val.toFixed(4);
+  const exp = Math.floor(Math.log10(val));
+  const mant = (val / Math.pow(10, exp)).toFixed(2);
+  const supMap: Record<string, string> = {
+    '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+    '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹'
+  };
+  const supExp = String(exp).split('').map(c => supMap[c] || c).join('');
+  return `${mant} × 10${supExp}`;
+}
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -606,6 +636,789 @@ function ExperimentVignette() {
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*             1. Magic State Distillation Factory Yield Calculator           */
+/* -------------------------------------------------------------------------- */
+
+type ProtocolKey = '15-1' | '20-4' | '8-2' | 'cultivation';
+
+interface ProtocolMeta {
+  name: string;
+  shortName: string;
+  ratio: number;
+  formula: (p: number, round: number) => number;
+  description: string;
+  color: string;
+}
+
+const PROTOCOLS: Record<ProtocolKey, ProtocolMeta> = {
+  '15-1': {
+    name: '15-to-1 (Bravyi-Kitaev)',
+    shortName: '15-to-1 BK',
+    ratio: 15,
+    formula: (p: number) => 35 * Math.pow(p, 3),
+    description: '15 noisy T-states yield 1 clean T-state. Cubic error suppression p_out ≈ 35·p_in³.',
+    color: '#F5B83D',
+  },
+  '20-4': {
+    name: '20-to-4 (Fowler Block)',
+    shortName: '20-to-4 Fowler',
+    ratio: 5,
+    formula: (p: number) => 28 * Math.pow(p, 2),
+    description: '20 noisy T-states yield 4 clean T-states (5:1 ratio). Quadratic error suppression p_out ≈ 28·p_in².',
+    color: '#8B5CF6',
+  },
+  '8-2': {
+    name: '8-to-2 (Bravyi-Haah)',
+    shortName: '8-to-2 BH',
+    ratio: 4,
+    formula: (p: number) => 12 * Math.pow(p, 2),
+    description: '8 noisy T-states yield 2 clean T-states (4:1 ratio). Compact quadratic suppression.',
+    color: '#22D3EE',
+  },
+  cultivation: {
+    name: 'In-Place Cultivation (Gidney 2024)',
+    shortName: 'In-Place Cultivation',
+    ratio: 4,
+    formula: (p: number, round: number) => (round === 1 ? 2 * Math.pow(p, 2) : 35 * Math.pow(p, 3)),
+    description: 'Grows magic states inside code patches. Eliminates stage-1 factory footprint by ~75%.',
+    color: '#34D399',
+  },
+};
+
+interface FactoryStage {
+  round: number;
+  pIn: number;
+  pOut: number;
+  rawMultiplier: number;
+  cumulativeRaw: number;
+}
+
+function MagicStateCalculatorWidget() {
+  const [pInLog, setPInLog] = useState<number>(-3); // 10^-3 = 0.001 (0.1%)
+  const [pTargetLog, setPTargetLog] = useState<number>(-10); // 10^-10
+  const [protocol, setProtocol] = useState<ProtocolKey>('15-1');
+
+  const pIn = Math.pow(10, pInLog);
+  const pTarget = Math.pow(10, pTargetLog);
+  const meta = PROTOCOLS[protocol];
+
+  // Calculate distillation stages
+  const stages: FactoryStage[] = [];
+  let currP = pIn;
+  let cumRaw = 1;
+  let roundCount = 0;
+  const maxRounds = 5;
+
+  while (currP > pTarget && roundCount < maxRounds) {
+    roundCount++;
+    const stepRatio = meta.ratio;
+    cumRaw *= stepRatio;
+    const nextP = Math.min(0.5, meta.formula(currP, roundCount));
+    stages.push({
+      round: roundCount,
+      pIn: currP,
+      pOut: nextP,
+      rawMultiplier: stepRatio,
+      cumulativeRaw: cumRaw,
+    });
+    currP = nextP;
+  }
+
+  const finalPOut = currP;
+  const totalRawNeeded = cumRaw;
+  const purityPercentage = (Math.max(0, 1 - finalPOut) * 100).toFixed(8);
+  const estPhysicalQubits = totalRawNeeded * 450;
+
+  const applyPreset = (inLog: number, targetLog: number, prot: ProtocolKey) => {
+    setPInLog(inLog);
+    setPTargetLog(targetLog);
+    setProtocol(prot);
+  };
+
+  return (
+    <div className="rounded-2xl border border-ink-600 bg-ink-800/90 p-6 md:p-8 shadow-2xl backdrop-blur-sm">
+      {/* Header */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-magic">
+            <Sparkles className="h-5 w-5" />
+            <span className="eyebrow font-mono uppercase tracking-wider text-magic">
+              INTERACTIVE TOOL // DISTILLATION FACTORY CALCULATOR
+            </span>
+          </div>
+          <h3 className="mt-1 font-display text-2xl font-semibold text-text-hi">
+            Magic State Distillation Factory Yield Calculator
+          </h3>
+          <p className="mt-1 text-sm text-text-mid max-w-2xl">
+            Simulate how raw noisy T-states are purified through multi-round distillation factories to reach algorithm fault-tolerance thresholds.
+          </p>
+        </div>
+
+        {/* Quick Presets */}
+        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+          <button
+            type="button"
+            onClick={() => applyPreset(-3, -10, '15-1')}
+            className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-magic/60 hover:text-magic"
+          >
+            Superconducting (0.1%)
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset(-3.3, -12, 'cultivation')}
+            className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-stabilizer/60 hover:text-stabilizer"
+          >
+            In-Place Cultivation
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset(-4, -15, '20-4')}
+            className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-plaquette/60 hover:text-plaquette"
+          >
+            High-Fidelity Ion (0.01%)
+          </button>
+        </div>
+      </div>
+
+      {/* Main Grid: Controls + Summary Cards */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-12">
+        {/* Controls Column */}
+        <div className="space-y-6 lg:col-span-5 rounded-xl border border-ink-700 bg-ink-900/50 p-5">
+          {/* Input Error Rate Slider */}
+          <div>
+            <div className="flex items-center justify-between font-mono text-xs">
+              <label htmlFor="p-in-slider" className="text-text-mid flex items-center gap-1.5">
+                <Sliders className="h-3.5 w-3.5 text-magic" />
+                Physical Error Rate (p_in):
+              </label>
+              <span className="font-semibold text-magic">
+                {(pIn * 100).toFixed(2)}% ({formatSci(pIn)})
+              </span>
+            </div>
+            <input
+              id="p-in-slider"
+              type="range"
+              min="-4"
+              max="-1.3"
+              step="0.05"
+              value={pInLog}
+              onChange={(e) => setPInLog(parseFloat(e.target.value))}
+              className="mt-3 w-full accent-magic cursor-pointer h-2 rounded-lg bg-ink-700"
+            />
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+              <span>0.01% (10⁻⁴)</span>
+              <span>0.10% (10⁻³)</span>
+              <span>1.00% (10⁻²)</span>
+              <span>5.00%</span>
+            </div>
+          </div>
+
+          {/* Target Error Rate Slider */}
+          <div>
+            <div className="flex items-center justify-between font-mono text-xs">
+              <label htmlFor="p-target-slider" className="text-text-mid flex items-center gap-1.5">
+                <Gauge className="h-3.5 w-3.5 text-syndrome" />
+                Target Output Error (p_target):
+              </label>
+              <span className="font-semibold text-syndrome">
+                {formatSci(pTarget)}
+              </span>
+            </div>
+            <input
+              id="p-target-slider"
+              type="range"
+              min="-15"
+              max="-6"
+              step="1"
+              value={pTargetLog}
+              onChange={(e) => setPTargetLog(parseInt(e.target.value))}
+              className="mt-3 w-full accent-syndrome cursor-pointer h-2 rounded-lg bg-ink-700"
+            />
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+              <span>10⁻⁶ (Small)</span>
+              <span>10⁻¹⁰ (Shor's)</span>
+              <span>10⁻¹⁵ (Chemistry)</span>
+            </div>
+          </div>
+
+          {/* Protocol Selection */}
+          <div>
+            <span className="block font-mono text-xs text-text-mid mb-2.5">
+              Distillation Protocol Architecture:
+            </span>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(PROTOCOLS) as ProtocolKey[]).map((key) => {
+                const p = PROTOCOLS[key];
+                const active = protocol === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setProtocol(key)}
+                    className={`rounded-lg border p-2.5 text-left transition-all ${
+                      active
+                        ? 'border-magic bg-magic/10 text-text-hi shadow-glow-amber'
+                        : 'border-ink-700 bg-ink-800/60 text-text-mid hover:border-ink-600 hover:text-text-hi'
+                    }`}
+                  >
+                    <p className="font-mono text-xs font-semibold" style={{ color: p.color }}>
+                      {p.shortName}
+                    </p>
+                    <p className="mt-1 text-[11px] text-text-low line-clamp-1">{p.name}</p>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-text-mid bg-ink-800/80 p-2.5 rounded-lg border border-ink-700">
+              {meta.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Output Metrics Column */}
+        <div className="space-y-6 lg:col-span-7 flex flex-col justify-between">
+          {/* Stat Cards */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Raw States / Pure
+              </p>
+              <p className="mt-2 font-display text-2xl font-bold text-magic">
+                {totalRawNeeded.toLocaleString()}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">noisy T-states</p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Factory Rounds
+              </p>
+              <p className="mt-2 font-display text-2xl font-bold text-syndrome">
+                {roundCount} {roundCount === 1 ? 'Round' : 'Rounds'}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">distillation depth</p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Output Error (p_out)
+              </p>
+              <p className="mt-2 font-mono text-lg font-bold text-stabilizer truncate">
+                {formatSci(finalPOut)}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">target ≤ {formatSci(pTarget)}</p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Est. Factory Qubits
+              </p>
+              <p className="mt-2 font-display text-2xl font-bold text-plaquette">
+                {estPhysicalQubits > 1000000
+                  ? `${(estPhysicalQubits / 1000000).toFixed(2)}M`
+                  : `${(estPhysicalQubits / 1000).toFixed(0)}k`}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">qubit footprint</p>
+            </div>
+          </div>
+
+          {/* Distillation Flow Pipeline */}
+          <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-5">
+            <div className="flex items-center justify-between">
+              <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-text-mid flex items-center gap-2">
+                <Layers className="h-4 w-4 text-magic" />
+                Distillation Pipeline Stage Breakdown
+              </h4>
+              <span className="font-mono text-[11px] text-magic bg-magic/10 px-2 py-0.5 rounded border border-magic/30">
+                Purity: {purityPercentage}%
+              </span>
+            </div>
+
+            {/* Pipeline Stage Cards */}
+            <div className="mt-4 space-y-3">
+              {/* Input raw stage */}
+              <div className="flex items-center gap-3 rounded-lg border border-ink-700 bg-ink-800/80 p-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/10 font-mono text-xs font-bold text-amber-400">
+                  RAW
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <span className="font-semibold text-text-hi">Raw Input |T_noisy⟩</span>
+                    <span className="text-amber-400">p_in = {formatSci(pIn)}</span>
+                  </div>
+                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-ink-700 overflow-hidden">
+                    <div className="h-full bg-amber-500" style={{ width: '25%' }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Rounds */}
+              {stages.map((stg) => (
+                <div key={stg.round} className="flex items-center gap-3 rounded-lg border border-ink-700 bg-ink-800/80 p-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-syndrome/40 bg-syndrome/10 font-mono text-xs font-bold text-syndrome">
+                    R{stg.round}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between font-mono text-xs">
+                      <span className="font-semibold text-text-hi">
+                        Stage {stg.round} ({stg.rawMultiplier}:1 factory filter)
+                      </span>
+                      <span className="text-syndrome">p_{stg.round} = {formatSci(stg.pOut)}</span>
+                    </div>
+                    <div className="mt-1.5 h-1.5 w-full rounded-full bg-ink-700 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-syndrome to-stabilizer"
+                        style={{ width: `${Math.min(100, 30 + stg.round * 25)}%` }}
+                      />
+                    </div>
+                    <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+                      <span>Cum. Ratio: {stg.cumulativeRaw}:1</span>
+                      <span>Error reduction: {(stg.pIn / Math.max(1e-25, stg.pOut)).toExponential(1)}x</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Target Met Badge */}
+              <div className="flex items-center justify-between rounded-lg border border-stabilizer/40 bg-stabilizer/10 px-4 py-2.5 font-mono text-xs">
+                <span className="flex items-center gap-2 font-semibold text-stabilizer">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Target Purity Achieved!
+                </span>
+                <span className="text-stabilizer">
+                  p_out = {formatSci(finalPOut)} ≤ {formatSci(pTarget)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*    2. Real-Time Decoder Latency vs Physical Qubit T1/T2 Decay Tradeoff     */
+/* -------------------------------------------------------------------------- */
+
+interface DecoderPreset {
+  name: string;
+  decUs: number;
+  cycleUs: number;
+  t1Us: number;
+  cycles: number;
+  distance: number;
+  desc: string;
+}
+
+const DECODER_PRESETS: DecoderPreset[] = [
+  {
+    name: 'Real-Time FPGA MWPM',
+    decUs: 0.5,
+    cycleUs: 1.0,
+    t1Us: 100,
+    cycles: 10000,
+    distance: 5,
+    desc: 'Dedicated FPGA streaming decoder decodes faster than 1.0µs syndrome cycles.',
+  },
+  {
+    name: 'GPU Neural Decoder',
+    decUs: 1.4,
+    cycleUs: 1.0,
+    t1Us: 100,
+    cycles: 10000,
+    distance: 5,
+    desc: 'Machine learning decoder has 1.4µs latency, creating continuous syndrome backlog.',
+  },
+  {
+    name: 'CPU Serial Decoder',
+    decUs: 3.5,
+    cycleUs: 1.0,
+    t1Us: 100,
+    cycles: 10000,
+    distance: 5,
+    desc: 'Classical serial software MWPM causes severe exponential syndrome queue buildup.',
+  },
+  {
+    name: 'Trapped Ion (Slow Clock)',
+    decUs: 15.0,
+    cycleUs: 200.0,
+    t1Us: 10000,
+    cycles: 5000,
+    distance: 5,
+    desc: 'Slower quantum clock (200µs) gives classical hardware plenty of time to clear queues.',
+  },
+];
+
+function DecoderLatencySimulatorWidget() {
+  const [tauDec, setTauDec] = useState<number>(0.8);
+  const [tauCycle, setTauCycle] = useState<number>(1.0);
+  const [t1Us, setT1Us] = useState<number>(100);
+  const [numCycles, setNumCycles] = useState<number>(10000);
+  const [codeDistance, setCodeDistance] = useState<number>(5);
+
+  const speedRatio = tauDec / tauCycle;
+  const isRealTime = speedRatio <= 1.0;
+
+  const backlogRounds = isRealTime ? 0 : Math.round(numCycles * (speedRatio - 1));
+  const backlogDelayUs = backlogRounds * tauDec;
+  const backlogDelayMs = backlogDelayUs / 1000;
+
+  const pT1Cycle = 1 - Math.exp(-tauCycle / t1Us);
+  const pPhysTotal = pT1Cycle + 0.0005;
+
+  const pTh = 0.01;
+  const pLogicalBaseCycle = Math.min(0.5, 0.03 * Math.pow(Math.max(0.0001, pPhysTotal / pTh), (codeDistance + 1) / 2));
+
+  const avgIdlingDelayPerCycle = backlogDelayUs / numCycles;
+  const pIdlingDecayCycle = 1 - Math.exp(-avgIdlingDelayPerCycle / t1Us);
+
+  const pLogicalCombinedCycle = Math.min(0.5, pLogicalBaseCycle + (1 - pLogicalBaseCycle) * pIdlingDecayCycle);
+
+  const totalSuccessFidelity = Math.max(0, Math.pow(1 - pLogicalCombinedCycle, numCycles));
+
+  const applyDecoderPreset = (preset: DecoderPreset) => {
+    setTauDec(preset.decUs);
+    setTauCycle(preset.cycleUs);
+    setT1Us(preset.t1Us);
+    setNumCycles(preset.cycles);
+    setCodeDistance(preset.distance);
+  };
+
+  const generateQueueGraphPoints = () => {
+    const points: string[] = [];
+    const steps = 40;
+    for (let i = 0; i <= steps; i++) {
+      const frac = i / steps;
+      const x = 30 + frac * 260;
+      const currentBacklog = isRealTime ? 0 : frac * numCycles * (speedRatio - 1);
+      const maxPossibleBacklog = Math.max(1, numCycles * 2.5);
+      const y = 140 - Math.min(110, (currentBacklog / maxPossibleBacklog) * 110);
+      points.push(`${x},${y}`);
+    }
+    return points.join(' ');
+  };
+
+  return (
+    <div className="rounded-2xl border border-ink-600 bg-ink-800/90 p-6 md:p-8 shadow-2xl backdrop-blur-sm">
+      {/* Header */}
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-rose-400">
+            <Activity className="h-5 w-5" />
+            <span className="eyebrow font-mono uppercase tracking-wider text-rose-400">
+              INTERACTIVE SIMULATOR // DECODER LATENCY VS DECAY TRADEOFF
+            </span>
+          </div>
+          <h3 className="mt-1 font-display text-2xl font-semibold text-text-hi">
+            Real-Time Decoder Latency vs Physical Qubit T1/T2 Decay Tradeoff
+          </h3>
+          <p className="mt-1 text-sm text-text-mid max-w-2xl">
+            Simulate what happens when classical syndrome decoding falls behind hardware rate. Backlog syndromes force physical qubits to wait in memory, causing exponential decoherence decay.
+          </p>
+        </div>
+
+        {/* Status Badge */}
+        <div className="mt-4 md:mt-0 flex items-center gap-3">
+          <div
+            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-mono text-xs font-bold transition-all ${
+              isRealTime
+                ? 'border-stabilizer/60 bg-stabilizer/10 text-stabilizer shadow-glow-green'
+                : 'border-rose-500/60 bg-rose-500/10 text-rose-400 shadow-glow-rose'
+            }`}
+          >
+            {isRealTime ? (
+              <>
+                <CheckCircle2 className="h-4 w-4 text-stabilizer" />
+                REAL-TIME SYNCHRONIZED
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="h-4 w-4 text-rose-400 animate-pulse" />
+                BACKLOG OVERFLOW RUNAWAY
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Presets Bar */}
+      <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-b border-ink-700 py-3">
+        <span className="font-mono text-xs text-text-low mr-2">Architecture Presets:</span>
+        {DECODER_PRESETS.map((p) => (
+          <button
+            key={p.name}
+            type="button"
+            onClick={() => applyDecoderPreset(p)}
+            className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-all ${
+              tauDec === p.decUs && tauCycle === p.cycleUs
+                ? 'border-rose-400 bg-rose-400/10 text-rose-300'
+                : 'border-ink-700 bg-ink-900/40 text-text-mid hover:border-ink-600 hover:text-text-hi'
+            }`}
+          >
+            {p.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Grid: Sliders + Dashboard */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-12">
+        {/* Controls Column */}
+        <div className="space-y-5 lg:col-span-5 rounded-xl border border-ink-700 bg-ink-900/50 p-5">
+          {/* Decoder Latency Slider */}
+          <div>
+            <div className="flex items-center justify-between font-mono text-xs">
+              <label htmlFor="dec-latency-slider" className="text-text-mid flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-rose-400" />
+                Decoder Latency (τ_dec):
+              </label>
+              <span className="font-semibold text-rose-400">
+                {tauDec >= 1.0 ? `${tauDec.toFixed(2)} µs` : `${(tauDec * 1000).toFixed(0)} ns`}
+              </span>
+            </div>
+            <input
+              id="dec-latency-slider"
+              type="range"
+              min="0.1"
+              max="5.0"
+              step="0.1"
+              value={tauDec}
+              onChange={(e) => setTauDec(parseFloat(e.target.value))}
+              className="mt-2.5 w-full accent-rose-400 cursor-pointer h-2 rounded-lg bg-ink-700"
+            />
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+              <span>100 ns (ASIC/FPGA)</span>
+              <span>1.0 µs</span>
+              <span>5.0 µs (Slow CPU)</span>
+            </div>
+          </div>
+
+          {/* Hardware Syndrome Cycle Time */}
+          <div>
+            <div className="flex items-center justify-between font-mono text-xs">
+              <label htmlFor="cycle-time-slider" className="text-text-mid flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-syndrome" />
+                Syndrome Cycle Time (τ_cycle):
+              </label>
+              <span className="font-semibold text-syndrome">
+                {tauCycle >= 1.0 ? `${tauCycle.toFixed(2)} µs` : `${(tauCycle * 1000).toFixed(0)} ns`}
+              </span>
+            </div>
+            <input
+              id="cycle-time-slider"
+              type="range"
+              min="0.2"
+              max="5.0"
+              step="0.1"
+              value={tauCycle}
+              onChange={(e) => setTauCycle(parseFloat(e.target.value))}
+              className="mt-2.5 w-full accent-syndrome cursor-pointer h-2 rounded-lg bg-ink-700"
+            />
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+              <span>200 ns</span>
+              <span>1.0 µs (Transmon)</span>
+              <span>5.0 µs</span>
+            </div>
+          </div>
+
+          {/* Qubit Coherence T1 */}
+          <div>
+            <div className="flex items-center justify-between font-mono text-xs">
+              <label htmlFor="t1-slider" className="text-text-mid flex items-center gap-1.5">
+                <Cpu className="h-3.5 w-3.5 text-magic" />
+                Qubit Coherence Time (T1/T2):
+              </label>
+              <span className="font-semibold text-magic">
+                {t1Us >= 1000 ? `${(t1Us / 1000).toFixed(1)} ms` : `${t1Us.toFixed(0)} µs`}
+              </span>
+            </div>
+            <input
+              id="t1-slider"
+              type="range"
+              min="10"
+              max="1000"
+              step="10"
+              value={t1Us}
+              onChange={(e) => setT1Us(parseInt(e.target.value))}
+              className="mt-2.5 w-full accent-magic cursor-pointer h-2 rounded-lg bg-ink-700"
+            />
+            <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
+              <span>10 µs</span>
+              <span>100 µs</span>
+              <span>1 ms (1000 µs)</span>
+            </div>
+          </div>
+
+          {/* Execution Depth Cycles */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="cycles-input" className="block font-mono text-xs text-text-mid mb-1">
+                Execution Depth (Cycles):
+              </label>
+              <select
+                id="cycles-input"
+                value={numCycles}
+                onChange={(e) => setNumCycles(parseInt(e.target.value))}
+                className="w-full rounded-lg border border-ink-700 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-hi"
+              >
+                <option value={1000}>1,000 cycles</option>
+                <option value={5000}>5,000 cycles</option>
+                <option value={10000}>10,000 cycles</option>
+                <option value={50000}>50,000 cycles</option>
+                <option value={100000}>100,000 cycles</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="distance-input" className="block font-mono text-xs text-text-mid mb-1">
+                Code Distance (d):
+              </label>
+              <select
+                id="distance-input"
+                value={codeDistance}
+                onChange={(e) => setCodeDistance(parseInt(e.target.value))}
+                className="w-full rounded-lg border border-ink-700 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-hi"
+              >
+                <option value={3}>d = 3 (17 qubits)</option>
+                <option value={5}>d = 5 (49 qubits)</option>
+                <option value={7}>d = 7 (97 qubits)</option>
+                <option value={9}>d = 9 (161 qubits)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Dashboard Column */}
+        <div className="space-y-6 lg:col-span-7 flex flex-col justify-between">
+          {/* Stat Cards */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Speed Ratio (τ_dec/τ_cyc)
+              </p>
+              <p
+                className={`mt-2 font-display text-2xl font-bold ${
+                  isRealTime ? 'text-stabilizer' : 'text-rose-400'
+                }`}
+              >
+                {speedRatio.toFixed(2)}x
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">
+                {isRealTime ? '≤ 1.0x Real-Time' : '> 1.0x Slowdown'}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Syndrome Backlog
+              </p>
+              <p className="mt-2 font-display text-2xl font-bold text-rose-400">
+                {backlogRounds.toLocaleString()}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">undecoded rounds</p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Added Idling Delay
+              </p>
+              <p className="mt-2 font-mono text-lg font-bold text-magic">
+                {backlogDelayMs >= 1000
+                  ? `${(backlogDelayMs / 1000).toFixed(2)} s`
+                  : `${backlogDelayMs.toFixed(1)} ms`}
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">extra memory wait</p>
+            </div>
+
+            <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
+              <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
+                Alg. Fidelity (F_tot)
+              </p>
+              <p
+                className={`mt-2 font-mono text-lg font-bold ${
+                  totalSuccessFidelity > 0.9 ? 'text-stabilizer' : totalSuccessFidelity > 0.5 ? 'text-magic' : 'text-rose-400'
+                }`}
+              >
+                {(totalSuccessFidelity * 100).toFixed(2)}%
+              </p>
+              <p className="mt-1 text-[11px] text-text-mid">survival rate</p>
+            </div>
+          </div>
+
+          {/* Syndrome Backlog Graph SVG */}
+          <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-5">
+            <div className="flex items-center justify-between">
+              <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-text-mid flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-rose-400" />
+                Syndrome Queue Accumulation vs Execution Time
+              </h4>
+              <span className="font-mono text-[11px] text-text-low">
+                Cycles: 0 → {numCycles.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="mt-4 relative bg-ink-950/80 rounded-lg p-3 border border-ink-800">
+              <svg viewBox="0 0 320 160" className="w-full h-44" role="img" aria-label="Syndrome Queue Accumulation Chart">
+                <line x1="30" y1="30" x2="290" y2="30" stroke="#2A3A5F" strokeDasharray="3 3" strokeWidth="1" />
+                <line x1="30" y1="85" x2="290" y2="85" stroke="#2A3A5F" strokeDasharray="3 3" strokeWidth="1" />
+                <line x1="30" y1="140" x2="290" y2="140" stroke="#2A3A5F" strokeWidth="1.5" />
+                <line x1="30" y1="20" x2="30" y2="140" stroke="#2A3A5F" strokeWidth="1.5" />
+
+                <text x="35" y="26" fill="#34D399" fontSize="9" fontFamily="monospace">
+                  Real-time baseline (0 backlog)
+                </text>
+
+                {!isRealTime && (
+                  <polygon
+                    points={`30,140 ${generateQueueGraphPoints()} 290,140`}
+                    fill="url(#roseGradient)"
+                    opacity="0.35"
+                  />
+                )}
+
+                <polyline
+                  fill="none"
+                  stroke={isRealTime ? '#34D399' : '#FB7185'}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  points={generateQueueGraphPoints()}
+                />
+
+                <defs>
+                  <linearGradient id="roseGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FB7185" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#FB7185" stopOpacity="0.0" />
+                  </linearGradient>
+                </defs>
+
+                <text x="160" y="156" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace">
+                  Execution Cycles (t) →
+                </text>
+                <text x="12" y="85" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace" transform="rotate(-90 12 85)">
+                  Queue Backlog (Q)
+                </text>
+              </svg>
+
+              <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-ink-700 bg-ink-900/90 p-3 text-xs leading-relaxed text-text-mid">
+                {isRealTime ? (
+                  <p className="text-stabilizer font-mono">
+                    ✓ Decoder throughput (1/τ_dec) exceeds syndrome arrival rate (1/τ_cycle). No syndrome queue forms. Quantum state executes at maximum theoretical speed without idling decay penalties.
+                  </p>
+                ) : (
+                  <p className="text-rose-300 font-mono">
+                    ⚠ Decoder is {speedRatio.toFixed(2)}x slower than hardware! {backlogRounds.toLocaleString()} rounds of undecoded syndromes pile up in classical memory. Qubits idle for {backlogDelayMs.toFixed(1)} ms, inducing {(pIdlingDecayCycle * 100).toFixed(2)}% extra decoherence decay per cycle.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ------------------------------ frontier blocks ----------------------------- */
 
 interface FrontierBlockData {
@@ -618,6 +1431,7 @@ interface FrontierBlockData {
   keyPoints: string[];
   links: ReactNode;
   vignette: ReactNode;
+  interactiveWidget?: ReactNode;
 }
 
 function FrontierBlock({ block, flip }: { block: FrontierBlockData; flip: boolean }) {
@@ -664,6 +1478,12 @@ function FrontierBlock({ block, flip }: { block: FrontierBlockData; flip: boolea
         </div>
         <div className={flip ? 'md:order-1' : ''}>{block.vignette}</div>
       </div>
+
+      {block.interactiveWidget && (
+        <Reveal delay={0.35} className="relative mx-auto max-w-6xl px-6 pt-12 md:px-8">
+          {block.interactiveWidget}
+        </Reveal>
+      )}
     </section>
   );
 }
@@ -967,6 +1787,7 @@ export default function FieldToday() {
         </>
       ),
       vignette: <MagicVignette />,
+      interactiveWidget: <MagicStateCalculatorWidget />,
     },
     {
       id: 'compilers',
@@ -1026,6 +1847,7 @@ export default function FieldToday() {
         </>
       ),
       vignette: <DecoderVignette />,
+      interactiveWidget: <DecoderLatencySimulatorWidget />,
     },
     {
       id: 'experiments',

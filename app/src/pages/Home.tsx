@@ -86,14 +86,14 @@ function SplitLine({
 function Hero() {
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
-      {/* Torus poster backdrop (hero-torus-fallback stands in for the WebGL torus) */}
+      {/* Torus poster backdrop using generated high-res visual artwork */}
       <div className="absolute inset-0" aria-hidden>
         <motion.img
-          src={asset('hero-torus-fallback.svg')}
-          alt=""
-          className="h-full w-full object-cover opacity-70"
+          src={asset('hero_quantum_lattice.jpg')}
+          alt="Topological Quantum Error Correction Torus Lattice"
+          className="h-full w-full object-cover opacity-60"
           initial={{ scale: 1.02 }}
-          animate={{ scale: [1.02, 1.08, 1.02] }}
+          animate={{ scale: [1.02, 1.06, 1.02] }}
           transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
         />
         {/* lattice texture overlay at 20% */}

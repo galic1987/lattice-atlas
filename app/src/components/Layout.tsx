@@ -4,6 +4,7 @@ import { NavLink, Link, Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
+import UniversalExplainer from '@/components/UniversalExplainer';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home' },
@@ -132,8 +133,9 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-ink-900">
-      <header className="fixed inset-x-0 top-0 z-40 h-16 border-b border-ink-600 bg-ink-900/85 backdrop-blur-md">
+    <div className="flex min-h-screen flex-col bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
+      <UniversalExplainer />
+      <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
           <Logo />
           <div className="flex items-center gap-4">
