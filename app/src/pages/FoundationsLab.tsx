@@ -12,7 +12,7 @@ import {
   Sparkles,
   Waves,
 } from 'lucide-react';
-import ConceptDepthLens from '@/components/ConceptDepthLens';
+import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
 import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
@@ -1305,7 +1305,7 @@ export default function FoundationsLab() {
             </header>
 
             <div className="space-y-6">
-              <ConceptDepthLens concept={activeStage.id} />
+              <MultiAgeCognitiveLens />
               <StageContent
                 stageId={activeStage.id}
                 answer={answers[activeStage.id]}
