@@ -30,6 +30,7 @@ import {
 import { papers, topics, topicById, shortName } from '@/data';
 import { useProgress } from '@/store/progress';
 import TopoLSCompiler from '@/components/TopoLSCompiler';
+import SpacetimeBraidWeaver from '@/components/SpacetimeBraidWeaver';
 import RealQuantumEndpoint from '@/components/RealQuantumEndpoint';
 import DifficultyMeter from '@/components/DifficultyMeter';
 
@@ -530,21 +531,22 @@ function SimVignette() {
 }
 
 function DecoderVignette() {
+  const reduce = useReducedMotion();
   const syndromes = [20, 45, 70, 95, 120, 145, 170, 195, 220, 245, 270];
   return (
-    <VignetteFrame caption="fig. 04 — the decoder chases the syndrome stream; the gap is latency">
-      <svg viewBox="0 0 320 160" className="mx-auto w-full max-w-[360px]" role="img" aria-label="A strip chart of syndrome dots arriving with a decoder line chasing them">
-        {/* latency gap */}
+    <VignetteFrame caption="fig. 04 — a decoder pipeline can trail each round while still keeping pace with the stream">
+      <svg viewBox="0 0 320 160" className="mx-auto w-full max-w-[360px]" role="img" aria-label="A strip chart separating the arriving syndrome stream from delayed decoder decisions">
+        {/* decision-latency window */}
         <motion.rect
           x={205}
           y={20}
           width={85}
           height={110}
           fill="#FB7185"
-          initial={{ opacity: 0 }}
+          initial={reduce ? false : { opacity: 0 }}
           whileInView={{ opacity: 0.08 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={reduce ? { duration: 0 } : { duration: 0.6, delay: 0.8 }}
         />
         {/* incoming syndrome dots */}
         {syndromes.map((x, i) => (
@@ -554,10 +556,10 @@ function DecoderVignette() {
             cy={45 + (i % 3) * 8}
             r={3.5}
             fill="#FB7185"
-            initial={{ opacity: 0, y: -8 }}
+            initial={reduce ? false : { opacity: 0, y: -8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.3, delay: i * 0.06, ease: EASE }}
+            transition={reduce ? { duration: 0 } : { duration: 0.3, delay: i * 0.06, ease: EASE }}
           />
         ))}
         {/* decoder line chasing */}
@@ -567,18 +569,18 @@ function DecoderVignette() {
           stroke="#22D3EE"
           strokeWidth={2}
           strokeLinecap="round"
-          initial={{ pathLength: 0 }}
+          initial={reduce ? false : { pathLength: 0 }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 1, delay: 0.3, ease: EASE }}
+          transition={reduce ? { duration: 0 } : { duration: 1, delay: 0.3, ease: EASE }}
         />
         {/* baseline */}
         <path d="M10 140 L310 140" stroke="#2A3A5F" strokeWidth={1} />
         <text x={248} y={106} fill="#FB7185" fontSize={10} fontFamily="'JetBrains Mono', monospace">
-          backlog
+          latency
         </text>
         <text x={20} y={30} fill="#64708E" fontSize={10} fontFamily="'JetBrains Mono', monospace">
-          syndromes →
+          detector rounds →
         </text>
       </svg>
     </VignetteFrame>
@@ -1002,91 +1004,90 @@ function MagicStateCalculatorWidget() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*    2. Real-Time Decoder Latency vs Physical Qubit T1/T2 Decay Tradeoff     */
+/*             2. Illustrative real-time decoder queue model                  */
 /* -------------------------------------------------------------------------- */
 
 interface DecoderPreset {
   name: string;
-  decUs: number;
+  serviceUs: number;
   cycleUs: number;
-  t1Us: number;
-  cycles: number;
-  distance: number;
+  workers: number;
+  decisionUs: number;
+  deadlineUs: number;
+  rounds: number;
   desc: string;
 }
 
 const DECODER_PRESETS: DecoderPreset[] = [
   {
-    name: 'Real-Time FPGA MWPM',
-    decUs: 0.5,
+    name: 'Queue clears',
+    serviceUs: 0.8,
     cycleUs: 1.0,
-    t1Us: 100,
-    cycles: 10000,
-    distance: 5,
-    desc: 'Dedicated FPGA streaming decoder decodes faster than 1.0µs syndrome cycles.',
+    workers: 1,
+    decisionUs: 35,
+    deadlineUs: 50,
+    rounds: 10000,
+    desc: 'One worker has enough sustained capacity, and the illustrative decision path meets its deadline.',
   },
   {
-    name: 'GPU Neural Decoder',
-    decUs: 1.4,
+    name: 'Parallel capacity',
+    serviceUs: 3.0,
     cycleUs: 1.0,
-    t1Us: 100,
-    cycles: 10000,
-    distance: 5,
-    desc: 'Machine learning decoder has 1.4µs latency, creating continuous syndrome backlog.',
+    workers: 4,
+    decisionUs: 60,
+    deadlineUs: 80,
+    rounds: 10000,
+    desc: 'Each worker is slower than the arrival cadence, but four workers provide enough aggregate throughput.',
   },
   {
-    name: 'CPU Serial Decoder',
-    decUs: 3.5,
+    name: 'Rate deficit',
+    serviceUs: 1.4,
     cycleUs: 1.0,
-    t1Us: 100,
-    cycles: 10000,
-    distance: 5,
-    desc: 'Classical serial software MWPM causes severe exponential syndrome queue buildup.',
+    workers: 1,
+    decisionUs: 20,
+    deadlineUs: 100,
+    rounds: 10000,
+    desc: 'Arrivals outpace aggregate service, so this deterministic queue grows approximately linearly.',
   },
   {
-    name: 'Trapped Ion (Slow Clock)',
-    decUs: 15.0,
-    cycleUs: 200.0,
-    t1Us: 10000,
-    cycles: 5000,
-    distance: 5,
-    desc: 'Slower quantum clock (200µs) gives classical hardware plenty of time to clear queues.',
+    name: 'Deadline miss',
+    serviceUs: 0.7,
+    cycleUs: 1.0,
+    workers: 1,
+    decisionUs: 80,
+    deadlineUs: 50,
+    rounds: 5000,
+    desc: 'Throughput keeps the queue empty, but the independent feed-forward decision deadline is missed.',
   },
 ];
 
 function DecoderLatencySimulatorWidget() {
-  const [tauDec, setTauDec] = useState<number>(0.8);
-  const [tauCycle, setTauCycle] = useState<number>(1.0);
-  const [t1Us, setT1Us] = useState<number>(100);
-  const [numCycles, setNumCycles] = useState<number>(10000);
-  const [codeDistance, setCodeDistance] = useState<number>(5);
+  const [serviceUs, setServiceUs] = useState<number>(0.8);
+  const [cycleUs, setCycleUs] = useState<number>(1.0);
+  const [workers, setWorkers] = useState<number>(1);
+  const [decisionUs, setDecisionUs] = useState<number>(35);
+  const [deadlineUs, setDeadlineUs] = useState<number>(50);
+  const [numRounds, setNumRounds] = useState<number>(10000);
 
-  const speedRatio = tauDec / tauCycle;
-  const isRealTime = speedRatio <= 1.0;
-
-  const backlogRounds = isRealTime ? 0 : Math.round(numCycles * (speedRatio - 1));
-  const backlogDelayUs = backlogRounds * tauDec;
-  const backlogDelayMs = backlogDelayUs / 1000;
-
-  const pT1Cycle = 1 - Math.exp(-tauCycle / t1Us);
-  const pPhysTotal = pT1Cycle + 0.0005;
-
-  const pTh = 0.01;
-  const pLogicalBaseCycle = Math.min(0.5, 0.03 * Math.pow(Math.max(0.0001, pPhysTotal / pTh), (codeDistance + 1) / 2));
-
-  const avgIdlingDelayPerCycle = backlogDelayUs / numCycles;
-  const pIdlingDecayCycle = 1 - Math.exp(-avgIdlingDelayPerCycle / t1Us);
-
-  const pLogicalCombinedCycle = Math.min(0.5, pLogicalBaseCycle + (1 - pLogicalBaseCycle) * pIdlingDecayCycle);
-
-  const totalSuccessFidelity = Math.max(0, Math.pow(1 - pLogicalCombinedCycle, numCycles));
+  const arrivalRate = 1 / cycleUs;
+  const serviceRate = workers / serviceUs;
+  const capacityRatio = serviceRate / arrivalRate;
+  const keepsPace = capacityRatio >= 1;
+  const elapsedUs = numRounds * cycleUs;
+  const serviceCapacity = Math.floor(elapsedUs * serviceRate);
+  const completedRounds = Math.min(numRounds, serviceCapacity);
+  const backlogRounds = Math.min(numRounds, Math.max(0, numRounds - completedRounds));
+  const queueDelayUs = backlogRounds / serviceRate;
+  const feedForwardLatencyUs = decisionUs + queueDelayUs;
+  const deadlineMet = feedForwardLatencyUs <= deadlineUs;
 
   const applyDecoderPreset = (preset: DecoderPreset) => {
-    setTauDec(preset.decUs);
-    setTauCycle(preset.cycleUs);
-    setT1Us(preset.t1Us);
-    setNumCycles(preset.cycles);
-    setCodeDistance(preset.distance);
+    setServiceUs(preset.serviceUs);
+    setCycleUs(preset.cycleUs);
+    setWorkers(preset.workers);
+    setDecisionUs(preset.decisionUs);
+    setDeadlineUs(preset.deadlineUs);
+    setNumRounds(preset.rounds);
   };
 
   const generateQueueGraphPoints = () => {
@@ -1095,13 +1096,25 @@ function DecoderLatencySimulatorWidget() {
     for (let i = 0; i <= steps; i++) {
       const frac = i / steps;
       const x = 30 + frac * 260;
-      const currentBacklog = isRealTime ? 0 : frac * numCycles * (speedRatio - 1);
-      const maxPossibleBacklog = Math.max(1, numCycles * 2.5);
-      const y = 140 - Math.min(110, (currentBacklog / maxPossibleBacklog) * 110);
+      const arrivals = frac * numRounds;
+      const capacity = frac * elapsedUs * serviceRate;
+      const currentBacklog = Math.min(arrivals, Math.max(0, arrivals - capacity));
+      const graphMaximum = Math.max(1, backlogRounds);
+      const y = 140 - Math.min(110, (currentBacklog / graphMaximum) * 110);
       points.push(`${x},${y}`);
     }
     return points.join(' ');
   };
+
+  const activePreset = DECODER_PRESETS.find(
+    (preset) =>
+      preset.serviceUs === serviceUs &&
+      preset.cycleUs === cycleUs &&
+      preset.workers === workers &&
+      preset.decisionUs === decisionUs &&
+      preset.deadlineUs === deadlineUs &&
+      preset.rounds === numRounds,
+  );
 
   return (
     <div className="rounded-2xl border border-ink-600 bg-ink-800/90 p-6 md:p-8 shadow-2xl backdrop-blur-sm">
@@ -1111,35 +1124,37 @@ function DecoderLatencySimulatorWidget() {
           <div className="flex items-center gap-2 text-rose-400">
             <Activity className="h-5 w-5" />
             <span className="eyebrow font-mono uppercase tracking-wider text-rose-400">
-              INTERACTIVE SIMULATOR // DECODER LATENCY VS DECAY TRADEOFF
+              ILLUSTRATIVE MODEL // STREAMING DECODER QUEUE
             </span>
           </div>
           <h3 className="mt-1 font-display text-2xl font-semibold text-text-hi">
-            Real-Time Decoder Latency vs Physical Qubit T1/T2 Decay Tradeoff
+            Can the classical pipeline keep pace?
           </h3>
           <p className="mt-1 text-sm text-text-mid max-w-2xl">
-            Simulate what happens when classical syndrome decoding falls behind hardware rate. Backlog syndromes force physical qubits to wait in memory, causing exponential decoherence decay.
+            Detector rounds arrive at a fixed cadence. Workers process them at a declared aggregate rate. Throughput determines queue growth; decision latency and a feed-forward deadline are tracked separately.
           </p>
         </div>
 
         {/* Status Badge */}
         <div className="mt-4 md:mt-0 flex items-center gap-3">
           <div
-            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-mono text-xs font-bold transition-all ${
-              isRealTime
+            role="status"
+            aria-live="polite"
+            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 font-mono text-xs font-bold ${
+              keepsPace
                 ? 'border-stabilizer/60 bg-stabilizer/10 text-stabilizer shadow-glow-green'
                 : 'border-rose-500/60 bg-rose-500/10 text-rose-400 shadow-glow-rose'
             }`}
           >
-            {isRealTime ? (
+            {keepsPace ? (
               <>
                 <CheckCircle2 className="h-4 w-4 text-stabilizer" />
-                REAL-TIME SYNCHRONIZED
+                CAPACITY KEEPS PACE
               </>
             ) : (
               <>
-                <AlertTriangle className="h-4 w-4 text-rose-400 animate-pulse" />
-                BACKLOG OVERFLOW RUNAWAY
+                <AlertTriangle className="h-4 w-4 text-rose-400" />
+                QUEUE GROWS LINEARLY
               </>
             )}
           </div>
@@ -1148,14 +1163,15 @@ function DecoderLatencySimulatorWidget() {
 
       {/* Presets Bar */}
       <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-b border-ink-700 py-3">
-        <span className="font-mono text-xs text-text-low mr-2">Architecture Presets:</span>
+        <span className="font-mono text-xs text-text-low mr-2">Illustrative presets:</span>
         {DECODER_PRESETS.map((p) => (
           <button
             key={p.name}
             type="button"
             onClick={() => applyDecoderPreset(p)}
-            className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-all ${
-              tauDec === p.decUs && tauCycle === p.cycleUs
+            aria-pressed={activePreset?.name === p.name}
+            className={`rounded-lg border px-3 py-1.5 font-mono text-xs transition-colors ${
+              activePreset?.name === p.name
                 ? 'border-rose-400 bg-rose-400/10 text-rose-300'
                 : 'border-ink-700 bg-ink-900/40 text-text-mid hover:border-ink-600 hover:text-text-hi'
             }`}
@@ -1169,43 +1185,44 @@ function DecoderLatencySimulatorWidget() {
       <div className="mt-6 grid gap-6 lg:grid-cols-12">
         {/* Controls Column */}
         <div className="space-y-5 lg:col-span-5 rounded-xl border border-ink-700 bg-ink-900/50 p-5">
-          {/* Decoder Latency Slider */}
+          {/* Service interval slider */}
           <div>
             <div className="flex items-center justify-between font-mono text-xs">
-              <label htmlFor="dec-latency-slider" className="text-text-mid flex items-center gap-1.5">
+              <label htmlFor="service-interval-slider" className="text-text-mid flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5 text-rose-400" />
-                Decoder Latency (τ_dec):
+                Service interval per worker:
               </label>
               <span className="font-semibold text-rose-400">
-                {tauDec >= 1.0 ? `${tauDec.toFixed(2)} µs` : `${(tauDec * 1000).toFixed(0)} ns`}
+                {serviceUs >= 1.0 ? `${serviceUs.toFixed(2)} µs/round` : `${(serviceUs * 1000).toFixed(0)} ns/round`}
               </span>
             </div>
             <input
-              id="dec-latency-slider"
+              id="service-interval-slider"
               type="range"
               min="0.1"
               max="5.0"
               step="0.1"
-              value={tauDec}
-              onChange={(e) => setTauDec(parseFloat(e.target.value))}
+              value={serviceUs}
+              onChange={(e) => setServiceUs(parseFloat(e.target.value))}
+              aria-valuetext={`${serviceUs.toFixed(1)} microseconds per round per worker`}
               className="mt-2.5 w-full accent-rose-400 cursor-pointer h-2 rounded-lg bg-ink-700"
             />
             <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-              <span>100 ns (ASIC/FPGA)</span>
-              <span>1.0 µs</span>
-              <span>5.0 µs (Slow CPU)</span>
+              <span>0.1 µs</span>
+              <span>2.5 µs</span>
+              <span>5.0 µs</span>
             </div>
           </div>
 
-          {/* Hardware Syndrome Cycle Time */}
+          {/* Detector-round arrival interval */}
           <div>
             <div className="flex items-center justify-between font-mono text-xs">
               <label htmlFor="cycle-time-slider" className="text-text-mid flex items-center gap-1.5">
                 <Zap className="h-3.5 w-3.5 text-syndrome" />
-                Syndrome Cycle Time (τ_cycle):
+                Detector-round arrival interval:
               </label>
               <span className="font-semibold text-syndrome">
-                {tauCycle >= 1.0 ? `${tauCycle.toFixed(2)} µs` : `${(tauCycle * 1000).toFixed(0)} ns`}
+                {cycleUs >= 1.0 ? `${cycleUs.toFixed(2)} µs/round` : `${(cycleUs * 1000).toFixed(0)} ns/round`}
               </span>
             </div>
             <input
@@ -1214,82 +1231,114 @@ function DecoderLatencySimulatorWidget() {
               min="0.2"
               max="5.0"
               step="0.1"
-              value={tauCycle}
-              onChange={(e) => setTauCycle(parseFloat(e.target.value))}
+              value={cycleUs}
+              onChange={(e) => setCycleUs(parseFloat(e.target.value))}
+              aria-valuetext={`${cycleUs.toFixed(1)} microseconds between arriving detector rounds`}
               className="mt-2.5 w-full accent-syndrome cursor-pointer h-2 rounded-lg bg-ink-700"
             />
             <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-              <span>200 ns</span>
-              <span>1.0 µs (Transmon)</span>
+              <span>0.2 µs</span>
+              <span>2.5 µs</span>
               <span>5.0 µs</span>
             </div>
           </div>
 
-          {/* Qubit Coherence T1 */}
+          {/* Aggregate workers */}
           <div>
             <div className="flex items-center justify-between font-mono text-xs">
-              <label htmlFor="t1-slider" className="text-text-mid flex items-center gap-1.5">
+              <label htmlFor="worker-slider" className="text-text-mid flex items-center gap-1.5">
                 <Cpu className="h-3.5 w-3.5 text-magic" />
-                Qubit Coherence Time (T1/T2):
+                Parallel service workers:
               </label>
               <span className="font-semibold text-magic">
-                {t1Us >= 1000 ? `${(t1Us / 1000).toFixed(1)} ms` : `${t1Us.toFixed(0)} µs`}
+                {workers}
               </span>
             </div>
             <input
-              id="t1-slider"
+              id="worker-slider"
               type="range"
-              min="10"
-              max="1000"
-              step="10"
-              value={t1Us}
-              onChange={(e) => setT1Us(parseInt(e.target.value))}
+              min="1"
+              max="8"
+              step="1"
+              value={workers}
+              onChange={(e) => setWorkers(parseInt(e.target.value))}
+              aria-valuetext={`${workers} parallel ${workers === 1 ? 'worker' : 'workers'}`}
               className="mt-2.5 w-full accent-magic cursor-pointer h-2 rounded-lg bg-ink-700"
             />
             <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-              <span>10 µs</span>
-              <span>100 µs</span>
-              <span>1 ms (1000 µs)</span>
+              <span>1 worker</span>
+              <span>4 workers</span>
+              <span>8 workers</span>
             </div>
           </div>
 
-          {/* Execution Depth Cycles */}
+          {/* Latency and deadline */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="cycles-input" className="block font-mono text-xs text-text-mid mb-1">
-                Execution Depth (Cycles):
+              <label htmlFor="decision-latency-input" className="block font-mono text-xs text-text-mid mb-1">
+                Pipeline decision latency:
               </label>
-              <select
-                id="cycles-input"
-                value={numCycles}
-                onChange={(e) => setNumCycles(parseInt(e.target.value))}
+              <input
+                id="decision-latency-input"
+                type="number"
+                min="1"
+                max="500"
+                step="1"
+                value={decisionUs}
+                onChange={(e) => setDecisionUs(Math.max(1, Number(e.target.value)))}
                 className="w-full rounded-lg border border-ink-700 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-hi"
-              >
-                <option value={1000}>1,000 cycles</option>
-                <option value={5000}>5,000 cycles</option>
-                <option value={10000}>10,000 cycles</option>
-                <option value={50000}>50,000 cycles</option>
-                <option value={100000}>100,000 cycles</option>
-              </select>
+              />
+              <p className="mt-1 font-mono text-[10px] text-text-low">µs, independent of throughput</p>
             </div>
 
             <div>
-              <label htmlFor="distance-input" className="block font-mono text-xs text-text-mid mb-1">
-                Code Distance (d):
+              <label htmlFor="deadline-input" className="block font-mono text-xs text-text-mid mb-1">
+                Feed-forward deadline:
               </label>
-              <select
-                id="distance-input"
-                value={codeDistance}
-                onChange={(e) => setCodeDistance(parseInt(e.target.value))}
+              <input
+                id="deadline-input"
+                type="number"
+                min="1"
+                max="500"
+                step="1"
+                value={deadlineUs}
+                onChange={(e) => setDeadlineUs(Math.max(1, Number(e.target.value)))}
                 className="w-full rounded-lg border border-ink-700 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-hi"
-              >
-                <option value={3}>d = 3 (17 qubits)</option>
-                <option value={5}>d = 5 (49 qubits)</option>
-                <option value={7}>d = 7 (97 qubits)</option>
-                <option value={9}>d = 9 (161 qubits)</option>
-              </select>
+              />
+              <p className="mt-1 font-mono text-[10px] text-text-low">µs before control must branch</p>
             </div>
           </div>
+
+          <div>
+            <label htmlFor="rounds-input" className="block font-mono text-xs text-text-mid mb-1">
+              Observation window:
+            </label>
+            <select
+              id="rounds-input"
+              value={numRounds}
+              onChange={(e) => setNumRounds(parseInt(e.target.value))}
+              className="w-full rounded-lg border border-ink-700 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-hi"
+            >
+              <option value={1000}>1,000 arriving rounds</option>
+              <option value={5000}>5,000 arriving rounds</option>
+              <option value={10000}>10,000 arriving rounds</option>
+              <option value={50000}>50,000 arriving rounds</option>
+              <option value={100000}>100,000 arriving rounds</option>
+            </select>
+          </div>
+
+          <div className="rounded-lg border border-ink-700 bg-ink-800/70 p-3 text-xs leading-relaxed text-text-mid">
+            <p className="font-mono text-text-hi">Deterministic fluid-queue model</p>
+            <p className="mt-1">
+              It assumes evenly spaced arrivals and identical workers. It does not estimate decoder accuracy, physical-qubit coherence, burstiness, communication overhead, or a particular hardware implementation.
+            </p>
+          </div>
+
+          {activePreset && (
+            <p className="text-xs leading-relaxed text-text-low" aria-live="polite">
+              {activePreset.desc}
+            </p>
+          )}
         </div>
 
         {/* Visual Dashboard Column */}
@@ -1298,23 +1347,23 @@ function DecoderLatencySimulatorWidget() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Speed Ratio (τ_dec/τ_cyc)
+                Capacity / arrivals
               </p>
               <p
                 className={`mt-2 font-display text-2xl font-bold ${
-                  isRealTime ? 'text-stabilizer' : 'text-rose-400'
+                  keepsPace ? 'text-stabilizer' : 'text-rose-400'
                 }`}
               >
-                {speedRatio.toFixed(2)}x
+                {capacityRatio.toFixed(2)}x
               </p>
               <p className="mt-1 text-[11px] text-text-mid">
-                {isRealTime ? '≤ 1.0x Real-Time' : '> 1.0x Slowdown'}
+                {serviceRate.toFixed(2)} served / {arrivalRate.toFixed(2)} arriving per µs
               </p>
             </div>
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Syndrome Backlog
+                Detector-round queue
               </p>
               <p className="mt-2 font-display text-2xl font-bold text-rose-400">
                 {backlogRounds.toLocaleString()}
@@ -1324,28 +1373,32 @@ function DecoderLatencySimulatorWidget() {
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Added Idling Delay
+                Queue drain delay
               </p>
               <p className="mt-2 font-mono text-lg font-bold text-magic">
-                {backlogDelayMs >= 1000
-                  ? `${(backlogDelayMs / 1000).toFixed(2)} s`
-                  : `${backlogDelayMs.toFixed(1)} ms`}
+                {queueDelayUs >= 1000
+                  ? `${(queueDelayUs / 1000).toFixed(2)} ms`
+                  : `${queueDelayUs.toFixed(1)} µs`}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">extra memory wait</p>
+              <p className="mt-1 text-[11px] text-text-mid">to clear the terminal queue</p>
             </div>
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Alg. Fidelity (F_tot)
+                Feed-forward path
               </p>
               <p
                 className={`mt-2 font-mono text-lg font-bold ${
-                  totalSuccessFidelity > 0.9 ? 'text-stabilizer' : totalSuccessFidelity > 0.5 ? 'text-magic' : 'text-rose-400'
+                  deadlineMet ? 'text-stabilizer' : 'text-rose-400'
                 }`}
               >
-                {(totalSuccessFidelity * 100).toFixed(2)}%
+                {feedForwardLatencyUs >= 1000
+                  ? `${(feedForwardLatencyUs / 1000).toFixed(2)} ms`
+                  : `${feedForwardLatencyUs.toFixed(1)} µs`}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">survival rate</p>
+              <p className="mt-1 text-[11px] text-text-mid" role="status" aria-live="polite">
+                {deadlineMet ? `within ${deadlineUs} µs deadline` : `misses ${deadlineUs} µs deadline`}
+              </p>
             </div>
           </div>
 
@@ -1354,25 +1407,30 @@ function DecoderLatencySimulatorWidget() {
             <div className="flex items-center justify-between">
               <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-text-mid flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-rose-400" />
-                Syndrome Queue Accumulation vs Execution Time
+                Deterministic queue vs arriving rounds
               </h4>
               <span className="font-mono text-[11px] text-text-low">
-                Cycles: 0 → {numCycles.toLocaleString()}
+                Rounds: 0 → {numRounds.toLocaleString()}
               </span>
             </div>
 
             <div className="mt-4 relative bg-ink-950/80 rounded-lg p-3 border border-ink-800">
-              <svg viewBox="0 0 320 160" className="w-full h-44" role="img" aria-label="Syndrome Queue Accumulation Chart">
+              <svg
+                viewBox="0 0 320 160"
+                className="w-full h-44"
+                role="img"
+                aria-label={`Queue chart: ${backlogRounds.toLocaleString()} of ${numRounds.toLocaleString()} arriving rounds remain after the observation window.`}
+              >
                 <line x1="30" y1="30" x2="290" y2="30" stroke="#2A3A5F" strokeDasharray="3 3" strokeWidth="1" />
                 <line x1="30" y1="85" x2="290" y2="85" stroke="#2A3A5F" strokeDasharray="3 3" strokeWidth="1" />
                 <line x1="30" y1="140" x2="290" y2="140" stroke="#2A3A5F" strokeWidth="1.5" />
                 <line x1="30" y1="20" x2="30" y2="140" stroke="#2A3A5F" strokeWidth="1.5" />
 
                 <text x="35" y="26" fill="#34D399" fontSize="9" fontFamily="monospace">
-                  Real-time baseline (0 backlog)
+                  Stable baseline (0 queued)
                 </text>
 
-                {!isRealTime && (
+                {!keepsPace && (
                   <polygon
                     points={`30,140 ${generateQueueGraphPoints()} 290,140`}
                     fill="url(#roseGradient)"
@@ -1382,7 +1440,7 @@ function DecoderLatencySimulatorWidget() {
 
                 <polyline
                   fill="none"
-                  stroke={isRealTime ? '#34D399' : '#FB7185'}
+                  stroke={keepsPace ? '#34D399' : '#FB7185'}
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   points={generateQueueGraphPoints()}
@@ -1396,7 +1454,7 @@ function DecoderLatencySimulatorWidget() {
                 </defs>
 
                 <text x="160" y="156" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace">
-                  Execution Cycles (t) →
+                  Arriving Detector Rounds →
                 </text>
                 <text x="12" y="85" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace" transform="rotate(-90 12 85)">
                   Queue Backlog (Q)
@@ -1404,17 +1462,26 @@ function DecoderLatencySimulatorWidget() {
               </svg>
 
               <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-ink-700 bg-ink-900/90 p-3 text-xs leading-relaxed text-text-mid">
-                {isRealTime ? (
+                {keepsPace ? (
                   <p className="text-stabilizer font-mono">
-                    ✓ Decoder throughput (1/τ_dec) exceeds syndrome arrival rate (1/τ_cycle). No syndrome queue forms. Quantum state executes at maximum theoretical speed without idling decay penalties.
+                    ✓ Aggregate service capacity ({serviceRate.toFixed(2)} rounds/µs) meets the arrival rate ({arrivalRate.toFixed(2)} rounds/µs), so this idealized queue stays empty. The separate {decisionUs} µs pipeline latency {deadlineMet ? 'meets' : 'misses'} the {deadlineUs} µs feed-forward deadline.
                   </p>
                 ) : (
                   <p className="text-rose-300 font-mono">
-                    ⚠ Decoder is {speedRatio.toFixed(2)}x slower than hardware! {backlogRounds.toLocaleString()} rounds of undecoded syndromes pile up in classical memory. Qubits idle for {backlogDelayMs.toFixed(1)} ms, inducing {(pIdlingDecayCycle * 100).toFixed(2)}% extra decoherence decay per cycle.
+                    ⚠ Arrivals exceed aggregate service capacity. After {numRounds.toLocaleString()} arrivals, {backlogRounds.toLocaleString()} rounds remain (never more than arrived); with a steady rate deficit, the queue grows approximately linearly. The terminal queue would take about {queueDelayUs.toFixed(1)} µs to drain.
                   </p>
                 )}
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-plaquette/30 bg-plaquette/5 p-4 text-sm leading-relaxed text-text-mid">
+            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-plaquette">
+              Throughput is not latency
+            </p>
+            <p className="mt-2">
+              Google reported about 63 µs average decoder latency while sustaining a 1.1 µs cycle stream: many rounds can be in a pipeline at once. Pauli-frame updates can often wait; a control branch that needs feed-forward cannot outlive its deadline.
+            </p>
           </div>
         </div>
       </div>
@@ -1812,7 +1879,12 @@ export default function FieldToday() {
         </>
       ),
       vignette: <CompilerVignette />,
-      interactiveWidget: <TopoLSCompiler />,
+      interactiveWidget: (
+        <div className="flex flex-col gap-8">
+          <SpacetimeBraidWeaver />
+          <TopoLSCompiler />
+        </div>
+      ),
     },
     {
       id: 'simulation',
@@ -1834,11 +1906,12 @@ export default function FieldToday() {
       num: '04',
       accent: '#FB7185',
       eyebrow: 'THE CLOCK',
-      title: 'Decoding faster than the noise.',
-      body: "A decoder that runs in post-processing is a science experiment; a decoder that runs in real time is a computer. Latency matters because undecoded syndromes pile up exponentially — and because non-Clifford gates need feed-forward decisions. Meanwhile, flag fault-tolerance shrinks syndrome extraction itself: a few extra 'flag' qubits catch hook errors, so small codes stay fault-tolerant without full-distance circuits.",
+      title: 'Decoding at the speed of the stream.',
+      body: "A decoder that runs in post-processing can validate an experiment; a fault-tolerant computer needs a sustained streaming service. If detector rounds arrive faster than the decoder's aggregate throughput, the queue grows approximately linearly under a steady rate deficit. Latency is a separate systems constraint: Google's experiment reported about 63 µs average decoder latency while sustaining a 1.1 µs cycle stream through pipelining. Pauli-frame bookkeeping can often be deferred, but lattice-surgery and non-Clifford feed-forward decisions still have deadlines. Meanwhile, flag fault-tolerance uses a few extra flag qubits to catch dangerous faults in small-code extraction circuits.",
       keyPoints: [
-        'latency vs decoherence race',
-        'streaming/hierarchical real-time decoders',
+        'aggregate throughput controls queue growth',
+        'pipeline latency and feed-forward deadlines are separate',
+        'streaming, windowed, and hierarchical decoder architectures',
         'flag qubits: cheap fault-tolerance for small codes',
       ],
       links: (
