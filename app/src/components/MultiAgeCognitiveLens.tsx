@@ -77,6 +77,8 @@ export default function MultiAgeCognitiveLens({
           <img
             src={asset(concept.banner)}
             alt={concept.bannerAlt ?? ''}
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (
