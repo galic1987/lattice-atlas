@@ -44,7 +44,7 @@ working directory.
 A full review (physics / code / security / perf-a11y) ran against main. Claude
 fixed everything cleanly in the data lane + Decoder Duel (merged PRs #14, #16).
 The items below live in files Gemini has been actively editing, so they're
-handed off rather than raced. Ranked by severity; each has a concrete fix.
+handed off rather than raced. Ranked by severity; each has a concrete fix. Items 6-9 DONE by Claude (PRs #19, #20). Items 1-5 remain — all in Gemini-owned, actively-edited files (3D components, SurfaceCodeLab, Certificate/ShareableScoreCard); Gemini owns these to avoid clobbering live edits.
 
 1. **HIGH — WebGL GPU leak** `components/SpacetimeView3D.tsx`. The scene-build
    `useEffect` re-runs on every playback step and reallocates a `WebGLRenderer`
@@ -67,18 +67,18 @@ handed off rather than raced. Ranked by severity; each has a concrete fix.
    never imported, yet is the only writer of `lattice-atlas-game-scores`, which
    `ShareableScoreCard.tsx` reads for up to 120/1000 points → permanently
    unreachable. Either mount the arcade or drop the arcade-points path.
-6. **MEDIUM (security) — supply chain**: remove `plugin-inspect-react-code`
+6. **[DONE — PR #19]** ~~MEDIUM (security) — supply chain~~: removed `plugin-inspect-react-code`
    (dev-only Vite plugin resolving from `npmmirror.com`, thin provenance; the
    `inspectAttr()` in `vite.config.ts`). It's unnecessary. While there, prune the
    ~40 unused scaffold deps in `package.json` (all `@radix-ui/*`,
    `@react-three/*`, `gsap`, `lenis`, `recharts`, `zod`, `vaul`, …) — tree-shaken
    out but bloating install/audit surface.
-7. **LOW — privacy**: `Expandable3B1BCard.tsx` embeds `youtube.com/embed`
+7. **[DONE — PR #19]** ~~LOW — privacy~~: `Expandable3B1BCard.tsx` now uses `youtube-nocookie.com`  //
    (in-page Google frame). Switch to `youtube-nocookie.com` to honor "no tracking".
-8. **LOW — contrast**: `tailwind.config.js` `text-low #64708E` ≈ 4.0:1 (below AA
+8. **[DONE — PR #20]** ~~LOW — contrast~~: `text-low` is now `#7B89A7` (4.87:1).  // old note: `#64708E` ≈ 4.0:1 (below AA
    for small text). `design/design.md` already documents the intended fix to a
    lighter value — apply it to the config.
-9. **LOW — perf**: `manualChunks` in `vite.config.ts` to split framer-motion
+9. **[PARTIAL — PR #20]** `manualChunks` split done (framer-motion + react vendor out of entry). REMAINING: add `loading="lazy"` to below-fold <img> in Home.tsx / ActChapterCard.tsx / FieldToday.tsx (Gemini-owned). Was: split framer-motion
    (~177KB gzip) out of the entry chunk; add `loading="lazy"` to below-fold
    `<img>` in `Home.tsx`, `ActChapterCard.tsx`, `FieldToday.tsx`.
 
