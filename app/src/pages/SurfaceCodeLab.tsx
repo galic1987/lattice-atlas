@@ -32,6 +32,7 @@ import {
 } from '@/lib/surfaceCode';
 import { topicById, shortName } from '@/data';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
+import WasmQuantumSandbox from '@/components/WasmQuantumSandbox';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -1442,6 +1443,10 @@ export default function SurfaceCodeLab() {
             </motion.div>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
+        <WasmQuantumSandbox />
       </section>
 
       <ThresholdSection />

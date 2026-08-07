@@ -3,6 +3,7 @@ import { Atom, BookOpen, Compass, Lightbulb, Sparkles } from 'lucide-react';
 import { ACT_NARRATIVES } from '@/data/cognitive_lens';
 import { tierColors } from '@/data';
 import { useProgress } from '@/store/progress';
+import { asset } from '@/lib/asset';
 
 const ROMAN_NUMERALS: Record<number, string> = {
   1: 'ACT I',
@@ -36,6 +37,21 @@ export default function ActChapterCard({ tier }: { tier: number }) {
         style={{ backgroundColor: color }}
         aria-hidden
       />
+
+      {/* Visual Metaphor Header Artwork */}
+      {tier === 2 && (
+        <div className="relative mb-6 h-40 w-full overflow-hidden rounded-xl border border-plaquette/30">
+          <img src={asset('act2_superposition_paradox.jpg')} alt="Act II Superposition Paradox Metaphor" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-transparent to-transparent" />
+        </div>
+      )}
+
+      {tier === 4 && (
+        <div className="relative mb-6 h-40 w-full overflow-hidden rounded-xl border border-star/30">
+          <img src={asset('act4_anyon_braiding.jpg')} alt="Act IV Anyon Braiding Metaphor" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-transparent to-transparent" />
+        </div>
+      )}
 
       {/* Act Header Strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700/80 pb-4">

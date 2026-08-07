@@ -10,12 +10,16 @@ import {
 } from 'framer-motion';
 import {
   ArrowRight,
+  Gamepad2,
   Map as MapIcon,
   MoveRight,
   Route as RouteIcon,
   ScrollText,
+  Sparkles,
   Telescope,
 } from 'lucide-react';
+import InteractiveTour from '@/components/InteractiveTour';
+import QuantumArcade from '@/components/QuantumArcade';
 import {
   papers,
   tierColors,
@@ -84,6 +88,9 @@ function SplitLine({
 }
 
 function Hero() {
+  const [tourOpen, setTourOpen] = useState(false);
+  const [arcadeOpen, setArcadeOpen] = useState(false);
+
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
       {/* Torus poster backdrop using generated high-res visual artwork */}
@@ -158,7 +165,40 @@ function Hero() {
               Explore the knowledge map
             </Link>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.7, duration: 0.4, ease: EASE_OUT_EXPO }}
+          >
+            <button
+              type="button"
+              onClick={() => setTourOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-plaquette/50 bg-plaquette/10 px-5 py-3 font-display text-sm font-semibold text-plaquette transition-all duration-200 hover:border-plaquette hover:bg-plaquette/20"
+            >
+              <Sparkles className="h-4 w-4 text-plaquette animate-pulse" />
+              60-Sec Guided Tour
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.8, duration: 0.4, ease: EASE_OUT_EXPO }}
+          >
+            <button
+              type="button"
+              onClick={() => setArcadeOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-star/50 bg-star/10 px-5 py-3 font-display text-sm font-semibold text-star transition-all duration-200 hover:border-star hover:bg-star/20"
+            >
+              <Gamepad2 className="h-4 w-4 text-star" />
+              Quantum Arcade Games
+            </button>
+          </motion.div>
         </div>
+
+        <InteractiveTour isOpen={tourOpen} onClose={() => setTourOpen(false)} />
+        <QuantumArcade isOpen={arcadeOpen} onClose={() => setArcadeOpen(false)} />
 
         <motion.p
           className="mt-16 font-mono text-[13px] text-text-low md:absolute md:bottom-10 md:right-8 md:mt-0"

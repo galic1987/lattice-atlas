@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
@@ -8,8 +8,8 @@ import {
   Cpu,
   ArrowRight
 } from 'lucide-react';
-import { topics, shortName } from '@/data';
-import { TERMS, type GlossaryTerm } from '@/data/glossary';
+import { resolveTopic, shortName } from '@/data';
+import { TERMS, matchGlossaryTerm, type GlossaryTerm } from '@/data/glossary';
 import { TOPIC_COGNITIVE_LENS } from '@/data/cognitive_lens';
 import { useProgress } from '@/store/progress';
 
@@ -116,7 +116,6 @@ export default function UniversalExplainer() {
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
   const [contextSnippet, setContextSnippet] = useState<string>('');
-  const location = useLocation();
   const { lensMode } = useProgress();
 
   useEffect(() => {
@@ -157,11 +156,20 @@ export default function UniversalExplainer() {
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelection(null);
+        setActiveQuery(null);
+      }
+    };
+
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -173,16 +181,12 @@ export default function UniversalExplainer() {
     setSelection(null);
   };
 
-  // Resolve matching glossary term or topic
+  // Resolve matching glossary term or topic with alias awareness
   const matchingGlossary: GlossaryTerm | undefined = activeQuery
-    ? TERMS.find((g: GlossaryTerm) => 
-        g.term.toLowerCase() === activeQuery.toLowerCase()
-      )
+    ? matchGlossaryTerm(activeQuery) || TERMS.find((g: GlossaryTerm) => g.term.toLowerCase() === activeQuery.toLowerCase())
     : undefined;
 
-  const matchingTopic = activeQuery
-    ? topics.find((t) => t.name.toLowerCase().includes(activeQuery.toLowerCase()) || activeQuery.toLowerCase().includes(t.name.toLowerCase()))
-    : undefined;
+  const matchingTopic = activeQuery ? resolveTopic(activeQuery) : undefined;
 
   const topicLens = matchingTopic ? TOPIC_COGNITIVE_LENS[matchingTopic.id] : undefined;
 
@@ -271,10 +275,20 @@ export default function UniversalExplainer() {
                     <p className="mt-2 text-xs leading-relaxed text-text-mid">{matchingGlossary.long}</p>
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-ink-600 bg-ink-800 p-4">
-                    <p className="text-sm leading-relaxed text-text-hi">
-                      <span className="font-semibold text-plaquette">&ldquo;{activeQuery}&rdquo;</span> is a key concept in Topological Quantum Error Correction. In the context of {location.pathname === '/lab' ? 'Surface Code Lab' : location.pathname === '/papers' ? 'Research Papers' : 'Quantum Computing'}, it relates to maintaining coherent logical quantum memory across noisy physical hardware.
+                  <div className="rounded-xl border border-ink-700 bg-ink-800 p-4">
+                    <div className="flex items-center gap-2 text-xs font-bold text-text-low uppercase tracking-wider font-mono">
+                      <span>Vocabulary Note</span>
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-text-mid">
+                      <span className="font-semibold text-text-hi">&ldquo;{activeQuery}&rdquo;</span> is not directly indexed in the Lattice Atlas core vocabulary. Explore our curated glossary to search related topological concepts.
                     </p>
+                    <Link
+                      to={`/glossary`}
+                      onClick={() => setActiveQuery(null)}
+                      className="mt-3 inline-flex items-center gap-1 font-mono text-xs text-plaquette hover:underline"
+                    >
+                      Browse Atlas Glossary <ArrowRight className="h-3 w-3" />
+                    </Link>
                   </div>
                 )}
 

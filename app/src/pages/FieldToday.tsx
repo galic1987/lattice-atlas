@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { papers, topics, topicById, shortName } from '@/data';
 import { useProgress } from '@/store/progress';
+import TopoLSCompiler from '@/components/TopoLSCompiler';
+import RealQuantumEndpoint from '@/components/RealQuantumEndpoint';
 import DifficultyMeter from '@/components/DifficultyMeter';
 
 function formatSci(val: number): string {
@@ -1808,6 +1810,7 @@ export default function FieldToday() {
         </>
       ),
       vignette: <CompilerVignette />,
+      interactiveWidget: <TopoLSCompiler />,
     },
     {
       id: 'simulation',
@@ -1869,6 +1872,7 @@ export default function FieldToday() {
         </>
       ),
       vignette: <ExperimentVignette />,
+      interactiveWidget: <RealQuantumEndpoint />,
     },
   ];
 
