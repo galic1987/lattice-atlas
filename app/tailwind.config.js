@@ -17,7 +17,7 @@ module.exports = {
         },
         'text-hi': '#EAF0FB',
         'text-mid': '#A9B4CC',
-        'text-low': '#64708E',
+        'text-low': '#7B89A7',
         plaquette: '#22D3EE',
         star: '#8B5CF6',
         magic: '#F5B83D',
