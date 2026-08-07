@@ -6,6 +6,7 @@ import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
+import SoundToggle from '@/components/SoundToggle';
 
 const NAV_ITEMS = [
   { to: '/foundations', label: 'Start', ariaLabel: 'Start with quantum foundations' },
@@ -184,8 +185,9 @@ export default function Layout() {
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
           <Logo />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <DesktopNav />
+            <SoundToggle />
             <ProgressPill onShare={() => setShareOpen(true)} />
             <button
               type="button"
