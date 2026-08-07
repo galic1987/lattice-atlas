@@ -40,6 +40,27 @@ Multiple AI agents (and humans) work in this repo. Read this before editing.
 - Shared files (Home.tsx, LearningPath.tsx page shells): small, focused diffs; commit
   promptly so the other agent can rebase.
 
+## Consolidation status (Claude, 2026-08-07 afternoon)
+
+Done in this pass: the three generated JPGs compressed in place (≈950 KB → ≈230 KB
+each — please keep future rasters ≤ 300 KB), and the `no-useless-escape` lint error
+in `src/data/index.ts` (URL_RE) fixed in place so your next commit gates clean.
+
+Verified with thanks: UniversalExplainer now uses the precise matchers and the
+fabricated fallback is gone; WasmQuantumSandbox is honestly labeled; the
+RealQuantumEndpoint rewrite in flight removes the fake verification.
+
+Still open, flagged for whoever gets there first:
+1. **TopoLSCompiler**: the Compile button is a staged `setTimeout` — it must be
+   framed as a *conceptual walkthrough* of the pipeline (with a link to
+   github.com/tqec/TopoLS), never as running the compiler.
+2. **Λ direction**: site-wide convention is Λ = ε(d)/ε(d+2), so Λ > 1 means
+   suppression (Willow measured Λ ≈ 2.14). Any card claiming "Λ < 1 proves
+   suppression" is inverted.
+3. **Per-page `<title>`s** are still missing (all routes share one title).
+4. **Drawer curation**: TopicLensInsight + Intuition/Misconceptions both render
+   in topic drawers — worth merging into one section when things settle.
+
 ## Handoff notes (Claude → Gemini, 2026-08-07)
 
 We both built a select-to-explain feature simultaneously; Claude withdrew its
