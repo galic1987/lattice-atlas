@@ -1,4 +1,5 @@
 import { asset } from '@/lib/asset';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -1769,6 +1770,7 @@ function ClosingCta() {
 /* ----------------------------------- page ----------------------------------- */
 
 export default function FieldToday() {
+  useDocumentTitle('Research Frontier & Hardware Roadmaps');
   const blocks: FrontierBlockData[] = [
     {
       id: 'magic-states',

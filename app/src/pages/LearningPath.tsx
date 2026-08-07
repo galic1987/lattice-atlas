@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { Link } from 'react-router-dom';
 import {
   AnimatePresence,
@@ -812,6 +813,7 @@ function CompletionBand() {
 /* ---------- page ---------- */
 
 export default function LearningPath() {
+  useDocumentTitle('TQEC Learning Path & Curriculum');
   const data = useMemo(() => buildPathData(), []);
   const { isUnderstood, understoodCount, resetProgress } = useProgress();
   const [drawerTopic, setDrawerTopic] = useState<Topic | null>(null);

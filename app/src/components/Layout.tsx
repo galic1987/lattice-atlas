@@ -1,5 +1,5 @@
 import { asset } from '@/lib/asset';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, Link, Outlet } from 'react-router-dom';
 import { Menu, Share2, X } from 'lucide-react';
 import { useProgress } from '@/store/progress';
@@ -91,25 +91,49 @@ function DesktopNav() {
 }
 
 function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
     if (!open) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      previouslyFocused?.focus();
     };
   }, [open, onClose]);
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div ref={dialogRef} className="fixed inset-0 z-50 bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
       <div className="flex h-16 items-center justify-between px-6">
         <Logo />
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={onClose}
           aria-label="Close menu"
