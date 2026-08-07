@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Sparkles,
   X,
   BookOpen,
-  Cpu,
-  ArrowRight
+  ArrowRight,
+  Cpu
 } from 'lucide-react';
 import { resolveTopic, shortName } from '@/data';
 import { TERMS, matchGlossaryTerm, type GlossaryTerm } from '@/data/glossary';
@@ -20,15 +20,99 @@ interface SelectionState {
   y: number;
 }
 
-/** Visual SVG diagram generator for any concept */
+/** Small relationship diagrams for the concept families this site can explain. */
 function ConceptSuperVisual({ term }: { term: string }) {
   const lower = term.toLowerCase();
 
-  // 1. Torus / Topology / Toric Code / Anyon
+  if (
+    lower.includes('amplitude')
+    || lower.includes('phase')
+    || lower.includes('interference')
+    || lower.includes('born')
+    || lower.includes('superposition')
+    || lower.includes('complex')
+  ) {
+    return (
+      <div className="h-48 overflow-hidden rounded-xl border border-plaquette/30 bg-ink-950 p-4">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="Two complex amplitude arrows add tip to tail, then the squared length of their sum becomes a probability">
+          <defs>
+            <marker id="phasor-cyan" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#22D3EE" /></marker>
+            <marker id="phasor-violet" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#8B5CF6" /></marker>
+            <marker id="phasor-green" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#34D399" /></marker>
+          </defs>
+          <circle cx="92" cy="78" r="57" fill="none" stroke="#2A3A5F" />
+          <line x1="35" y1="78" x2="149" y2="78" stroke="#2A3A5F" />
+          <line x1="92" y1="21" x2="92" y2="135" stroke="#2A3A5F" />
+          <line x1="92" y1="78" x2="130" y2="78" stroke="#22D3EE" strokeWidth="4" markerEnd="url(#phasor-cyan)" />
+          <line x1="130" y1="78" x2="154" y2="48" stroke="#8B5CF6" strokeWidth="4" markerEnd="url(#phasor-violet)" />
+          <line x1="92" y1="78" x2="154" y2="48" stroke="#34D399" strokeWidth="3" strokeDasharray="5 4" markerEnd="url(#phasor-green)" />
+          <text x="174" y="52" fill="#34D399" fontSize="11" fontFamily="JetBrains Mono">a + b</text>
+          <path d="M190 80h50" stroke="#64708E" markerEnd="url(#phasor-green)" />
+          <text x="215" y="70" textAnchor="middle" fill="#64708E" fontSize="10" fontFamily="JetBrains Mono">square length</text>
+          <rect x="202" y="95" width="52" height="38" rx="8" fill="#34D399" fillOpacity="0.15" stroke="#34D399" />
+          <text x="228" y="118" textAnchor="middle" fill="#34D399" fontSize="12" fontFamily="JetBrains Mono">|a+b|²</text>
+          <text x="92" y="151" textAnchor="middle" fill="#A9B4CC" fontSize="10" fontFamily="JetBrains Mono">add amplitudes first</text>
+        </svg>
+      </div>
+    );
+  }
+
+  if (lower.includes('tensor') || lower.includes('entang')) {
+    return (
+      <div className="h-48 overflow-hidden rounded-xl border border-star/30 bg-ink-950 p-4">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="A two by two amplitude table; a crossed diagonal pattern cannot be made from one independent row recipe and one column recipe">
+          <text x="74" y="18" textAnchor="middle" fill="#64708E" fontSize="10" fontFamily="JetBrains Mono">B=0</text>
+          <text x="134" y="18" textAnchor="middle" fill="#64708E" fontSize="10" fontFamily="JetBrains Mono">B=1</text>
+          <text x="25" y="57" fill="#64708E" fontSize="10" fontFamily="JetBrains Mono">A=0</text>
+          <text x="25" y="117" fill="#64708E" fontSize="10" fontFamily="JetBrains Mono">A=1</text>
+          {[[44, 27], [104, 27], [44, 87], [104, 87]].map(([x, y], index) => (
+            <rect key={`${x}-${y}`} x={x} y={y} width="54" height="54" rx="8" fill={index === 0 || index === 3 ? '#22D3EE' : '#111A2E'} fillOpacity={index === 0 || index === 3 ? 0.25 : 1} stroke={index === 0 || index === 3 ? '#22D3EE' : '#2A3A5F'} />
+          ))}
+          <text x="71" y="61" textAnchor="middle" fill="#22D3EE" fontSize="13" fontFamily="JetBrains Mono">1/√2</text>
+          <text x="131" y="121" textAnchor="middle" fill="#22D3EE" fontSize="13" fontFamily="JetBrains Mono">1/√2</text>
+          <path d="M178 82h36" stroke="#64708E" strokeWidth="2" />
+          <text x="238" y="54" textAnchor="middle" fill="#FB7185" fontSize="10" fontFamily="JetBrains Mono">cannot factor</text>
+          <text x="238" y="78" textAnchor="middle" fill="#EAF0FB" fontSize="13" fontFamily="JetBrains Mono">det ≠ 0</text>
+          <text x="238" y="105" textAnchor="middle" fill="#8B5CF6" fontSize="11" fontFamily="JetBrains Mono">entangled</text>
+        </svg>
+      </div>
+    );
+  }
+
+  if (
+    lower.includes('vector')
+    || lower.includes('basis')
+    || lower.includes('inner product')
+    || lower.includes('hilbert')
+    || lower.includes('bra')
+    || lower.includes('eigen')
+    || lower.includes('unitary')
+    || lower.includes('observable')
+    || lower.includes('matrix')
+  ) {
+    return (
+      <div className="h-48 overflow-hidden rounded-xl border border-star/30 bg-ink-950 p-4">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="A state vector is resolved into coordinates along two basis axes; an inner product measures one projection">
+          <defs><marker id="vector-head" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7Z" fill="#22D3EE" /></marker></defs>
+          <line x1="48" y1="126" x2="235" y2="126" stroke="#3D5178" />
+          <line x1="48" y1="126" x2="48" y2="20" stroke="#3D5178" />
+          <text x="240" y="130" fill="#8B5CF6" fontSize="11" fontFamily="JetBrains Mono">|0⟩</text>
+          <text x="35" y="19" fill="#8B5CF6" fontSize="11" fontFamily="JetBrains Mono">|1⟩</text>
+          <line x1="48" y1="126" x2="190" y2="49" stroke="#22D3EE" strokeWidth="4" markerEnd="url(#vector-head)" />
+          <line x1="190" y1="49" x2="190" y2="126" stroke="#34D399" strokeDasharray="4 4" />
+          <line x1="48" y1="49" x2="190" y2="49" stroke="#8B5CF6" strokeDasharray="4 4" />
+          <text x="202" y="47" fill="#22D3EE" fontSize="12" fontFamily="JetBrains Mono">|ψ⟩</text>
+          <text x="121" y="144" textAnchor="middle" fill="#34D399" fontSize="10" fontFamily="JetBrains Mono">α = ⟨0|ψ⟩</text>
+          <text x="35" y="83" textAnchor="end" fill="#8B5CF6" fontSize="10" fontFamily="JetBrains Mono">β</text>
+        </svg>
+      </div>
+    );
+  }
+
   if (lower.includes('torus') || lower.includes('topolog') || lower.includes('toric') || lower.includes('anyon')) {
     return (
       <div className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border border-plaquette/30 bg-ink-950 p-4">
-        <svg viewBox="0 0 300 160" className="h-full w-full">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="A non-contractible loop wraps around a torus and cannot shrink to a point">
           <defs>
             <linearGradient id="torusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.8" />
@@ -39,7 +123,7 @@ function ConceptSuperVisual({ term }: { term: string }) {
           <ellipse cx="150" cy="80" rx="100" ry="45" fill="none" stroke="url(#torusGrad)" strokeWidth="3" strokeDasharray="6 3" />
           <ellipse cx="150" cy="80" rx="40" ry="18" fill="none" stroke="#22D3EE" strokeWidth="2" />
           {/* Topological Loop */}
-          <path d="M 50 80 Q 150 130 250 80" fill="none" stroke="#FB7185" strokeWidth="3" className="animate-pulse" />
+          <path d="M 50 80 Q 150 130 250 80" fill="none" stroke="#FB7185" strokeWidth="3" />
           <circle cx="150" cy="105" r="4" fill="#FB7185" />
           <text x="150" y="125" textAnchor="middle" fill="#FB7185" className="font-mono text-[10px]">Non-contractible Logical Loop</text>
           <text x="150" y="45" textAnchor="middle" fill="#A9B4CC" className="font-mono text-[11px]">Torus Topology (Genus 1)</text>
@@ -48,11 +132,10 @@ function ConceptSuperVisual({ term }: { term: string }) {
     );
   }
 
-  // 2. Stabilizer / Syndrome / Plaquette / Star / Error
-  if (lower.includes('stabilizer') || lower.includes('syndrome') || lower.includes('plaquette') || lower.includes('star') || lower.includes('error')) {
+  if (lower.includes('stabilizer') || lower.includes('syndrome') || lower.includes('plaquette') || lower.includes('star') || lower.includes('error') || lower.includes('decoder') || lower.includes('code')) {
     return (
       <div className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border border-syndrome/30 bg-ink-950 p-4">
-        <svg viewBox="0 0 300 160" className="h-full w-full">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="A physical error touches neighboring parity checks and produces a syndrome pattern">
           {/* Grid */}
           <rect x="90" y="30" width="120" height="100" fill="none" stroke="#2A3A5F" strokeWidth="2" />
           {/* Z Plaquette */}
@@ -68,7 +151,7 @@ function ConceptSuperVisual({ term }: { term: string }) {
           <circle cx="210" cy="80" r="5" fill="#EAF0FB" />
           <circle cx="150" cy="130" r="5" fill="#EAF0FB" />
           {/* Syndrome flash */}
-          <circle cx="120" cy="55" r="8" fill="#FB7185" fillOpacity="0.8" className="animate-ping" />
+          <circle cx="120" cy="55" r="8" fill="#FB7185" fillOpacity="0.8" />
           <text x="120" y="58" textAnchor="middle" fill="#FFFFFF" className="font-mono text-[9px] font-bold">!</text>
           <text x="150" y="152" textAnchor="middle" fill="#A9B4CC" className="font-mono text-[10px]">Syndrome Flash on Anti-Commutation</text>
         </svg>
@@ -76,11 +159,10 @@ function ConceptSuperVisual({ term }: { term: string }) {
     );
   }
 
-  // 3. Qubit / Pauli / Gate / Superposition / Dirac / Matrix
-  if (lower.includes('qubit') || lower.includes('pauli') || lower.includes('gate') || lower.includes('state') || lower.includes('dirac') || lower.includes('matrix')) {
+  if (lower.includes('qubit') || lower.includes('pauli') || lower.includes('gate') || lower.includes('state') || lower.includes('dirac')) {
     return (
       <div className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border border-star/30 bg-ink-950 p-4">
-        <svg viewBox="0 0 300 160" className="h-full w-full">
+        <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label="A one-qubit pure state is shown as an arrow on the Bloch sphere">
           {/* Bloch Sphere Circle */}
           <circle cx="150" cy="80" r="50" fill="none" stroke="#2A3A5F" strokeWidth="2" />
           <ellipse cx="150" cy="80" rx="50" ry="18" fill="none" stroke="#2A3A5F" strokeWidth="1" strokeDasharray="3 3" />
@@ -98,15 +180,15 @@ function ConceptSuperVisual({ term }: { term: string }) {
     );
   }
 
-  // Default Generic Quantum System Diagram
   return (
     <div className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-xl border border-ink-600 bg-ink-950 p-4">
-      <svg viewBox="0 0 300 160" className="h-full w-full">
-        <rect x="40" y="30" width="220" height="100" rx="8" fill="none" stroke="#2A3A5F" strokeWidth="2" />
-        <circle cx="100" cy="80" r="25" fill="#22D3EE" fillOpacity="0.2" stroke="#22D3EE" strokeWidth="2" />
-        <circle cx="200" cy="80" r="25" fill="#8B5CF6" fillOpacity="0.2" stroke="#8B5CF6" strokeWidth="2" />
-        <path d="M 125 80 Q 150 60 175 80" fill="none" stroke="#34D399" strokeWidth="2" strokeDasharray="4 2" />
-        <text x="150" y="115" textAnchor="middle" fill="#A9B4CC" className="font-mono text-[11px]">Quantum Fault-Tolerant System</text>
+      <svg viewBox="0 0 300 160" className="h-full w-full" role="img" aria-label={`${term} shown between its prerequisites and downstream applications`}>
+        <rect x="90" y="52" width="120" height="56" rx="12" fill="#22D3EE" fillOpacity="0.12" stroke="#22D3EE" />
+        <text x="150" y="77" textAnchor="middle" fill="#EAF0FB" fontSize="12" fontFamily="JetBrains Mono">{term.slice(0, 22)}</text>
+        <text x="150" y="94" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="JetBrains Mono">selected concept</text>
+        <path d="M20 80h58M222 80h58" stroke="#3D5178" strokeWidth="2" strokeDasharray="4 3" />
+        <text x="48" y="69" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="JetBrains Mono">prerequisites</text>
+        <text x="252" y="69" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="JetBrains Mono">applications</text>
       </svg>
     </div>
   );
@@ -117,6 +199,9 @@ export default function UniversalExplainer() {
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
   const [contextSnippet, setContextSnippet] = useState<string>('');
   const { lensMode } = useProgress();
+  const reduceMotion = useReducedMotion();
+  const drawerRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -173,6 +258,37 @@ export default function UniversalExplainer() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!activeQuery) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab' || !drawerRef.current) return;
+      const focusable = Array.from(
+        drawerRef.current.querySelectorAll(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      ) as HTMLElement[];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleTab);
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+    return () => {
+      document.removeEventListener('keydown', handleTab);
+      document.body.style.overflow = '';
+      previouslyFocused?.focus();
+    };
+  }, [activeQuery]);
+
   const openExplainer = (query: string) => {
     setActiveQuery(query);
     if (selection) {
@@ -226,10 +342,14 @@ export default function UniversalExplainer() {
         {activeQuery && (
           <div id="universal-explain-drawer" className="fixed inset-0 z-[10000] flex items-center justify-end bg-black/60 backdrop-blur-sm">
             <motion.aside
-              initial={{ x: '100%' }}
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="universal-explainer-title"
+              initial={reduceMotion ? false : { x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
+              transition={reduceMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
               className="relative flex h-full w-full max-w-lg flex-col border-l border-ink-600 bg-ink-900 p-6 shadow-2xl overflow-y-auto"
             >
               {/* Header */}
@@ -240,13 +360,15 @@ export default function UniversalExplainer() {
                   </div>
                   <div>
                     <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">// CONTEXTUAL EXPLAINER</span>
-                    <h2 className="font-display text-xl font-bold text-text-hi">&ldquo;{activeQuery}&rdquo;</h2>
+                    <h2 id="universal-explainer-title" className="font-display text-xl font-bold text-text-hi">&ldquo;{activeQuery}&rdquo;</h2>
                   </div>
                 </div>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={() => setActiveQuery(null)}
                   className="rounded-lg p-2 text-text-low hover:bg-ink-800 hover:text-text-hi"
+                  aria-label="Close concept explanation"
                 >
                   <X className="h-5 w-5" />
                 </button>

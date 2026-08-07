@@ -1,4 +1,5 @@
 import { asset } from '@/lib/asset';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -819,6 +820,8 @@ function EntryPoints() {
 /* ------------------------------------------------------------------ */
 
 export default function Home() {
+  useDocumentTitle('Topological Quantum Error Correction Atlas');
+
   return (
     <MotionConfig reducedMotion="user">
       <Hero />

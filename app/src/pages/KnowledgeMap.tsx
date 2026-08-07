@@ -1,4 +1,5 @@
 import { asset } from '@/lib/asset';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import {
   useCallback,
   useEffect,
@@ -1089,6 +1090,7 @@ function BottomCta() {
 /* ------------------------------------------------------------------ */
 
 export default function KnowledgeMap() {
+  useDocumentTitle('Interactive TQEC Knowledge Map');
   const { understoodCount, resetProgress } = useProgress();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<'tree' | 'list'>(() =>

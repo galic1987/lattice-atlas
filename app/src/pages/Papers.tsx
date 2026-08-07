@@ -1,4 +1,5 @@
 import { asset } from '@/lib/asset';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -570,6 +571,7 @@ const DIFF_OPTIONS: { value: DiffFilter; label: string }[] = [
 ];
 
 export default function Papers() {
+  useDocumentTitle('Seminal TQEC Research Papers & Canon');
   const { readCount } = useProgress();
   const reduceMotion = useReducedMotion();
   const location = useLocation();

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -739,6 +740,7 @@ const CHALLENGES: LabChallenge[] = [
 const CHALLENGES_KEY = 'lattice-atlas-lab-challenges';
 
 export default function SurfaceCodeLab() {
+  useDocumentTitle('Surface Code Interactive Lab & 3D Viewer');
   const [d, setD] = useState(5);
   const lat = useMemo(() => buildLattice(d), [d]);
   const [errors, setErrors] = useState<Pauli[]>(() => new Array<Pauli>(25).fill(0));
