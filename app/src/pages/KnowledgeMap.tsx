@@ -39,7 +39,7 @@ import { useProgress } from '@/store/progress';
 import SelfCheck from '@/components/SelfCheck';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
-import { Intuition, Misconceptions } from '@/components/TopicInsights';
+import { Intuition } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import TopicLensInsight from '@/components/TopicLensInsight';
 import Expandable3B1BCard from '@/components/Expandable3B1BCard';
@@ -926,8 +926,6 @@ function TopicDrawer({
                     <GlossaryText text={topic.detail} />
                   </p>
                 </DrawerSection>
-
-                <Misconceptions topicId={topic.id} />
 
                 <SelfCheck topicId={topic.id} />
 

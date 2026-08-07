@@ -47,7 +47,7 @@ import SelfCheck from '@/components/SelfCheck';
 import Diagnostic from '@/components/Diagnostic';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
-import { Intuition, Misconceptions } from '@/components/TopicInsights';
+import { Intuition } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import ActChapterCard from '@/components/ActChapterCard';
 import TopicLensInsight from '@/components/TopicLensInsight';
@@ -296,7 +296,6 @@ function TopicDrawer({
                 <GlossaryText text={topic.detail} />
               </p>
 
-              <Misconceptions topicId={topic.id} />
 
               <TopicLensInsight topicId={topic.id} />
 
