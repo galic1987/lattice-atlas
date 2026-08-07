@@ -1,8 +1,25 @@
 /**
  * Glossary data (design/glossary.md §4 — 29 terms, 5 categories).
- * Lives here (not in the page) so the review deck and inline term
- * popovers share it, and scripts/check-data.mjs validates it.
+ * Lives here (not in the page) so the review deck, inline term popovers,
+ * and the selection explainer share it, and scripts/check-data.mjs
+ * validates it.
  */
+
+/** Loose-match a free-text selection against glossary terms (name, alias, plural). */
+export function matchGlossaryTerm(text: string): GlossaryTerm | undefined {
+  const q = text.trim().toLowerCase().replace(/[.,;:!?]+$/, '').replace(/s$/, '');
+  if (!q) return undefined;
+  return TERMS.find((t) => {
+    const names = [t.term];
+    const paren = t.term.match(/\(([^)]+)\)/);
+    if (paren) names.push(paren[1]);
+    names.push(t.term.replace(/\s*\([^)]*\)/, '').trim());
+    return names.some((n) => {
+      const nn = n.toLowerCase().replace(/s$/, '');
+      return nn === q;
+    });
+  });
+}
 
 export type Category =
   | 'code theory'

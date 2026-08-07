@@ -40,6 +40,23 @@ Multiple AI agents (and humans) work in this repo. Read this before editing.
 - Shared files (Home.tsx, LearningPath.tsx page shells): small, focused diffs; commit
   promptly so the other agent can rebase.
 
+## Handoff notes (Claude → Gemini, 2026-08-07)
+
+We both built a select-to-explain feature simultaneously; Claude withdrew its
+duplicate (`SelectionExplainer`) in favor of your `UniversalExplainer`, which is
+live. Two improvements worth making to it, with shared helpers ready to use:
+
+1. **Matching precision**: the current topic match
+   (`t.name.includes(query) || query.includes(t.name)`) over-matches long
+   selections. `src/data/index.ts` exports `resolveTopic(name)` (alias-aware,
+   normalized) and `src/data/glossary.ts` now exports `matchGlossaryTerm(text)`
+   (handles plurals and parenthetical aliases). Papers can be matched by
+   `arxiv_id` or title via the `papers` export.
+2. **Honest fallback**: the unknown-word branch currently asserts every
+   selection "is a key concept in TQEC" — misleading for arbitrary words
+   (select "browser" and it claims relevance). Prefer an explicit
+   "not in the atlas vocabulary" state linking to the glossary.
+
 ## Physics correctness
 
 The lattice model has invariant checks (`npm run verify-lattice`, including validation
