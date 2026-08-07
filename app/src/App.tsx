@@ -11,6 +11,8 @@ const FieldToday = lazy(() => import('@/pages/FieldToday'));
 const Glossary = lazy(() => import('@/pages/Glossary'));
 const Review = lazy(() => import('@/pages/Review'));
 const DecoderDuel = lazy(() => import('@/pages/DecoderDuel'));
+const FoundationsLab = lazy(() => import('@/pages/FoundationsLab'));
+const Altitudes = lazy(() => import('@/pages/Altitudes'));
 
 function PageFallback() {
   return (
@@ -37,6 +39,8 @@ export default function App() {
         <Route path="glossary" element={lazyPage(<Glossary />)} />
         <Route path="review" element={lazyPage(<Review />)} />
         <Route path="duel" element={lazyPage(<DecoderDuel />)} />
+        <Route path="foundations" element={lazyPage(<FoundationsLab />)} />
+        <Route path="altitudes" element={lazyPage(<Altitudes />)} />
         <Route path="*" element={lazyPage(<Home />)} />
       </Route>
     </Routes>
