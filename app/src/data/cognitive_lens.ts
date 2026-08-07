@@ -242,7 +242,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
       analogyTitle: '2D Grid Fabric & Plaquette Smoke Detectors',
       description:
         'Imagine a woven grid on a donut surface. Cross-hair star detectors check vertex intersections, while square plaquette detectors monitor tile windows.',
-      takeaway: 'Star checks detect bit flips (X); plaquette checks detect phase flips (Z).',
+      takeaway: 'X-type star checks detect phase flips (Z); Z-type plaquette checks detect bit flips (X).',
     },
     rigor: {
       formalismTitle: 'Toric Code Hamiltonian & Star/Plaquette Generators',
@@ -316,7 +316,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     },
     rigor: {
       formalismTitle: 'Boundary Patch Merging, Splitting & Parity Measurements M_XX, M_ZZ',
-      mathExpression: 'M_{ZZ} = ∏_{i ∈ boundary} Z_i Z_{i+1},  Code(d) ⊕ Code(d) → Code(2d)',
+      mathExpression: 'M_{ZZ} = L_{Z,1} · L_{Z,2}  (joint parity measured; code distance d preserved)',
       description:
         'Merging two planar code patches measures joint logical operators L_{Z,1} L_{Z,2} or L_{X,1} L_{X,2} in d clock cycles without moving physical qubits.',
     },
@@ -329,7 +329,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
       takeaway: 'Measurement-based QEC replaces active gate execution with single-qubit measurements.',
     },
     rigor: {
-      formalismTitle: '3D Raussendorf-Harrington-Gottesman (RHG) Cluster State',
+      formalismTitle: '3D Raussendorf-Harrington-Goyal (RHG) Cluster State',
       mathExpression: '|C⟩ = ∏_{(u,v) ∈ E} CZ_{uv} |+⟩^⊗V,  M_X, M_Z',
       description:
         'Measurement-based quantum computation (MBQC) on 3D RHG cluster state performs fault-tolerant quantum computation via single-qubit Pauli measurements.',
@@ -344,7 +344,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     },
     rigor: {
       formalismTitle: 'Bravyi-Kitaev 15-to-1 Reed-Muller Distillation Routine',
-      mathExpression: '|T⟩ = cos(π/8)|0⟩ + sin(π/8)|1⟩,  ϵ_out = 35 ϵ_in^3',
+      mathExpression: '|T⟩ = (|0⟩ + e^(iπ/4)|1⟩)/√2,  ϵ_out ≈ 35 ϵ_in^3',
       description:
         '15-to-1 distillation gadget uses the [[15, 1, 3]] Reed-Muller code to measure error syndromes on noisy input |T⟩ states, suppressing error rate cubicly.',
     },
@@ -371,7 +371,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
       takeaway: 'Diagrammatic spider rules simplify quantum circuits visually.',
     },
     rigor: {
-      formalismTitle: 'Rigged Symmetric Monoidal Category & Spider Generators',
+      formalismTitle: '†-Compact (Dagger-Compact) Symmetric Monoidal Category & Spider Generators',
       mathExpression: 'Z_n^m(α) : |0⟩^⊗n ⟨0|^⊗m + e^(iα)|1⟩^⊗n ⟨1|^⊗m',
       description:
         'ZX-calculus is a rigorous graphical language for quantum computing based on green (Z) and red (X) spiders satisfying rewiring graph transformation rules.',
@@ -400,7 +400,7 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
     },
     rigor: {
       formalismTitle: 'FPGA Stream Processing & Low-Latency Pipeline Architectures',
-      mathExpression: 'Latency < t_{coherence} ≈ 1 µs,  Throughput > 10^6 syndromes/sec',
+      mathExpression: 'Latency < t_{cycle} ≈ 1 µs  (backlog constraint),  Throughput > 10^6 syndromes/sec',
       description:
         'Hardware control stacks deploy streaming decoders on FPGAs/ASICs to achieve sub-microsecond syndrome processing and feed-forward corrections.',
     },
@@ -455,10 +455,10 @@ export const TOPIC_COGNITIVE_LENS: Record<string, TopicCognitiveLens> = {
       takeaway: 'Real physical hardware has officially proven logical error suppression in labs.',
     },
     rigor: {
-      formalismTitle: 'Experimental Logical Qubit Lifetime Milestones (Google, Quantinuum, IBM)',
-      mathExpression: 'Λ = Λ_{logical} / Λ_{physical} < 1,  P_L(d=5) < P_L(d=3)',
+      formalismTitle: 'Experimental Logical Qubit Lifetime Milestones (Google Willow, Quantinuum, Harvard/QuEra)',
+      mathExpression: 'Λ = ε_L(d) / ε_L(d+2) > 1  (Willow: Λ ≈ 2.14),  P_L(d=5) < P_L(d=3)',
       description:
-        'Landmark physical experiments (Google Sycamore, Quantinuum H-series, Harvard/QuEra) demonstrate logical error suppression with d=3 and d=5 surface/color codes.',
+        'Landmark physical experiments (Google Willow, Quantinuum H-series, Harvard/QuEra) demonstrate logical error suppression with d=3 and d=5 surface/color codes.',
     },
   },
 };

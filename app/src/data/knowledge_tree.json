@@ -292,12 +292,12 @@
     "name": "Decoding: Minimum-Weight Perfect Matching & the Threshold",
     "tier": 5,
     "short": "Decoding turns a syndrome pattern into a most-likely error correction; for the surface code this maps to minimum-weight perfect matching on a graph, the algorithm behind the famous ~1% threshold.",
-    "detail": "A surface-code syndrome is a set of defect locations in a 2D (space) or 3D (space-time) graph. Decoding means finding an error chain consistent with those defects and topologically trivial relative to the true error. Because the code is CSS, X and Z syndromes decode independently as two matching problems. Minimum-weight perfect matching (MWPM, via Edmonds' blossom algorithm) pairs defects minimizing total chain length, approximating the most likely error. Dennis et al. showed this yields a threshold near 10.3% for phenomenological noise and ~1% for circuit-level noise. Matching is not exact maximum-likelihood (which is #P-hard). Degeneracy, correlations, and finite-size effects all matter, motivating the frontier topics of correlated and fast decoders. Every experimental claim of 'below threshold' is ultimately a statement about logical error rates under a specified decoder.",
+    "detail": "A surface-code syndrome is a set of defect locations in a 2D (space) or 3D (space-time) graph. Decoding means finding an error chain consistent with those defects and topologically trivial relative to the true error. Because the code is CSS, X and Z syndromes decode independently as two matching problems. Minimum-weight perfect matching (MWPM, via Edmonds' blossom algorithm) pairs defects minimizing total chain length, approximating the most likely error. Dennis et al. showed a threshold near 10.3% for code-capacity noise (perfect measurements), around 3% for phenomenological noise (noisy measurements), and ~1% for circuit-level noise. Matching is not exact maximum-likelihood (which is #P-hard). Degeneracy, correlations, and finite-size effects all matter, motivating the frontier topics of correlated and fast decoders. Every experimental claim of 'below threshold' is ultimately a statement about logical error rates under a specified decoder.",
     "key_points": [
       "Decoding = finding a probable error chain with the observed syndrome endpoints",
       "MWPM: pair defects with minimum total graph distance using Edmonds' blossom algorithm",
       "Space-time decoding: measurement errors become temporal edges in the 3D matching graph",
-      "Thresholds: ~10.3% (code capacity), ~1% (phenomenological), ~0.5-1% (circuit level)",
+      "Thresholds: ~10.3% (code capacity), ~3% (phenomenological), ~0.5-1% (circuit level)",
       "MWPM approximates, not equals, maximum likelihood; degeneracy and correlated noise are its blind spots"
     ],
     "depends_on": [
@@ -350,7 +350,7 @@
     "resources": [
       "Horsman, Fowler, Devitt & Van Meter, 'Surface code quantum computing by lattice surgery', arXiv:1111.4022",
       "Daniel Litinski, 'A Game of Surface Codes', arXiv:1808.02892",
-      "Litinski, 'Magic State Distillation: Not as Costly as You Think', arXiv:1905.08916"
+      "Litinski, 'Magic State Distillation: Not as Costly as You Think', arXiv:1905.06903"
     ]
   },
   {
@@ -395,7 +395,7 @@
     ],
     "resources": [
       "Bravyi & Kitaev, 'Universal quantum computation with ideal Clifford gates and noisy ancillas', arXiv:quant-ph/0403025",
-      "Daniel Litinski, arXiv:1905.08916",
+      "Daniel Litinski, arXiv:1905.06903",
       "Gidney & Ekerå, 'How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits', arXiv:1905.09749"
     ]
   },
