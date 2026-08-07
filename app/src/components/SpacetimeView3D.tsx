@@ -280,9 +280,22 @@ function WebGLSpacetimeCanvas({
     return () => {
       window.removeEventListener('resize', handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (rendererRef.current && rendererRef.current.domElement) {
-        container.removeChild(rendererRef.current.domElement);
-        rendererRef.current.dispose();
+      // Dispose every GPU resource this scene allocated. renderer.dispose()
+      // alone leaves geometries/materials on the GPU, and recreating the
+      // renderer each re-render (without forceContextLoss) can exhaust the
+      // browser's ~16 WebGL context cap. Free both here.
+      scene.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+        else if (mat) mat.dispose();
+      });
+      scene.clear();
+      renderer.dispose();
+      renderer.forceContextLoss();
+      if (renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement);
       }
     };
   }, [lat, roundsData, result, currentStep, layerSpacing, selectedRound]);
