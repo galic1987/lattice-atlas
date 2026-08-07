@@ -70,7 +70,7 @@ export default function TopicLensInsight({ topicId }: { topicId: string }) {
                 <h4 className="font-display text-sm font-semibold text-text-hi">
                   {data.rigor.formalismTitle}
                 </h4>
-                <div className="mt-1.5 inline-block rounded bg-ink-950 px-2.5 py-1 font-mono text-[12px] text-magic border border-magic/30">
+                <div className="mt-1.5 block max-w-full overflow-x-auto rounded bg-ink-950 px-2.5 py-1 font-mono text-[12px] text-magic border border-magic/30">
                   {data.rigor.mathExpression}
                 </div>
                 <p className="mt-2 text-text-mid leading-relaxed">{data.rigor.description}</p>

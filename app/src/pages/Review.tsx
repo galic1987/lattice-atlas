@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, BookOpen, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import { CATEGORY_COLORS, TERMS, type GlossaryTerm } from '@/data/glossary';
 import { useProgress } from '@/store/progress';
+import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
 /**
  * Spaced review of glossary terms. Cards unlock as their related topics
@@ -40,6 +41,7 @@ function loadRecords(): Record<string, ReviewRecord> {
 const TERM_BY_SLUG = new Map(TERMS.map((t) => [t.slug, t]));
 
 export default function Review() {
+  useDocumentTitle('Daily Review');
   const { isUnderstood, understoodCount } = useProgress();
   const [records, setRecords] = useState<Record<string, ReviewRecord>>(loadRecords);
 

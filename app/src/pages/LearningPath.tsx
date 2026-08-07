@@ -460,7 +460,7 @@ function StepCard({
       }}
     >
       <div className="grid gap-6 md:grid-cols-[1fr_200px]">
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-[13px] text-text-low">
             STEP {String(index + 1).padStart(2, '0')}
             {isCurrent && !done && (
@@ -506,7 +506,7 @@ function StepCard({
           )}
         </div>
 
-        <div className="md:border-l md:border-ink-700 md:pl-5">
+        <div className="min-w-0 md:border-l md:border-ink-700 md:pl-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-star">
             Unlocks
           </p>

@@ -172,7 +172,7 @@ export default function Layout() {
   const [shareOpen, setShareOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen flex-col bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
       <a
         href="#main-content"
         className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-lg bg-plaquette px-4 py-2 font-semibold text-ink-950 transition-transform focus:translate-y-0"
