@@ -26,6 +26,9 @@ export interface AltitudeConcept {
   id: string;
   label: string;
   title: string;
+  /** Optional banner image in public/ (see design/art-directions-altitudes.md). */
+  banner?: string;
+  bannerAlt?: string;
   levels: AltitudeLevel[];
   proLinks: AltitudeLink[];
 }
