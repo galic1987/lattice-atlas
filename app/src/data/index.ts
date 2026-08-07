@@ -205,18 +205,50 @@ if (import.meta.env.DEV) {
 }
 
 const ARXIV_RE = /arXiv:([a-z-]+\/\d{7}|\d{4}\.\d{4,5})(v\d+)?/i;
+const URL_RE = /(https?:\/\/[^\s)]+)/i;
+const YOUTUBE_ID_RE = /(?:youtube\.com\/(?:watch\?v=|playlist\?list=)|youtu\.be\/)([a-zA-Z0-9_-]+)/i;
 
-/** Parse a citation string into a display title, arXiv link (if any), and type tag. */
-export function parseResource(raw: string): { title: string; link: string | null; tag: string } {
-  const m = raw.match(ARXIV_RE);
+export interface ParsedResource {
+  title: string;
+  link: string | null;
+  tag: string;
+  is3B1B: boolean;
+  youtubeId: string | null;
+  isPlaylist: boolean;
+}
+
+/** Parse a citation string into a display title, link, tag, and 3Blue1Brown expandable data. */
+export function parseResource(raw: string): ParsedResource {
+  const mArxiv = raw.match(ARXIV_RE);
+  const mUrl = raw.match(URL_RE);
+  const mYt = raw.match(YOUTUBE_ID_RE);
+  const is3B1B = /3blue1brown|3b1b/i.test(raw);
+
   let tag = 'REFERENCE';
-  if (m) tag = 'PAPER';
+  if (mArxiv) tag = 'PAPER';
+  else if (is3B1B) tag = '3BLUE1BROWN VIDEO';
   else if (/video|youtube/i.test(raw)) tag = 'VIDEO';
   else if (/lecture/i.test(raw)) tag = 'LECTURE NOTES';
   else if (/textbook|book|chapter|nielsen|preskill notes/i.test(raw)) tag = 'TEXTBOOK';
+
+  let link: string | null = null;
+  if (mArxiv) {
+    link = `https://arxiv.org/abs/${mArxiv[1]}`;
+  } else if (mUrl) {
+    link = mUrl[1];
+  } else if (is3B1B) {
+    link = 'https://www.3blue1brown.com/topics/linear-algebra';
+  }
+
+  // Clean title by removing trailing URL parens if present
+  const title = raw.replace(/\s*\([^)]*https?:\/\/[^)]*\)/gi, '').trim();
+
   return {
-    title: raw,
-    link: m ? `https://arxiv.org/abs/${m[1]}` : null,
+    title,
+    link,
     tag,
+    is3B1B,
+    youtubeId: mYt ? mYt[1] : null,
+    isPlaylist: raw.includes('list='),
   };
 }

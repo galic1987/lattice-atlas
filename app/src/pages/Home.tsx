@@ -19,7 +19,6 @@ import {
   Telescope,
 } from 'lucide-react';
 import InteractiveTour from '@/components/InteractiveTour';
-import QuantumArcade from '@/components/QuantumArcade';
 import {
   papers,
   tierColors,
@@ -69,27 +68,47 @@ function SplitLine({
   delay: number;
   className?: string;
 }) {
+  const words = text.trim().split(/\s+/);
+  const wordOffsets = words.reduce<number[]>((acc, _, idx) => {
+    const prev = idx === 0 ? 0 : acc[idx - 1] + words[idx - 1].length + 1;
+    acc.push(prev);
+    return acc;
+  }, []);
+
   return (
-    <span className={`block ${className}`} aria-label={text} role="text">
-      {text.split('').map((c, i) => (
-        <motion.span
-          key={i}
-          aria-hidden
-          className="inline-block"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: delay + i * 0.02, duration: 0.7, ease: EASE_OUT_EXPO }}
-        >
-          {c === ' ' ? ' ' : c}
-        </motion.span>
-      ))}
+    <span className={`block ${className}`}>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden>
+        {words.map((word, wordIndex) => {
+          const start = wordOffsets[wordIndex];
+          return (
+            <span key={`${word}-${wordIndex}`} className="inline-block whitespace-nowrap">
+              {word.split('').map((character, characterIndex) => (
+                <motion.span
+                  key={`${character}-${characterIndex}`}
+                  className="inline-block"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: delay + (start + characterIndex) * 0.02,
+                    duration: 0.7,
+                    ease: EASE_OUT_EXPO,
+                  }}
+                >
+                  {character}
+                </motion.span>
+              ))}
+              {wordIndex < words.length - 1 && ' '}
+            </span>
+          );
+        })}
+      </span>
     </span>
   );
 }
 
 function Hero() {
   const [tourOpen, setTourOpen] = useState(false);
-  const [arcadeOpen, setArcadeOpen] = useState(false);
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
@@ -122,9 +141,9 @@ function Hero() {
         <h1 className="mt-6 font-display text-[42px] font-bold leading-[1.02] tracking-[-0.02em] text-text-hi md:text-display-xl">
           <SplitLine text="Quantum information," delay={0.3} />
           <span className="block">
-            <SplitLine text="woven into " delay={0.72} />
+            <SplitLine text="woven into" delay={0.72} />
             <motion.span
-              className="text-gradient-cyan-violet -mt-[0.15em] block md:mt-0 md:inline"
+              className="text-gradient-cyan-violet -mt-[0.15em] block md:ml-[0.22em] md:mt-0 md:inline"
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.72 + 'woven into '.length * 0.02, duration: 0.7, ease: EASE_OUT_EXPO }}
@@ -152,8 +171,8 @@ function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.5, duration: 0.4, ease: EASE_OUT_EXPO }}
           >
-            <Link to="/path" className="btn-primary">
-              Start the learning path <ArrowRight className="h-4 w-4" />
+            <Link to="/foundations" className="btn-primary">
+              Start from zero <ArrowRight className="h-4 w-4" />
             </Link>
           </motion.div>
           <motion.div
@@ -161,8 +180,8 @@ function Hero() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.6, duration: 0.4, ease: EASE_OUT_EXPO }}
           >
-            <Link to="/map" className="btn-secondary">
-              Explore the knowledge map
+            <Link to="/path" className="btn-secondary">
+              I know the basics
             </Link>
           </motion.div>
 
@@ -181,24 +200,9 @@ function Hero() {
             </button>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.8, duration: 0.4, ease: EASE_OUT_EXPO }}
-          >
-            <button
-              type="button"
-              onClick={() => setArcadeOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-star/50 bg-star/10 px-5 py-3 font-display text-sm font-semibold text-star transition-all duration-200 hover:border-star hover:bg-star/20"
-            >
-              <Gamepad2 className="h-4 w-4 text-star" />
-              Quantum Arcade Games
-            </button>
-          </motion.div>
         </div>
 
         <InteractiveTour isOpen={tourOpen} onClose={() => setTourOpen(false)} />
-        <QuantumArcade isOpen={arcadeOpen} onClose={() => setArcadeOpen(false)} />
 
         <motion.p
           className="mt-16 font-mono text-[13px] text-text-low md:absolute md:bottom-10 md:right-8 md:mt-0"
@@ -686,6 +690,24 @@ function EntryPoints() {
 
   const cards = [
     {
+      icon: Sparkles,
+      color: '#F5B83D',
+      title: 'Waves to Qubits',
+      body: 'Build quantum intuition from tangible wave and compass experiments, then translate each picture into the mathematics it represents.',
+      cta: 'Start from zero',
+      to: '/foundations',
+      stat: null,
+    },
+    {
+      icon: Gamepad2,
+      color: '#FB7185',
+      title: 'Decoder Duel',
+      body: 'Predict syndrome patterns, repair error chains, and compare your correction with a decoder in a scored surface-code challenge.',
+      cta: 'Play the challenge',
+      to: '/duel',
+      stat: null,
+    },
+    {
       icon: MapIcon,
       color: '#22D3EE',
       title: 'The Map',
@@ -743,7 +765,7 @@ function EntryPoints() {
       </motion.div>
 
       <motion.div
-        className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4"
+        className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3"
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.2 }}

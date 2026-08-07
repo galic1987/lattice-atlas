@@ -16,7 +16,7 @@
     "resources": [
       "Nielsen & Chuang, 'Quantum Computation and Quantum Information', Chapter 2",
       "Gilbert Strang, 'Introduction to Linear Algebra'",
-      "3Blue1Brown 'Essence of Linear Algebra' video series"
+      "3Blue1Brown 'Essence of Linear Algebra' video series (https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab)"
     ]
   },
   {
@@ -37,7 +37,8 @@
     ],
     "resources": [
       "Nielsen & Chuang, Sections 1.2 and 2.1",
-      "Andy Matuschak & Michael Nielsen, 'Quantum Country' essay 1"
+      "Andy Matuschak & Michael Nielsen, 'Quantum Country' essay 1",
+      "3Blue1Brown 'Complex Number Transformations & Euler Formula' (https://www.youtube.com/watch?v=mvmuCPvBiWQ)"
     ]
   },
   {

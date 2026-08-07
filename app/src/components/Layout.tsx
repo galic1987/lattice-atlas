@@ -1,21 +1,22 @@
 import { asset } from '@/lib/asset';
 import { useEffect, useState } from 'react';
 import { NavLink, Link, Outlet } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, Share2, X } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Home' },
-  { to: '/map', label: 'Map' },
-  { to: '/path', label: 'Path' },
-  { to: '/lab', label: 'Lab' },
-  { to: '/duel', label: 'Duel' },
+  { to: '/foundations', label: 'Start', ariaLabel: 'Start with quantum foundations' },
+  { to: '/map', label: 'Map', ariaLabel: 'Knowledge map' },
+  { to: '/path', label: 'Path', ariaLabel: 'Learning path' },
+  { to: '/lab', label: 'Lab', ariaLabel: 'Surface code lab' },
+  { to: '/duel', label: 'Duel', ariaLabel: 'Decoder Duel game' },
   { to: '/papers', label: 'Papers' },
-  { to: '/field-today', label: 'Field Today' },
+  { to: '/field-today', label: 'Frontier', ariaLabel: 'Field today' },
   { to: '/glossary', label: 'Glossary' },
+  { to: '/review', label: 'Review', ariaLabel: 'Daily spaced review' },
 ] as const;
 
 function Logo() {
@@ -35,7 +36,7 @@ function Logo() {
 
 function ProgressPill({ onShare }: { onShare: () => void }) {
   const { understoodCount } = useProgress();
-  const pct = Math.round((understoodCount / topics.length) * 100);
+  const pct = Math.max(0, Math.min(100, Math.round((understoodCount / topics.length) * 100)));
   const filled = Math.round(pct / 20);
   return (
     <div className="hidden items-center gap-2 sm:flex">
@@ -52,7 +53,7 @@ function ProgressPill({ onShare }: { onShare: () => void }) {
         onClick={onShare}
         className="inline-flex items-center gap-1 rounded-full border border-plaquette/50 bg-plaquette/10 px-3 py-1 font-mono text-xs font-semibold text-plaquette transition-transform hover:scale-105"
       >
-        🏆 Share Score
+        <Share2 className="h-3 w-3" aria-hidden /> Share progress
       </button>
     </div>
   );
@@ -60,14 +61,15 @@ function ProgressPill({ onShare }: { onShare: () => void }) {
 
 function DesktopNav() {
   return (
-    <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-      {NAV_ITEMS.map(({ to, label }) => (
+    <nav className="hidden items-center lg:flex" aria-label="Main">
+      {NAV_ITEMS.map(({ to, label, ...item }) => (
         <NavLink
           key={to}
           to={to}
-          end={to === '/'}
+          end={(to as string) === '/'}
+          aria-label={'ariaLabel' in item ? item.ariaLabel : undefined}
           className={({ isActive }) =>
-            `relative px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+            `relative px-2 py-2 text-sm font-medium transition-colors duration-200 ${
               isActive ? 'text-plaquette' : 'text-text-mid hover:text-text-hi'
             }`
           }
@@ -77,8 +79,8 @@ function DesktopNav() {
               {label}
               <span
                 className={`absolute inset-x-3 -bottom-[1px] h-0.5 rounded-full bg-plaquette transition-opacity duration-200 ${
-                  isActive ? 'opacity-100' : 'opacity-0'
-                }`}
+                    isActive ? 'opacity-100' : 'opacity-0'
+                  }`}
               />
             </>
           )}
@@ -104,7 +106,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 bg-ink-950/[0.98] md:hidden">
+    <div className="fixed inset-0 z-50 bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
       <div className="flex h-16 items-center justify-between px-6">
         <Logo />
         <button
@@ -117,11 +119,12 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
         </button>
       </div>
       <nav className="flex flex-col gap-2 px-6 pt-10" aria-label="Main">
-        {NAV_ITEMS.map(({ to, label }, i) => (
+        {NAV_ITEMS.map(({ to, label, ...item }, i) => (
           <NavLink
             key={to}
             to={to}
-            end={to === '/'}
+            end={(to as string) === '/'}
+            aria-label={'ariaLabel' in item ? item.ariaLabel : undefined}
             onClick={onClose}
             className={({ isActive }) =>
               `flex items-baseline gap-4 py-2 font-display text-[28px] font-semibold transition-colors duration-200 ${
@@ -146,6 +149,12 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
+      <a
+        href="#main-content"
+        className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-lg bg-plaquette px-4 py-2 font-semibold text-ink-950 transition-transform focus:translate-y-0"
+      >
+        Skip to content
+      </a>
       <UniversalExplainer />
       <ShareableScoreCard isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
@@ -158,7 +167,7 @@ export default function Layout() {
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="rounded-lg p-2 text-text-mid transition-colors hover:text-text-hi md:hidden"
+              className="rounded-lg p-2 text-text-mid transition-colors hover:text-text-hi lg:hidden"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -168,7 +177,7 @@ export default function Layout() {
 
       <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      <main className="flex-1 pt-16">
+      <main id="main-content" className="flex-1 pt-16">
         <Outlet />
       </main>
 

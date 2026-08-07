@@ -50,6 +50,7 @@ import { Intuition, Misconceptions } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import ActChapterCard from '@/components/ActChapterCard';
 import TopicLensInsight from '@/components/TopicLensInsight';
+import Expandable3B1BCard from '@/components/Expandable3B1BCard';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -350,6 +351,9 @@ function TopicDrawer({
                   <ul className="space-y-2">
                     {topic.resources.map((res) => {
                       const r = parseResource(res);
+                      if (r.is3B1B) {
+                        return <li key={res}><Expandable3B1BCard resource={r} /></li>;
+                      }
                       return (
                         <li key={res}>
                           {r.link ? (

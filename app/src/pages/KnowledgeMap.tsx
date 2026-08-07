@@ -41,6 +41,7 @@ import TopicNotes from '@/components/TopicNotes';
 import { Intuition, Misconceptions } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import TopicLensInsight from '@/components/TopicLensInsight';
+import Expandable3B1BCard from '@/components/Expandable3B1BCard';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -992,6 +993,9 @@ function TopicDrawer({
                     <div className="flex flex-col gap-3">
                       {topic.resources.map((raw, i) => {
                         const r = parseResource(raw);
+                        if (r.is3B1B) {
+                          return <Expandable3B1BCard key={i} resource={r} />;
+                        }
                         const inner = (
                           <>
                             <span className="font-mono text-[11px] uppercase tracking-wider text-text-low">
