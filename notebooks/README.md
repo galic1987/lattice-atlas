@@ -17,3 +17,5 @@ All notebook code is executed against the real libraries before being
 committed (see repo history); the hardware cells are validated on the Aer
 simulator with a thermal-relaxation noise model, and each notebook includes a
 dry-run cell so you never waste hardware minutes on a broken pipeline.
+
+PR flow verified end-to-end on 2026-08-07.
