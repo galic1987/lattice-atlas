@@ -8,7 +8,7 @@ import {
   useLocation,
   useNavigationType,
 } from 'react-router-dom';
-import { Menu, Share2, X, Bot } from 'lucide-react';
+import { Menu, Share2, X, BookOpen } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
@@ -288,12 +288,12 @@ export default function Layout() {
             <button
               type="button"
               onClick={() => setAiTutorOpen(true)}
-              title="Open TQEC AI Tutor"
-              aria-label="Open TQEC AI Tutor"
+              title="Open TQEC concept lookup"
+              aria-label="Open TQEC concept lookup"
               className="inline-flex items-center gap-1.5 rounded-full border border-plaquette/50 bg-plaquette/10 px-2.5 py-1 font-mono text-xs text-plaquette transition-colors hover:bg-plaquette/20"
             >
-              <Bot className="h-3.5 w-3.5" />
-              <span>AI Tutor</span>
+              <BookOpen className="h-3.5 w-3.5" />
+              <span>Concept Lookup</span>
             </button>
             <ProgressPill onShare={() => setShareOpen(true)} />
             <button
