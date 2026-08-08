@@ -1399,13 +1399,32 @@ export default function SurfaceCodeLab() {
 
             {/* decode */}
             <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
-              <p className="eyebrow mb-3">{'// DECODE'}</p>
-              <p className="font-mono text-[12px] leading-relaxed text-text-mid">
-                {errorCount} error{errorCount === 1 ? '' : 's'} ·{' '}
-                <span className={syndrome.size > 0 ? 'text-syndrome' : ''}>
-                  {syndrome.size} detection event{syndrome.size === 1 ? '' : 's'}
-                </span>
-              </p>
+              <p className="eyebrow mb-3">{'// DECODE & FAULT CLASSIFICATION'}</p>
+              
+              {/* Structured Fault & Event Separation */}
+              <div className="mb-4 space-y-2.5 font-mono text-xs">
+                <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2 border border-ink-700">
+                  <span className="text-text-mid flex items-center gap-1.5 font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-syndrome" /> 1. Input Faults:
+                  </span>
+                  <span className="text-text-hi font-bold">{errorCount} Pauli error{errorCount === 1 ? '' : 's'}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2 border border-ink-700">
+                  <span className="text-text-mid flex items-center gap-1.5 font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-magic" /> 2. Observed Events:
+                  </span>
+                  <span className="text-magic font-bold">{syndrome.size} detection event{syndrome.size === 1 ? '' : 's'}</span>
+                </div>
+                <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2 border border-ink-700">
+                  <span className="text-text-mid flex items-center gap-1.5 font-semibold">
+                    <span className="h-2 w-2 rounded-full bg-stabilizer" /> 3. Residual Faults:
+                  </span>
+                  <span className={result ? (result.success ? 'text-stabilizer font-bold' : 'text-syndrome font-bold') : 'text-text-low'}>
+                    {result ? (result.success ? '0 Logical Flips' : 'Logical Flip (Uncorrected)') : 'Pending Decode'}
+                  </span>
+                </div>
+              </div>
+
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"

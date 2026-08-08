@@ -144,7 +144,7 @@ export function generateRound(plan: RoundPlan, rng: () => number): DuelRound {
   throw new Error('could not generate a round with a visible syndrome');
 }
 
-export type RoundOutcome = 'clean' | 'heavy' | 'fail';
+export type RoundOutcome = 'clean' | 'assisted' | 'heavy' | 'fail';
 
 export interface Judgment {
   outcome: RoundOutcome;
@@ -153,22 +153,31 @@ export interface Judgment {
   logicalZ: boolean;
   guessWeight: number;
   points: number;
+  usedHint?: boolean;
 }
 
-export const POINTS: Record<RoundOutcome, number> = { clean: 15, heavy: 10, fail: 0 };
+export const POINTS: Record<RoundOutcome, number> = { clean: 15, assisted: 8, heavy: 10, fail: 0 };
+export const OUTCOME_EMOJI: Record<RoundOutcome, string> = { clean: '🟩', assisted: '🟨', heavy: '🟨', fail: '🟥' };
 export const DAILY_MAX_SCORE = DAILY_PLAN.length * POINTS.clean;
 
 /** Judge a submitted correction against the hidden truth. */
-export function judge(round: DuelRound, guess: Pauli[]): Judgment {
+export function judge(round: DuelRound, guess: Pauli[], usedHint: boolean = false): Judgment {
   const residual = round.hidden.map((e, q) => (e ^ guess[q]) as Pauli);
   const cleared = computeSyndrome(round.lat, residual).size === 0;
   const guessWeight = guess.filter((p) => p !== 0).length;
   if (!cleared) {
-    return { outcome: 'fail', cleared, logicalX: false, logicalZ: false, guessWeight, points: 0 };
+    return { outcome: 'fail', cleared, logicalX: false, logicalZ: false, guessWeight, points: 0, usedHint };
   }
   const flips = logicalFlips(round.lat, residual);
   const success = !flips.x && !flips.z;
-  const outcome: RoundOutcome = success ? (guessWeight <= round.parWeight ? 'clean' : 'heavy') : 'fail';
+  let outcome: RoundOutcome = 'fail';
+  if (success) {
+    if (usedHint) {
+      outcome = 'assisted';
+    } else {
+      outcome = guessWeight <= round.parWeight ? 'clean' : 'heavy';
+    }
+  }
   return {
     outcome,
     cleared,
@@ -176,14 +185,9 @@ export function judge(round: DuelRound, guess: Pauli[]): Judgment {
     logicalZ: flips.z,
     guessWeight,
     points: POINTS[outcome],
+    usedHint,
   };
 }
-
-export const OUTCOME_EMOJI: Record<RoundOutcome, string> = {
-  clean: '🟩',
-  heavy: '🟨',
-  fail: '🟥',
-};
 
 const compactPattern = (pattern: Pauli[]) => pattern
   .flatMap((pauli, qubit) => (pauli === 0 ? [] : [`${qubit}:${pauli}`]))

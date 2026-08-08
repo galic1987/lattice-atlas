@@ -2,6 +2,7 @@ import { Suspense, lazy, type ReactNode } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import AppErrorBoundary from '@/components/AppErrorBoundary';
+import ScrollToTop from '@/components/ScrollToTop';
 
 const Home = lazy(() => import('@/pages/Home'));
 const KnowledgeMap = lazy(() => import('@/pages/KnowledgeMap'));
@@ -34,6 +35,7 @@ export default function App() {
 
   return (
     <AppErrorBoundary resetKey={location.pathname}>
+      <ScrollToTop />
       <Routes location={location}>
         <Route element={<Layout />}>
           <Route index element={lazyPage(<Home />)} />
