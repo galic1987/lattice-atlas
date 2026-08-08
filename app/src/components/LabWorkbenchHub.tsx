@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
+import SpacetimeBraidWeaver from '@/components/SpacetimeBraidWeaver';
 import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 import StimUploader from '@/components/StimUploader';
 import MultiManifoldExplorer from '@/components/MultiManifoldExplorer';
@@ -224,13 +225,7 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'braid-3d' && (
           <div className="p-4">
-            <SpacetimeView3D
-              lat={defaultLattice}
-              errors={defaultErrors}
-              result={defaultResult}
-              currentStep={5}
-              p={0.01}
-            />
+            <SpacetimeBraidWeaver />
           </div>
         )}
 
