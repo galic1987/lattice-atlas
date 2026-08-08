@@ -36,6 +36,7 @@ import { topicById, shortName } from '@/data';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
 import WasmQuantumSandbox from '@/components/WasmQuantumSandbox';
 import TorusTopologyViewer from '@/components/TorusTopologyViewer';
+import GenusExplorer from '@/components/GenusExplorer';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -1675,6 +1676,21 @@ export default function SurfaceCodeLab() {
           </p>
         </div>
         <TorusTopologyViewer />
+
+        <div className="mt-8 mb-6">
+          <p className="eyebrow !text-star">{'// ONE STEP FURTHER'}</p>
+          <h2 className="mt-2 max-w-2xl font-display text-[26px] font-semibold leading-[1.15] text-text-hi md:text-[32px]">
+            Add a handle, add two logical qubits.
+          </h2>
+          <p className="mt-3 max-w-2xl leading-[1.7] text-text-mid">
+            The torus stores two logical qubits because it has one handle. Drill
+            more handles into the surface and the count climbs in lockstep: a
+            genus-g surface encodes k = 2g. Below the sphere, torus, and
+            multi-holed surfaces show exactly where those protected loops live —
+            and where the tidy formula stops.
+          </p>
+        </div>
+        <GenusExplorer />
       </section>
 
       {/* cross-links */}
