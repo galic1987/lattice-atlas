@@ -86,7 +86,7 @@ export default function TorusTopologyViewer() {
 
       {/* Description */}
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Kitaev’s original 1998 Toric Code embeds physical qubits on a 2D periodic lattice. Topologically, a closed periodic surface forms a <strong>Genus-1 Torus</strong>. Unlike planar surface codes (1 logical qubit), a Torus stores <strong>2 logical qubits</strong> in non-contractible 1-cycles ($\gamma_1, \gamma_2$) that wrap completely around the donut.
+        Kitaev’s original 1998 Toric Code embeds physical qubits on a 2D periodic lattice. Topologically, a closed periodic surface forms a <strong>Genus-1 Torus</strong>. Unlike planar surface codes (1 logical qubit), a Torus stores <strong>2 logical qubits</strong> in non-contractible 1-cycles (γ₁, γ₂) that wrap completely around the donut.
       </p>
 
       {/* 3D Torus Interactive WebGL / Canvas Container */}
@@ -95,7 +95,7 @@ export default function TorusTopologyViewer() {
         <div className="relative col-span-2 overflow-hidden rounded-xl border border-ink-700 bg-ink-950 p-4">
           <div className="flex items-center justify-between border-b border-ink-800 pb-2 font-mono text-[11px] text-text-low">
             <span className="flex items-center gap-1.5 text-star font-bold">
-              <Sparkles className="h-4 w-4" /> 3D Parametric Torus (R=80, r=35)
+              <Sparkles className="h-4 w-4" /> Torus Homology Schematic
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -224,7 +224,7 @@ export default function TorusTopologyViewer() {
               </div>
 
               <p className="text-[11px] leading-relaxed text-text-mid">
-                Any local error loop that does not wrap around the Torus can be continuously contracted to a point ($\partial e = 0$). It is equal to a product of stabilizer operators and leaves the logical qubit untouched!
+                Any local error loop that does not wrap around the Torus can be continuously contracted to a point (∂e = 0). It is equal to a product of stabilizer operators and leaves the logical qubit untouched!
               </p>
             </div>
           </div>
@@ -233,9 +233,9 @@ export default function TorusTopologyViewer() {
           <div className="rounded-xl border border-ink-700 bg-ink-950 p-4 flex-1 flex flex-col justify-between">
             <div>
               <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">HISTORICAL ORIGIN</span>
-              <h4 className="font-display text-sm font-bold text-text-hi mt-1">Kitaev (1998) Toric Code Paper</h4>
+              <h4 className="font-display text-sm font-bold text-text-hi mt-1">Kitaev (1997) Toric Code Paper</h4>
               <p className="mt-2 text-xs leading-relaxed text-text-mid">
-                A. Yu. Kitaev introduced topological quantum memory on 2D closed manifolds in <i>Annals of Physics</i> (1998).
+                A. Yu. Kitaev introduced topological quantum memory on 2D closed manifolds in “Fault-tolerant quantum computation by anyons” — posted to arXiv in 1997, published in <i>Annals of Physics</i> in 2003.
               </p>
             </div>
 

@@ -328,7 +328,8 @@ const EMPTY_DUEL_RECORD: DuelRecord = {
 };
 
 function validOutcomes(value: unknown): value is RoundOutcome[] {
-  return Array.isArray(value) && value.every((item) => item === 'clean' || item === 'heavy' || item === 'fail');
+  return Array.isArray(value)
+    && value.every((item) => item === 'clean' || item === 'heavy' || item === 'assisted' || item === 'fail');
 }
 
 function cleanDaily(value: unknown): Record<string, DailyDuelResult> {
