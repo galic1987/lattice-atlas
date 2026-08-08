@@ -8,12 +8,13 @@ import {
   useLocation,
   useNavigationType,
 } from 'react-router-dom';
-import { Menu, Share2, X } from 'lucide-react';
+import { Menu, Share2, X, Bot } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
 import SoundToggle from '@/components/SoundToggle';
+import AITutorDrawer from '@/components/AITutorDrawer';
 import { FOUNDATION_STAGE_IDS } from '@/lib/learningRecord';
 
 const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }> = [
@@ -225,6 +226,7 @@ function MobileNav({ open, onClose, onShare }: { open: boolean; onClose: () => v
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [aiTutorOpen, setAiTutorOpen] = useState(false);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
   const mainRef = useRef<HTMLElement>(null);
   const initialRoute = useRef(true);
@@ -274,12 +276,23 @@ export default function Layout() {
       </p>
       <UniversalExplainer />
       <ShareableScoreCard isOpen={shareOpen} onClose={() => setShareOpen(false)} />
+      <AITutorDrawer isOpen={aiTutorOpen} onClose={() => setAiTutorOpen(false)} />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
           <Logo />
           <div className="flex items-center gap-3">
             <DesktopNav />
             <SoundToggle />
+            <button
+              type="button"
+              onClick={() => setAiTutorOpen(true)}
+              title="Open TQEC AI Tutor"
+              aria-label="Open TQEC AI Tutor"
+              className="inline-flex items-center gap-1.5 rounded-full border border-plaquette/50 bg-plaquette/10 px-2.5 py-1 font-mono text-xs text-plaquette transition-colors hover:bg-plaquette/20"
+            >
+              <Bot className="h-3.5 w-3.5" />
+              <span>AI Tutor</span>
+            </button>
             <ProgressPill onShare={() => setShareOpen(true)} />
             <button
               type="button"

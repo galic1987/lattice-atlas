@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import StimUploader from '@/components/StimUploader';
+import MultiManifoldExplorer from '@/components/MultiManifoldExplorer';
 import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -1675,6 +1677,12 @@ export default function SurfaceCodeLab() {
           </p>
         </div>
         <TorusTopologyViewer />
+      </section>
+
+      {/* Custom Stim Circuit Upload & Multi-Manifold Topology Explorer */}
+      <section className="mx-auto max-w-7xl px-6 py-8 md:px-8 space-y-8">
+        <StimUploader />
+        <MultiManifoldExplorer />
       </section>
 
       {/* cross-links */}
