@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, X, Send, ArrowRight } from 'lucide-react';
+import { BookOpen, X, Send, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { resolveTopic } from '@/data';
 import { matchGlossaryTerm } from '@/data/glossary';
@@ -35,13 +35,16 @@ export default function AITutorDrawer({
     {
       id: 'welcome',
       sender: 'tutor',
-      text: 'Hello! I am your TQEC Pedagogical AI Tutor. Ask me anything about surface codes, lattice surgery, Stim simulations, or quantum threshold scaling!',
-      timestamp: 'Just now',
+      text: 'This is a deterministic concept lookup over the atlas’s own topic and glossary data — not a language model. Ask about a TQEC topic or term and it will pull that entry’s definition and link you into the map. If a phrase isn’t in the atlas, it will say so rather than guess.',
+      timestamp: 'Reference',
     },
   ]);
   const [inputText, setInputText] = useState(initialQuery);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Deterministic lookup: resolve the query against the atlas's own topic and
+  // glossary data first, then a small set of curated, fact-checked reference
+  // entries. If nothing matches, say so — never fabricate an answer.
   const generateAnswer = (query: string): ChatMessage => {
     const qLower = query.toLowerCase();
     const topicMatch = resolveTopic(query);
@@ -51,17 +54,17 @@ export default function AITutorDrawer({
     const matchedTopicId: string | undefined = topicMatch?.id;
 
     if (topicMatch) {
-      replyText = `**${topicMatch.name}** (Tier ${topicMatch.tier}): ${topicMatch.short}\n\n**Key Insight**: ${topicMatch.detail.slice(0, 220)}…`;
+      replyText = `${topicMatch.name} (Tier ${topicMatch.tier}): ${topicMatch.short}\n\n${topicMatch.detail.slice(0, 220)}…`;
     } else if (termMatch) {
-      replyText = `**${termMatch.term}**: ${termMatch.short}`;
+      replyText = `${termMatch.term}: ${termMatch.short}`;
     } else if (qLower.includes('willow') || qLower.includes('lambda')) {
-      replyText = 'Google Willow (*Nature* 638, 2024) achieved a suppressive Lambda factor of **Λ = 2.14 > 1.0** below threshold ($p = 0.3\\%$), proving exponential error suppression as code distance scales from $d=3$ to $d=5$ and $d=7$.';
+      replyText = 'Google Willow (Nature 638, 2024) reported a suppression factor Λ = 2.14 > 1 below threshold (p ≈ 0.3%): the logical error rate falls as the code distance grows from d=3 to d=5 to d=7.';
     } else if (qLower.includes('mwpm') || qLower.includes('matching')) {
-      replyText = 'Minimum Weight Perfect Matching (MWPM) pairs detection events ($S_i \\neq +1$) on a syndrome graph with minimum edge weight using Blossom’s algorithm (Edmonds 1965).';
+      replyText = 'Minimum-Weight Perfect Matching pairs detection events (checks that flipped to −1) on the syndrome graph with minimum total edge weight — classically via Edmonds’ Blossom algorithm (1965).';
     } else if (qLower.includes('qubit') || qLower.includes('49')) {
-      replyText = 'A distance-$d$ rotated surface code requires $N = d^2 + (d-1)^2$ total qubits ($d^2$ data qubits and $d^2 - 1$ syndrome ancilla qubits). For $d=5$, $N = 25 + 24 = 49$ qubits!';
+      replyText = 'A distance-d rotated surface code uses N = d² + (d−1)² physical qubits — d² data qubits plus d²−1 syndrome ancillas. For d=5 that is 25 + 24 = 49.';
     } else {
-      replyText = `That is a key concept in Topological Quantum Error Correction! In a 2D surface code, local physical noise is detected by commuting Pauli parity checks ($S_i = X_i X_j X_k X_l$ or $Z_i Z_j Z_k Z_l$) without destroying the stored logical state.`;
+      replyText = 'I don’t have a reference entry matching that phrasing. This panel only looks up the atlas’s own topics and glossary terms — it doesn’t generate answers — so try one of the suggested questions below, or browse the Glossary and Knowledge Map from the top nav.';
     }
 
     return {
@@ -89,11 +92,13 @@ export default function AITutorDrawer({
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInputText('');
 
+    // Instant lookup — the short delay only lets the question render first;
+    // it is not simulated "thinking".
     setTimeout(() => {
       const tutorReply = generateAnswer(text);
       sound.playDecoderLock();
       setMessages((prev) => [...prev, tutorReply]);
-    }, 400);
+    }, 120);
   }, [inputText]);
 
   useEffect(() => {
@@ -124,11 +129,11 @@ export default function AITutorDrawer({
             <div className="flex items-center justify-between border-b border-ink-700 p-4 bg-ink-850">
               <div className="flex items-center gap-2.5">
                 <div className="rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette">
-                  <Bot className="h-5 w-5" />
+                  <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">// AI PEDAGOGICAL TUTOR</span>
-                  <h3 className="font-display text-base font-bold text-text-hi">TQEC Learning Assistant</h3>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">// CONCEPT LOOKUP · NOT A LANGUAGE MODEL</span>
+                  <h3 className="font-display text-base font-bold text-text-hi">TQEC Concept Reference</h3>
                 </div>
               </div>
 
@@ -203,7 +208,7 @@ export default function AITutorDrawer({
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Ask a question about TQEC..."
+                  placeholder="Look up a TQEC topic or term..."
                   className="flex-1 rounded-xl border border-ink-600 bg-ink-950 px-3.5 py-2.5 font-mono text-xs text-text-hi placeholder:text-text-low focus:border-plaquette focus:outline-none"
                 />
                 <button
