@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, BookOpen, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
+import { ArrowRight, BookOpen, Map as MapIcon } from 'lucide-react';
 import { CATEGORY_COLORS, TERMS, type GlossaryTerm } from '@/data/glossary';
 import { useProgress, type ReviewScheduleEntry } from '@/store/progress';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
@@ -294,36 +294,34 @@ export default function Review() {
               transition={{ duration: reduce ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="rounded-xl border border-stabilizer/40 bg-ink-850 p-10 text-center"
             >
-              <p className="eyebrow !text-stabilizer">{'// DONE FOR TODAY'}</p>
+              <p className={`eyebrow ${graded > 0 ? '!text-stabilizer' : '!text-plaquette'}`}>
+                {graded > 0 ? '// DONE FOR TODAY' : '// BUILD YOUR DAILY REVIEW DECK'}
+              </p>
               <h2 className="mt-3 font-display text-[28px] font-semibold text-text-hi">
                 {graded > 0
                   ? `${graded} card${graded === 1 ? '' : 's'} reviewed.`
-                  : 'Nothing due right now.'}
+                  : 'Your Review Deck is Empty'}
               </h2>
               <p className="mx-auto mt-3 max-w-md leading-relaxed text-text-mid">
-                {unlocked.length === 0
-                  ? 'Complete a Foundation prediction, study an Altitude, or explore a map topic; its vocabulary then starts appearing here.'
-                  : deferred > 0
+                {graded > 0 ? (
+                  deferred > 0
                     ? `${deferred} more card${deferred === 1 ? '' : 's'} remain due, but this session stops here to protect focus.`
                     : nextDue
-                      ? `Next scheduled card: ${nextDue}. Exploring more topics adds more of the deck.`
-                      : 'Cards return as their intervals expire. Exploring more topics adds more of the deck.'}
+                      ? `Next scheduled card: ${nextDue}. Exploring more topics adds more to your deck.`
+                      : 'Cards return as their intervals expire. Exploring more topics adds more of the deck.'
+                ) : (
+                  'Cards automatically enter your daily spaced-repetition review deck as you explore topics in the Knowledge Map, complete experiments in Foundations Lab, or study Altitudes. Return here daily to strengthen your quantum memory!'
+                )}
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                {unlocked.length === 0 ? (
-                  <Link to="/foundations" className="btn-primary">
-                    Start Foundations <ArrowRight className="h-4 w-4" />
-                  </Link>
-                ) : (
-                  <Link to="/path" className="btn-primary">
-                    <RouteIcon className="h-4 w-4" /> Continue the path
-                  </Link>
-                )}
+                <Link to="/foundations" className="btn-primary">
+                  Start Foundations Lab <ArrowRight className="h-4 w-4" />
+                </Link>
                 <Link to="/map" className="btn-secondary">
-                  <MapIcon className="h-4 w-4" /> Open the map
+                  <MapIcon className="h-4 w-4" /> Explore Knowledge Map
                 </Link>
                 <Link to="/glossary" className="btn-ghost">
-                  <BookOpen className="h-4 w-4" /> Browse the glossary
+                  <BookOpen className="h-4 w-4" /> Browse Glossary
                 </Link>
               </div>
             </motion.div>

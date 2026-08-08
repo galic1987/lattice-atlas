@@ -1109,6 +1109,33 @@ function TopicDrawer({
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* Sticky bottom continuation bar */}
+        <div className="sticky bottom-0 z-10 flex items-center justify-between gap-3 border-t border-ink-600 bg-ink-900/95 p-4 backdrop-blur">
+          <button
+            type="button"
+            onClick={() => toggleUnderstood(topic.id)}
+            aria-pressed={understood}
+            className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-bold transition-all ${
+              understood
+                ? 'border-stabilizer/60 bg-stabilizer/15 text-stabilizer'
+                : 'border-plaquette/40 bg-plaquette/10 text-plaquette hover:bg-plaquette/20'
+            }`}
+          >
+            <Check className="h-4 w-4" />
+            {understood ? 'Explored' : 'Mark as Explored'}
+          </button>
+          {topic.depends_on.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onNavigate(topic.depends_on[0])}
+              className="flex items-center gap-1.5 rounded-lg border border-ink-600 bg-ink-800 px-3 py-2.5 text-xs text-text-mid hover:border-ink-500 hover:text-text-hi"
+            >
+              <span>Prereq</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </motion.aside>
     </div>
   );

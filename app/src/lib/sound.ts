@@ -5,13 +5,13 @@
 
 class SoundSystem {
   private ctx: AudioContext | null = null;
-  private isMuted: boolean = false;
+  private isMuted: boolean = true;
 
   constructor() {
     try {
-      this.isMuted = localStorage.getItem('lattice-atlas-sound-enabled') === 'false';
+      this.isMuted = localStorage.getItem('lattice-atlas-sound-enabled') !== 'true';
     } catch {
-      this.isMuted = false;
+      this.isMuted = true;
     }
   }
 

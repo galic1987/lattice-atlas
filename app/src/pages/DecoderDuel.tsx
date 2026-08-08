@@ -349,6 +349,7 @@ export default function DecoderDuel() {
   const [guideOpen, setGuideOpen] = useState(() => !record.guideSeen);
   const [hintQubit, setHintQubit] = useState<number | null>(null);
   const [hintMessage, setHintMessage] = useState('');
+  const [usedHintThisRound, setUsedHintThisRound] = useState(false);
   const [copied, setCopied] = useState(false);
   const finalizedRun = useRef(false);
   const practiceRunId = useRef('');
@@ -472,8 +473,9 @@ export default function DecoderDuel() {
       const row = Math.floor(referenceMove / round.lat.d) + 1;
       const col = (referenceMove % round.lat.d) + 1;
       setHintQubit(referenceMove);
+      setUsedHintThisRound(true);
       setHintMessage(
-        `The built-in decoder uses ${PAULI_NAME[round.reference[referenceMove]]} at row ${row}, column ${col}. This is one move in its complete correction, not proof of a unique answer; other valid corrections may exist.`,
+        `The built-in decoder uses ${PAULI_NAME[round.reference[referenceMove]]} at row ${row}, column ${col} (Assisted Solve). This is one move in its complete correction, not proof of a unique answer.`,
       );
       return;
     }
@@ -483,7 +485,8 @@ export default function DecoderDuel() {
       const row = Math.floor(extraMove / round.lat.d) + 1;
       const col = (extraMove % round.lat.d) + 1;
       setHintQubit(extraMove);
-      setHintMessage(`Your guess already contains every reference move. Inspect the extra paint at row ${row}, column ${col}; the reference decoder leaves that qubit untouched.`);
+      setUsedHintThisRound(true);
+      setHintMessage(`Your guess already contains every reference move. Inspect extra paint at row ${row}, column ${col} (Assisted Solve).`);
       return;
     }
 
@@ -518,9 +521,8 @@ export default function DecoderDuel() {
         compatible: true,
       });
     } else if (
-      !next.bestPractice
-      || finalScore > next.bestPractice.score
-      || (finalScore === next.bestPractice.score && finalOutcomes.length > next.bestPractice.rounds)
+      mode === 'practice' &&
+      (!record.bestPractice || finalScore > record.bestPractice.score)
     ) {
       next.bestPractice = { score: finalScore, rounds: finalOutcomes.length };
     }
@@ -559,7 +561,7 @@ export default function DecoderDuel() {
 
   const submit = () => {
     if (!round || defectsLeft > 0) return;
-    settle(judge(round, guess));
+    settle(judge(round, guess, usedHintThisRound));
   };
 
   const forfeit = () => {
@@ -571,6 +573,7 @@ export default function DecoderDuel() {
       logicalZ: false,
       guessWeight: guess.filter((pauli) => pauli !== 0).length,
       points: 0,
+      usedHint: usedHintThisRound,
     });
   };
 
@@ -584,6 +587,7 @@ export default function DecoderDuel() {
     const idx = roundIdx + 1;
     setRoundIdx(idx);
     setVerdict(null);
+    setUsedHintThisRound(false);
     setPhase('play');
     const plan = mode === 'daily' ? DAILY_PLAN[idx] : practicePlan(idx);
     setGuess(new Array<Pauli>(plan.d ** 2).fill(0));

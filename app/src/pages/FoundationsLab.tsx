@@ -820,11 +820,13 @@ function Prediction({
   state,
   onSelect,
   onSubmit,
+  onRetry,
 }: {
   stageId: StageId;
   state: PredictionState;
   onSelect: (option: number) => void;
   onSubmit: () => void;
+  onRetry?: () => void;
 }) {
   const question = QUESTIONS[stageId];
   const correct = state.submitted && state.selected === question.answer;
@@ -874,12 +876,17 @@ function Prediction({
           <button type="button" onClick={onSubmit} disabled={state.selected === null} className="btn-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:scale-100">
             Lock prediction & reveal
           </button>
-          <span className="text-xs text-text-low">Your choice cannot change until you reset the local practice.</span>
+          <span className="text-xs text-text-low">Lock your choice to reveal the physical explanation.</span>
         </div>
       ) : (
         <div className={`mt-5 rounded-lg border p-4 ${correct ? 'border-stabilizer/35 bg-stabilizer/5' : 'border-syndrome/35 bg-syndrome/5'}`} role="status" aria-live="polite">
           <p className={`font-mono text-xs font-semibold uppercase tracking-wider ${correct ? 'text-stabilizer' : 'text-syndrome'}`}>{correct ? '+20 · Prediction matched' : '+0 · Model updated'}</p>
           <p className="mt-2 text-sm leading-6 text-text-mid">{question.explanation}</p>
+          {!correct && onRetry && (
+            <button type="button" onClick={onRetry} className="btn-secondary mt-3 text-xs">
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Retry this prediction
+            </button>
+          )}
         </div>
       )}
     </section>
@@ -891,11 +898,13 @@ function StageContent({
   answer,
   onSelect,
   onSubmit,
+  onRetry,
 }: {
   stageId: StageId;
   answer: PredictionState;
   onSelect: (option: number) => void;
   onSubmit: () => void;
+  onRetry: (stageId: StageId) => void;
 }) {
   if (stageId === 'bit-amplitude') {
     return (
@@ -921,7 +930,7 @@ function StageContent({
           ]}
           result="P(0) = 9/25 = 36% · P(1) = 16/25 = 64%"
         />
-        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} />
+        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} onRetry={() => onRetry(stageId)} />
       </>
     );
   }
@@ -950,7 +959,7 @@ function StageContent({
           ]}
           result="P(D0) = 1/2 · the complementary detector receives the other 1/2"
         />
-        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} />
+        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} onRetry={() => onRetry(stageId)} />
       </>
     );
   }
@@ -979,7 +988,7 @@ function StageContent({
           ]}
           result="P(0) = 1/3 · P(1) = 2/3 · the factor −i affects phase, not this basis readout"
         />
-        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} />
+        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} onRetry={() => onRetry(stageId)} />
       </>
     );
   }
@@ -1008,7 +1017,7 @@ function StageContent({
           ]}
           result="Relative phase becomes observable through interference; a common global phase never does"
         />
-        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} />
+        <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} onRetry={() => onRetry(stageId)} />
       </>
     );
   }
@@ -1036,7 +1045,7 @@ function StageContent({
         ]}
         result="[1/2  1/2; 1/2  1/2] = |+⟩ ⊗ |+⟩ · zero determinant means separable"
       />
-      <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} />
+      <Prediction stageId={stageId} state={answer} onSelect={onSelect} onSubmit={onSubmit} onRetry={() => onRetry(stageId)} />
     </>
   );
 }
@@ -1195,6 +1204,13 @@ export default function FoundationsLab() {
     });
   };
 
+  const retryStage = (stageId: StageId) => {
+    setAnswers((current) => ({
+      ...current,
+      [stageId]: { selected: null, submitted: false },
+    }));
+  };
+
   const resetPractice = () => {
     setAnswers(emptyAnswers());
     clearEvidence('foundation-prediction');
@@ -1337,6 +1353,7 @@ export default function FoundationsLab() {
                 answer={answers[activeStage.id]}
                 onSelect={choosePrediction}
                 onSubmit={submitPrediction}
+                onRetry={retryStage}
               />
             </div>
 
