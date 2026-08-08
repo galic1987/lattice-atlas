@@ -941,23 +941,28 @@ export default function SurfaceCodeLab() {
   const activeChallenge = CHALLENGES.find((c) => c.id === challengeId) ?? null;
   const activeSolved = activeChallenge !== null && challengesDone.has(activeChallenge.id);
 
-  /** Playback auto-stepping interval effect */
+  /** Mirror of currentStep so the playback interval reads the live head
+   *  without threading it through a (must-stay-pure) setState updater. */
+  const currentStepRef = useRef(currentStep);
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+  }, [currentStep]);
+
+  /** Playback auto-stepping interval effect. The step-driven side effects
+   *  (halt at the end, decode once the correction is revealed) run in the
+   *  async interval callback, never inside a setState updater. */
   useEffect(() => {
     if (!isPlaying) return;
     const speedMs = 1400 / playbackSpeed;
     const timer = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev >= 5) {
-          setIsPlaying(false);
-          return 5;
-        }
-        const next = prev + 1;
-        if (next >= 4 && !result) {
-          const res = decode(lat, errors);
-          setResult(res);
-        }
-        return next;
-      });
+      const prev = currentStepRef.current;
+      if (prev >= 5) {
+        setIsPlaying(false);
+        return;
+      }
+      const next = prev + 1;
+      setCurrentStep(next);
+      if (next >= 4 && !result) setResult(decode(lat, errors));
     }, speedMs);
     return () => clearInterval(timer);
   }, [isPlaying, playbackSpeed, lat, errors, result]);

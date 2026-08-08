@@ -380,6 +380,7 @@ export default function DecoderDuel() {
     setGuessHistory([]);
     setHintQubit(null);
     setHintMessage('');
+    setUsedHintThisRound(false);
   }, [day]);
 
   useEffect(() => {
@@ -420,6 +421,7 @@ export default function DecoderDuel() {
     setGuessHistory([]);
     setHintQubit(null);
     setHintMessage('');
+    setUsedHintThisRound(false);
     setCopied(false);
     if (m === 'practice') {
       const suffix = typeof crypto.randomUUID === 'function'
