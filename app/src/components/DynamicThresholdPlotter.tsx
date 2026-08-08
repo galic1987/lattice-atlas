@@ -1,8 +1,8 @@
 import { useState, useId } from 'react';
+import { Link } from 'react-router-dom';
 import {
   TrendingUp,
   Sparkles,
-  Zap,
   Play,
   RotateCcw,
   CheckCircle2,
@@ -26,8 +26,7 @@ export default function DynamicThresholdPlotter() {
   const [selectedP, setSelectedP] = useState<number>(0.005); // Default physical error rate 0.5%
   const [pTh, setPTh] = useState<number>(0.01); // Threshold 1.0%
   const [enabledDistances, setEnabledDistances] = useState<number[]>([3, 5, 7, 9]);
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [simulatedPoints, setSimulatedPoints] = useState<{ d: number; p: number; rate: number }[]>([]);
+  const [modelPoints, setModelPoints] = useState<{ d: number; p: number; rate: number }[]>([]);
 
   const gradId = useId();
 
@@ -41,25 +40,19 @@ export default function DynamicThresholdPlotter() {
     }
   };
 
-  const runSimulation = () => {
-    setIsSimulating(true);
-    setTimeout(() => {
-      const newSims = enabledDistances.map((d) => {
-        const theoretical = computeLogicalErrorRate(d, selectedP, pTh);
-        // Add realistic Monte Carlo statistical fluctuation (+/- 10%)
-        const noise = (Math.random() - 0.5) * 0.2 * theoretical;
-        return { d, p: selectedP, rate: Math.max(0.000001, theoretical + noise) };
-      });
-      setSimulatedPoints(newSims);
-      setIsSimulating(false);
-    }, 600);
+  // Marks the analytic model's predicted P_L at the selected physical error
+  // rate — this is the theoretical scaling curve, NOT a decoded simulation.
+  const plotModelPoint = () => {
+    setModelPoints(
+      enabledDistances.map((d) => ({ d, p: selectedP, rate: computeLogicalErrorRate(d, selectedP, pTh) })),
+    );
   };
 
   const resetPlot = () => {
     setSelectedP(0.005);
     setPTh(0.01);
     setEnabledDistances([3, 5, 7, 9]);
-    setSimulatedPoints([]);
+    setModelPoints([]);
   };
 
   // Color mapping per distance
@@ -139,6 +132,18 @@ export default function DynamicThresholdPlotter() {
         Below the <strong>Fault-Tolerance Threshold (p_th ≈ 1.0%)</strong>, larger surface code distances (d=3 → 9) <i>exponentially suppress</i> logical error rates (Λ = P_L(d)/P_L(d+2) &gt; 1). Above p_th, larger codes degrade faster than they correct!
       </p>
 
+      {/* Honesty note: this is an analytic model, not a decoded simulation */}
+      <p className="mt-2 text-[11px] leading-relaxed text-text-low">
+        These are <strong>analytic scaling curves</strong> from the standard
+        model P_L ≈ (p/p_th)<sup>(d+1)/2</sup> — a teaching tool, not decoded
+        samples. For a real Monte Carlo that actually decodes millions of shots,
+        run the{' '}
+        <Link to="/lab" className="text-plaquette underline decoration-plaquette/40 hover:decoration-plaquette">
+          threshold experiment in the Lab
+        </Link>
+        .
+      </p>
+
       {/* Main Interactive Grid */}
       <div className="relative mt-6 grid gap-6 md:grid-cols-3">
         {/* Left 2 Cols: Interactive SVG Plot */}
@@ -150,12 +155,11 @@ export default function DynamicThresholdPlotter() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={runSimulation}
-                disabled={isSimulating}
-                className="inline-flex items-center gap-1 rounded bg-plaquette/15 px-2.5 py-1 font-mono text-[10px] text-plaquette hover:bg-plaquette/25 disabled:opacity-50"
+                onClick={plotModelPoint}
+                className="inline-flex items-center gap-1 rounded bg-plaquette/15 px-2.5 py-1 font-mono text-[10px] text-plaquette hover:bg-plaquette/25"
               >
-                {isSimulating ? <Zap className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
-                {isSimulating ? 'Sampling Stim...' : 'Run Monte Carlo'}
+                <Play className="h-3 w-3" />
+                Mark model prediction
               </button>
               <button
                 type="button"
@@ -257,8 +261,8 @@ export default function DynamicThresholdPlotter() {
                 );
               })}
 
-              {/* Simulated Monte Carlo Points Overlay */}
-              {simulatedPoints.map((sim, i) => (
+              {/* Analytic model prediction markers */}
+              {modelPoints.map((sim, i) => (
                 <g key={i}>
                   <circle cx={xScale(sim.p)} cy={yScale(sim.rate)} r="5" fill="#FFF" stroke={distanceColors[sim.d]} strokeWidth="2" className="animate-ping" />
                   <circle cx={xScale(sim.p)} cy={yScale(sim.rate)} r="3" fill={distanceColors[sim.d]} />
