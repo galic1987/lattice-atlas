@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import DynamicThresholdPlotter from '@/components/DynamicThresholdPlotter';
+import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -247,9 +248,21 @@ function LatticeView({
         const { x, y } = qubitPoint(lat.d, q);
         const corrected = correctedQubits.has(q);
         const activeError = showErrors ? e : 0;
-
         return (
-          <g key={q} onClick={() => onQubitClick(q)} className="cursor-pointer">
+          <g
+            key={q}
+            role="button"
+            tabIndex={0}
+            aria-label={`Data qubit ${q}, ${e === 0 ? 'no error' : `Pauli ${PAULI_LABEL[e]} error`}`}
+            onClick={() => onQubitClick(q)}
+            onKeyDown={(evt) => {
+              if (evt.key === 'Enter' || evt.key === ' ') {
+                evt.preventDefault();
+                onQubitClick(q);
+              }
+            }}
+            className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-plaquette"
+          >
             {corrected && (
               <circle cx={x} cy={y} r={16} fill="none" stroke={OK} strokeWidth={2} strokeDasharray="4 3" />
             )}
@@ -1458,6 +1471,10 @@ export default function SurfaceCodeLab() {
 
       <section className="mx-auto max-w-7xl px-6 py-6 md:px-8">
         <DynamicThresholdPlotter />
+      </section>
+
+      <section className="mx-auto max-w-7xl px-6 py-6 md:px-8">
+        <TorusTopologyViewer />
       </section>
 
       <ThresholdSection />

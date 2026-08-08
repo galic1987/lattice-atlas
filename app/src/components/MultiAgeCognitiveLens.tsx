@@ -82,7 +82,13 @@ export default function MultiAgeCognitiveLens({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="lattice-bg h-full w-full bg-gradient-to-br from-ink-800 via-ink-900 to-ink-950" />
+          <img
+            src={asset('multi_age_cognitive_prism.jpg')}
+            alt="Multi-Age Cognitive Growth Prism"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover opacity-80"
+          />
         )}
         <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-ink-950 via-ink-950/40 to-transparent p-4">
           <div className="flex items-center gap-2 font-mono text-xs text-star">

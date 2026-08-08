@@ -11,7 +11,8 @@ import { topics, papers } from '@/data';
 import { useProgress } from '@/store/progress';
 import { toast } from 'sonner';
 
-const NAME_STORAGE_KEY = 'lattice-atlas-user-name';
+const NAME_STORAGE_KEY = 'lattice-atlas-name';
+const DUEL_STORAGE_KEY = 'lattice-atlas-duel';
 const ARCADE_STORAGE_KEY = 'lattice-atlas-game-scores';
 
 export default function ShareableScoreCard({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -24,10 +25,13 @@ export default function ShareableScoreCard({ isOpen, onClose }: { isOpen: boolea
     }
   });
 
-  const arcadeScore = (() => {
+  const bonusScore = (() => {
     try {
-      const saved = localStorage.getItem(ARCADE_STORAGE_KEY);
-      return saved ? JSON.parse(saved).highScore || 0 : 0;
+      const savedArcade = localStorage.getItem(ARCADE_STORAGE_KEY);
+      const arcadeScore = savedArcade ? JSON.parse(savedArcade).highScore || 0 : 0;
+      const savedDuel = localStorage.getItem(DUEL_STORAGE_KEY);
+      const duelScore = savedDuel ? JSON.parse(savedDuel).endlessBest?.score || 0 : 0;
+      return Math.max(arcadeScore, duelScore);
     } catch {
       return 0;
     }
@@ -36,7 +40,7 @@ export default function ShareableScoreCard({ isOpen, onClose }: { isOpen: boolea
   // Calculate Overall Quantum Readiness Score (0 to 1000)
   const topicPoints = Math.round((understoodCount / topics.length) * 650);
   const paperPoints = Math.round((readCount / papers.length) * 230);
-  const arcadePoints = Math.min(Math.round(arcadeScore / 10), 120);
+  const arcadePoints = Math.min(Math.round(bonusScore / 10), 120);
   const totalScore = topicPoints + paperPoints + arcadePoints;
 
   // Rank Title

@@ -41,14 +41,14 @@ export default function ActChapterCard({ tier }: { tier: number }) {
       {/* Visual Metaphor Header Artwork */}
       {tier === 2 && (
         <div className="relative mb-6 h-40 w-full overflow-hidden rounded-xl border border-plaquette/30">
-          <img src={asset('act2_superposition_paradox.jpg')} alt="Act II Superposition Paradox Metaphor" className="h-full w-full object-cover" />
+          <img src={asset('act2_superposition_paradox.jpg')} alt="Act II Superposition Paradox Metaphor" loading="lazy" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-transparent to-transparent" />
         </div>
       )}
 
       {tier === 4 && (
         <div className="relative mb-6 h-40 w-full overflow-hidden rounded-xl border border-star/30">
-          <img src={asset('act4_anyon_braiding.jpg')} alt="Act IV Anyon Braiding Metaphor" className="h-full w-full object-cover" />
+          <img src={asset('act4_anyon_braiding.jpg')} alt="Act IV Anyon Braiding Metaphor" loading="lazy" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-transparent to-transparent" />
         </div>
       )}

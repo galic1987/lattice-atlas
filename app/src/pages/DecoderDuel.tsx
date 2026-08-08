@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { Check, Copy, Flag, Play, RotateCcw, Share2, Swords } from 'lucide-react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { sound } from '@/lib/sound';
+import { Check, Copy, Flag, Play, RotateCcw, Share2, Swords } from 'lucide-react';
 import {
   DAILY_PLAN,
   POINTS,
@@ -104,10 +105,14 @@ function DuelLattice({
             aria-label={`Qubit ${q}, ${
               g === 1 ? 'X correction' : g === 2 ? 'Z correction' : 'no correction'
             }${revealed ? '' : ' — press Enter to paint'}`}
-            onClick={() => onQubitClick(q)}
+            onClick={() => {
+              sound.playErrorFlip();
+              onQubitClick(q);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
+                sound.playErrorFlip();
                 onQubitClick(q);
               }
             }}
