@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Compass, X } from 'lucide-react';
 import { tierNames, type Topic } from '@/data';
-import { useProgress } from '@/store/progress';
 
 /**
  * Placement diagnostic for the learning path: one question per tier, in
  * order. The recommended starting tier is the first one answered wrongly
- * (or skipped). Marking earlier tiers as understood is offered but never
- * done implicitly.
+ * (or skipped). Six samples can suggest a starting point; they never alter
+ * progress or certify mastery of whole tiers.
  */
 
 interface DiagQuestion {
@@ -73,7 +72,7 @@ const QUESTIONS: DiagQuestion[] = [
 ];
 
 export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
-  const { isUnderstood, toggleUnderstood } = useProgress();
+  const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [picks, setPicks] = useState<Record<number, number | 'skip'>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -81,7 +80,6 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
   const answeredAll = QUESTIONS.every((_, i) => picks[i] !== undefined);
   const firstMiss = QUESTIONS.find((qq, i) => picks[i] !== qq.answer)?.tier ?? null;
   const startTier = firstMiss ?? 6;
-  const earlierTopics = ordered.filter((t) => t.tier < startTier && !isUnderstood(t.id));
 
   const scrollToTier = () => {
     const target = ordered.find((t) => t.tier === startTier);
@@ -90,10 +88,6 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
     document
       .getElementById(`step-${target.id}`)
       ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
-
-  const markEarlier = () => {
-    for (const t of earlierTopics) toggleUnderstood(t.id);
   };
 
   const reset = () => {
@@ -106,6 +100,8 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="placement-quiz"
         className="inline-flex items-center gap-2 rounded-full border border-magic/40 bg-magic/[0.08] px-4 py-2 text-sm text-magic transition-colors duration-200 hover:border-magic hover:bg-magic/[0.14]"
       >
         <Compass className="h-4 w-4" />
@@ -115,10 +111,11 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
+            id="placement-quiz"
+            initial={reduce ? false : { opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduce ? 0 : 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
             <div className="mt-4 rounded-xl border border-ink-600 bg-ink-800 p-6">
@@ -135,7 +132,8 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
               </div>
               <p className="mt-2 text-sm leading-relaxed text-text-mid">
                 One question per tier, in order. Answer honestly — &ldquo;not
-                sure&rdquo; counts as a starting point, not a failure.
+                sure&rdquo; counts as a starting point, not a failure. This short
+                sample recommends where to begin; it does not prove a tier is mastered.
               </p>
 
               <div className="mt-5 flex flex-col gap-4">
@@ -165,6 +163,7 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
                             type="button"
                             disabled={submitted}
                             onClick={() => setPicks((p) => ({ ...p, [qi]: oi }))}
+                            aria-pressed={picked}
                             className={`rounded-lg border px-3 py-1.5 text-left text-[13px] leading-snug transition-colors duration-150 disabled:cursor-default ${cls}`}
                           >
                             {opt}
@@ -175,6 +174,7 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
                         type="button"
                         disabled={submitted}
                         onClick={() => setPicks((p) => ({ ...p, [qi]: 'skip' }))}
+                        aria-pressed={picks[qi] === 'skip'}
                         className={`rounded-lg border px-3 py-1.5 font-mono text-[12px] transition-colors duration-150 disabled:cursor-default ${
                           picks[qi] === 'skip'
                             ? 'border-magic/70 bg-magic/10 text-magic'
@@ -198,30 +198,24 @@ export default function Diagnostic({ ordered }: { ordered: Topic[] }) {
                   Get my starting point <ArrowRight className="h-4 w-4" />
                 </button>
               ) : (
-                <div className="mt-6 rounded-lg border border-magic/40 bg-magic/[0.06] p-4">
+                <div className="mt-6 rounded-lg border border-magic/40 bg-magic/[0.06] p-4" role="status" aria-live="polite">
                   <p className="font-mono text-[12px] font-semibold uppercase tracking-wider text-magic">
                     {firstMiss === null
-                      ? 'You already know this material'
-                      : `Start at Tier ${startTier} · ${tierNames[startTier]}`}
+                      ? 'No gap found in these six samples'
+                      : `Suggested review point: Tier ${startTier} · ${tierNames[startTier]}`}
                   </p>
                   <p className="mt-1.5 text-sm leading-relaxed text-text-mid">
                     {firstMiss === null
-                      ? 'Every answer checks out. Skim Tier 6 for the frontier topics, then head straight for the papers and the Field Today page.'
-                      : `Everything below Tier ${startTier} looks solid from here on out — begin where the first gap appeared.`}
+                      ? 'All six answers were correct. Start with Tier 6, but use each topic check and a delayed review before treating earlier material as retained.'
+                      : `Begin near the first uncertain or incorrect sample. Earlier answers were correct samples, not certification of the full tiers.`}
+                  </p>
+                  <p className="mt-2 font-mono text-[11px] text-text-low">
+                    {QUESTIONS.map((question, index) => `T${question.tier} ${picks[index] === question.answer ? '✓' : 'review'}`).join(' · ')}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button type="button" onClick={scrollToTier} className="btn-primary px-4 py-2 text-[13px]">
                       Take me to Tier {startTier}
                     </button>
-                    {earlierTopics.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={markEarlier}
-                        className="btn-secondary px-4 py-2 text-[13px]"
-                      >
-                        Mark Tiers 1–{startTier - 1} understood ({earlierTopics.length} topics)
-                      </button>
-                    )}
                     <button type="button" onClick={reset} className="btn-ghost text-[13px]">
                       Retake
                     </button>

@@ -19,7 +19,7 @@ module.exports = {
         'text-mid': '#A9B4CC',
         'text-low': '#7B89A7',
         plaquette: '#22D3EE',
-        star: '#8B5CF6',
+        star: '#9B7BFA',
         magic: '#F5B83D',
         syndrome: '#FB7185',
         stabilizer: '#34D399',
