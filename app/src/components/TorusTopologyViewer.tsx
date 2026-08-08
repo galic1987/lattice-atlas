@@ -86,7 +86,7 @@ export default function TorusTopologyViewer() {
 
       {/* Description */}
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Kitaev’s original 1998 Toric Code embeds physical qubits on a 2D periodic lattice. Topologically, a closed periodic surface forms a <strong>Genus-1 Torus</strong>. Unlike planar surface codes (1 logical qubit), a Torus stores <strong>2 logical qubits</strong> in non-contractible 1-cycles (γ₁, γ₂) that wrap completely around the donut.
+        Kitaev’s original 1997 Toric Code embeds physical qubits on a 2D periodic lattice. Topologically, a closed periodic surface forms a <strong>Genus-1 Torus</strong>. Unlike planar surface codes (1 logical qubit), a Torus stores <strong>2 logical qubits</strong> in non-contractible 1-cycles (γ₁, γ₂) that wrap completely around the donut.
       </p>
 
       {/* 3D Torus Interactive WebGL / Canvas Container */}
@@ -245,7 +245,7 @@ export default function TorusTopologyViewer() {
               rel="noreferrer"
               className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-magic/40 bg-magic/10 py-2 font-mono text-xs font-bold text-magic hover:bg-magic/20"
             >
-              <ExternalLink className="h-3.5 w-3.5" /> Read Kitaev 1998 Paper
+              <ExternalLink className="h-3.5 w-3.5" /> Read Kitaev 1997 Paper
             </a>
           </div>
         </div>
