@@ -5,6 +5,9 @@ import MultiManifoldExplorer from '@/components/MultiManifoldExplorer';
 import LatticeSurgeryWelder from '@/components/LatticeSurgeryWelder';
 import AnyonBraidingSandbox from '@/components/AnyonBraidingSandbox';
 import QECOverheadCalculator from '@/components/QECOverheadCalculator';
+import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
+import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
+import CertificateGenerator from '@/components/CertificateGenerator';
 import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -1689,6 +1692,9 @@ export default function SurfaceCodeLab() {
         <LatticeSurgeryWelder />
         <AnyonBraidingSandbox />
         <QECOverheadCalculator />
+        <QuantumCircuitComposer />
+        <MagicStateDistillationFactory />
+        <CertificateGenerator />
       </section>
 
       {/* cross-links */}
