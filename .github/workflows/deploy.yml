@@ -29,25 +29,40 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Stim verifier
+        run: python -m pip install --disable-pip-version-check stim==1.16.0
+
       - name: Install
         working-directory: app
         run: npm ci
 
       - name: Lint
         working-directory: app
-        run: npx eslint src scripts
+        run: npx eslint src scripts tests
 
       - name: Verify lattice model
         working-directory: app
-        run: npm run verify-lattice
+        run: npm run verify-lattice -- --require-stim
 
       - name: Build (runs check-data first)
         working-directory: app
         run: npm run build -- --base=/lattice-atlas/
 
-      - name: SPA fallback (404.html)
+      - name: Check production bundle budgets
         working-directory: app
-        run: cp dist/index.html dist/404.html
+        run: npm run check-bundles
+
+      - name: Install Chromium for release checks
+        working-directory: app
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser accessibility and interaction gates
+        working-directory: app
+        run: npm run test:e2e
 
       - uses: actions/configure-pages@v5
         with:

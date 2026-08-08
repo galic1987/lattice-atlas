@@ -1,433 +1,268 @@
-import { useState, useId, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Box,
-  Play,
-  Pause,
-  Code2,
-  ExternalLink,
-  Layers,
-  RotateCcw
-} from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ExternalLink, GitMerge, Orbit, ScanLine } from 'lucide-react';
 
-interface BraidPreset {
-  id: string;
-  name: string;
-  gate: string;
-  description: string;
-  rounds: number;
-  pipes: {
-    id: string;
-    label: string;
-    color: string;
-    points: { x: number; y: number; z: number }[];
-  }[];
-  stimSnippet: string;
-  zxDescription: string;
+type SketchId = 'surgery-cnot' | 'mutual-braid';
+
+interface Sketch {
+  id: SketchId;
+  tab: string;
+  title: string;
+  invariant: string;
+  boundary: string;
+  steps: ReadonlyArray<{ title: string; body: string }>;
+  source: { label: string; href: string };
 }
 
-const BRAID_PRESETS: BraidPreset[] = [
+const SKETCHES: ReadonlyArray<Sketch> = [
   {
-    id: 'cnot-surgery',
-    name: 'Logical CNOT (Lattice Surgery Weld)',
-    gate: 'CNOT Gate',
-    description:
-      'Two logical surface code patches (Control & Target) undergo a Z-boundary weld over 3 clock cycles, performing a fault-tolerant logical CNOT.',
-    rounds: 6,
-    pipes: [
+    id: 'surgery-cnot',
+    tab: 'CNOT measurement pattern',
+    title: 'Ancilla-assisted lattice-surgery CNOT',
+    invariant:
+      'One standard convention prepares a logical ancilla in |+⟩, measures ZCZA, then XAXT, then ZA, and uses the outcomes to update the Pauli frame.',
+    boundary:
+      'This is a logical measurement pattern—not a compiled patch layout or a three-cycle hardware circuit. A fault-tolerant implementation repeats syndrome extraction for a distance-dependent schedule and must specify boundaries, noise, decoding, and feed-forward.',
+    steps: [
       {
-        id: 'patch-control',
-        label: 'Control Qubit Patch',
-        color: '#22D3EE', // cyan
-        points: [
-          { x: 60, y: 80, z: 0 },
-          { x: 60, y: 80, z: 40 },
-          { x: 100, y: 80, z: 80 },
-          { x: 100, y: 80, z: 120 },
-          { x: 60, y: 80, z: 160 },
-        ],
+        title: 'Prepare the mediator',
+        body: 'Prepare logical ancilla A in |+⟩. Control C and target T remain separate logical patches.',
       },
       {
-        id: 'patch-target',
-        label: 'Target Qubit Patch',
-        color: '#8B5CF6', // violet
-        points: [
-          { x: 180, y: 80, z: 0 },
-          { x: 180, y: 80, z: 40 },
-          { x: 140, y: 80, z: 80 },
-          { x: 140, y: 80, z: 120 },
-          { x: 180, y: 80, z: 160 },
-        ],
+        title: 'Measure ZCZA',
+        body: 'A merge/split pattern extracts the joint logical Z parity of control and ancilla; it does not reveal either logical value alone.',
+      },
+      {
+        title: 'Measure XAXT',
+        body: 'A second merge/split pattern extracts the joint logical X parity of ancilla and target.',
+      },
+      {
+        title: 'Measure ZA + update frame',
+        body: 'Measure the ancilla in Z and combine all three classical outcomes into the prescribed Pauli-frame corrections. The resulting logical channel is CNOT.',
       },
     ],
-    stimSnippet: `# Logical CNOT via Lattice Surgery
-R 0 1 2 3 4 5 6 7
-TICK # Round 1: Independent patches
-CX 0 1 2 3
-TICK # Round 2: Weld Z-boundary
-M 0 1 2 3
-DETECTOR(0, 0, 0) rec[-1] rec[-2]`,
-    zxDescription: 'ZX Graph: Green (Z) spider connected to Red (X) spider across 3 spacetime layers.',
+    source: {
+      label: 'Lattice-surgery construction (Horsman et al.)',
+      href: 'https://arxiv.org/abs/1111.4022',
+    },
   },
   {
-    id: 'anyon-braid',
-    name: 'Majorana / Anyon Braid (Hadamard / Phase Gate)',
-    gate: 'Logical H / S Gate',
-    description:
-      'Two non-Abelian anyon defects exchange positions in 3D spacetime (wrapping 360°), braiding their worldlines to perform a topological phase rotation.',
-    rounds: 8,
-    pipes: [
+    id: 'mutual-braid',
+    tab: 'e around m',
+    title: 'Mutual braiding in the toric-code model',
+    invariant:
+      'A closed e path that winds once around an m excitation contributes a relative phase −1 compared with an otherwise equivalent unlinked reference path.',
+    boundary:
+      'Toric/surface-code e and m excitations are Abelian. This sketch is not a non-Abelian exchange, not a universal H/S/T gate recipe, and not an executable defect schedule. Excitations are created in pairs or absorbed at compatible boundaries; the diagram isolates only the linked portion of a larger process.',
+    steps: [
       {
-        id: 'anyon-1',
-        label: 'Anyon Defect 1',
-        color: '#F5B83D', // gold
-        points: [
-          { x: 80, y: 60, z: 0 },
-          { x: 120, y: 100, z: 40 },
-          { x: 160, y: 60, z: 80 },
-          { x: 120, y: 20, z: 120 },
-          { x: 80, y: 60, z: 160 },
-        ],
+        title: 'Choose two coherent branches',
+        body: 'Use a reference branch that does not enclose m and a braid branch in which e will travel around m. A relative phase needs both branches to be observable.',
       },
       {
-        id: 'anyon-2',
-        label: 'Anyon Defect 2',
-        color: '#FB7185', // rose
-        points: [
-          { x: 160, y: 60, z: 0 },
-          { x: 120, y: 20, z: 40 },
-          { x: 80, y: 60, z: 80 },
-          { x: 120, y: 100, z: 120 },
-          { x: 160, y: 60, z: 160 },
-        ],
+        title: 'Move e halfway around m',
+        body: 'Local string operations move the e endpoint. The path itself is spatial; stacking the frames supplies the time direction.',
+      },
+      {
+        title: 'Close the linked path',
+        body: 'Return e to its starting configuration after one winding. The braid branch is now topologically linked with the m worldline.',
+      },
+      {
+        title: 'Interfere with the reference',
+        body: 'The linked branch has relative phase −1. Measurement statistics reveal that phase only after a later operation recombines the two branches.',
       },
     ],
-    stimSnippet: `# Anyon Defect Braid (Hadamard / Phase)
-# Worldline 1 wraps around Worldline 2
-QUBIT_COORDS(0, 0) 0
-QUBIT_COORDS(1, 0) 1
-TICK
-H 0 1
-CX 0 1
-TICK
-OBSERVABLE_INCLUDE(0) rec[-1]`,
-    zxDescription: 'ZX Graph: Twisted ribbon link invariant braid with non-trivial Phase shift π/4.',
+    source: {
+      label: 'Toric-code model (Kitaev)',
+      href: 'https://arxiv.org/abs/quant-ph/9707021',
+    },
   },
 ];
 
+const SURGERY_Y = [310, 232, 154, 76] as const;
+const BRAID_POSITIONS = [
+  { x: 360, y: 278 },
+  { x: 494, y: 180 },
+  { x: 360, y: 82 },
+  { x: 226, y: 180 },
+] as const;
+
+function SurgeryDiagram({ step }: { step: number }) {
+  const activeY = SURGERY_Y[step];
+  return (
+    <svg
+      viewBox="0 0 720 360"
+      className="min-w-[620px] w-full"
+      role="img"
+      aria-label={`Lattice-surgery CNOT logical measurement pattern, stage ${step + 1}: ${SKETCHES[0].steps[step].title}`}
+    >
+      <defs>
+        <marker id="time-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0 0L8 4L0 8Z" fill="#7B89A7" />
+        </marker>
+      </defs>
+      <line x1="55" y1="322" x2="55" y2="38" stroke="#7B89A7" strokeWidth="2" markerEnd="url(#time-arrow)" />
+      <text x="34" y="178" transform="rotate(-90 34 178)" fill="#A9B4CC" fontSize="12" fontFamily="JetBrains Mono">logical time</text>
+
+      {[
+        { x: 210, label: 'C · control', color: '#22D3EE' },
+        { x: 360, label: 'A · ancilla', color: '#F5B83D' },
+        { x: 510, label: 'T · target', color: '#9B7BFA' },
+      ].map((rail) => (
+        <g key={rail.label}>
+          <rect x={rail.x - 34} y="38" width="68" height="286" rx="18" fill={rail.color} fillOpacity="0.08" stroke={rail.color} strokeOpacity="0.55" />
+          <line x1={rail.x} y1="314" x2={rail.x} y2="48" stroke={rail.color} strokeWidth="5" strokeLinecap="round" />
+          <text x={rail.x} y="347" textAnchor="middle" fill={rail.color} fontSize="13" fontFamily="JetBrains Mono">{rail.label}</text>
+        </g>
+      ))}
+
+      <rect x="210" y="216" width="150" height="32" rx="14" fill="#22D3EE" fillOpacity="0.18" stroke="#22D3EE" strokeWidth="2" />
+      <text x="285" y="237" textAnchor="middle" fill="#EAF0FB" fontSize="13" fontFamily="JetBrains Mono">measure ZCZA</text>
+      <rect x="360" y="138" width="150" height="32" rx="14" fill="#9B7BFA" fillOpacity="0.18" stroke="#9B7BFA" strokeWidth="2" />
+      <text x="435" y="159" textAnchor="middle" fill="#EAF0FB" fontSize="13" fontFamily="JetBrains Mono">measure XAXT</text>
+      <rect x="326" y="60" width="68" height="32" rx="14" fill="#F5B83D" fillOpacity="0.18" stroke="#F5B83D" strokeWidth="2" />
+      <text x="360" y="81" textAnchor="middle" fill="#EAF0FB" fontSize="13" fontFamily="JetBrains Mono">ZA</text>
+
+      <line x1="92" y1={activeY} x2="600" y2={activeY} stroke="#FB7185" strokeWidth="2.5" strokeDasharray="7 5" />
+      <rect x="604" y={activeY - 15} width="90" height="30" rx="10" fill="#FB7185" fillOpacity="0.14" stroke="#FB7185" />
+      <text x="649" y={activeY + 5} textAnchor="middle" fill="#FB7185" fontSize="12" fontFamily="JetBrains Mono">stage {step + 1}</text>
+    </svg>
+  );
+}
+
+function BraidDiagram({ step }: { step: number }) {
+  const moving = BRAID_POSITIONS[step];
+  return (
+    <svg
+      viewBox="0 0 720 360"
+      className="min-w-[620px] w-full"
+      role="img"
+      aria-label={`Four-frame spatial braid sketch, stage ${step + 1}: ${SKETCHES[1].steps[step].title}`}
+    >
+      <defs>
+        <marker id="braid-direction" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0 0L8 4L0 8Z" fill="#9B7BFA" />
+        </marker>
+      </defs>
+      <text x="42" y="34" fill="#A9B4CC" fontSize="12" fontFamily="JetBrains Mono">one spatial frame · time advances with the stage control</text>
+      <ellipse cx="360" cy="180" rx="134" ry="98" fill="#111A2E" stroke="#3D5178" strokeWidth="2" />
+      <path d="M360 278C510 278 548 106 390 82" fill="none" stroke="#9B7BFA" strokeOpacity="0.45" strokeWidth="3" strokeDasharray="7 6" markerEnd="url(#braid-direction)" />
+      <path d="M330 82C172 106 210 278 360 278" fill="none" stroke="#9B7BFA" strokeOpacity="0.45" strokeWidth="3" strokeDasharray="7 6" markerEnd="url(#braid-direction)" />
+      <circle cx="360" cy="180" r="26" fill="#22D3EE" fillOpacity="0.18" stroke="#22D3EE" strokeWidth="3" />
+      <text x="360" y="185" textAnchor="middle" fill="#22D3EE" fontSize="16" fontWeight="700" fontFamily="JetBrains Mono">m</text>
+      <circle cx={moving.x} cy={moving.y} r="22" fill="#9B7BFA" fillOpacity="0.22" stroke="#9B7BFA" strokeWidth="3" />
+      <text x={moving.x} y={moving.y + 5} textAnchor="middle" fill="#EAF0FB" fontSize="16" fontWeight="700" fontFamily="JetBrains Mono">e</text>
+      <path d="M116 278V82" stroke="#7B89A7" strokeWidth="2" strokeDasharray="5 5" />
+      <text x="116" y="304" textAnchor="middle" fill="#A9B4CC" fontSize="12" fontFamily="JetBrains Mono">unlinked reference</text>
+      <text x="360" y="333" textAnchor="middle" fill="#FB7185" fontSize="13" fontFamily="JetBrains Mono">linked branch / reference branch = −1 after one closed winding</text>
+    </svg>
+  );
+}
+
 export default function SpacetimeBraidWeaver() {
-  const [selectedPreset, setSelectedPreset] = useState<BraidPreset>(BRAID_PRESETS[0]);
-  const [currentTime, setCurrentTime] = useState<number>(80);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [rotX, setRotX] = useState<number>(25);
-  const [rotY, setRotY] = useState<number>(-35);
-  const [showStim, setShowStim] = useState<boolean>(false);
-  const gradId = useId();
+  const [sketchId, setSketchId] = useState<SketchId>('surgery-cnot');
+  const [step, setStep] = useState(0);
+  const sketch = useMemo(
+    () => SKETCHES.find((candidate) => candidate.id === sketchId) ?? SKETCHES[0],
+    [sketchId],
+  );
+  const Icon = sketch.id === 'surgery-cnot' ? GitMerge : Orbit;
 
-  // Animation scrubber loop — driven by an effect so the interval is always
-  // cleared on pause and on unmount (the old version leaked the timer).
-  const togglePlay = () => {
-    if (!isPlaying && currentTime >= 160) setCurrentTime(80); // restart from the top
-    setIsPlaying((p) => !p);
-  };
-
-  useEffect(() => {
-    if (!isPlaying) return undefined;
-    const id = setInterval(() => {
-      setCurrentTime((prev) => (prev >= 160 ? 160 : prev + 4));
-    }, 50);
-    return () => clearInterval(id);
-  }, [isPlaying]);
-
-  const resetRotation = () => {
-    setRotX(25);
-    setRotY(-35);
+  const chooseSketch = (id: SketchId) => {
+    setSketchId(id);
+    setStep(0);
   };
 
   return (
-    <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
-      {/* Header */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b border-ink-700 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// 3D TOPOLOGICAL INTERACTIVE LAB</span>
-            <span className="rounded bg-stabilizer/20 px-2 py-0.5 font-mono text-[10px] text-stabilizer font-bold">SPACETIME PIPES</span>
+    <section className="min-w-0 rounded-2xl border border-plaquette/40 bg-ink-900 p-5 shadow-glow-cyan md:p-6" aria-labelledby="spacetime-sketch-title">
+      <div className="flex flex-col gap-4 border-b border-ink-700 pb-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="shrink-0 rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette">
+            <ScanLine className="h-6 w-6" aria-hidden="true" />
           </div>
-          <h3 className="font-display text-xl font-bold text-text-hi">3D Spacetime Braid Weaver for Lattice Surgery</h3>
+          <div>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// CONCEPTUAL · NOT EXECUTED</span>
+            <h3 id="spacetime-sketch-title" className="font-display text-xl font-bold text-text-hi">Spacetime sketches: what each line actually means</h3>
+          </div>
         </div>
-
-        {/* Preset Selector */}
-        <div className="flex flex-wrap gap-2">
-          {BRAID_PRESETS.map((p) => (
+        <div className="flex flex-wrap gap-2" aria-label="Choose a spacetime sketch">
+          {SKETCHES.map((candidate) => (
             <button
-              key={p.id}
+              key={candidate.id}
               type="button"
-              onClick={() => {
-                setSelectedPreset(p);
-                setCurrentTime(80);
-                setIsPlaying(false);
-              }}
-              className={
-                selectedPreset.id === p.id
-                  ? 'rounded-lg border border-plaquette bg-plaquette/20 px-3 py-1.5 font-mono text-xs font-bold text-plaquette shadow-sm'
-                  : 'rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-mid hover:border-ink-500'
-              }
+              aria-pressed={candidate.id === sketch.id}
+              onClick={() => chooseSketch(candidate.id)}
+              className={candidate.id === sketch.id
+                ? 'rounded-lg border border-plaquette bg-plaquette/15 px-3 py-2 font-mono text-xs font-bold text-plaquette'
+                : 'rounded-lg border border-ink-600 bg-ink-800 px-3 py-2 font-mono text-xs text-text-mid hover:border-ink-500 hover:text-text-hi'}
             >
-              {p.gate}
+              {candidate.tab}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Description & Overview */}
-      <p className="mt-4 text-xs leading-relaxed text-text-mid">{selectedPreset.description}</p>
+      <div className="mt-5 flex items-start gap-3 rounded-xl border border-stabilizer/35 bg-stabilizer/[0.07] p-4">
+        <Icon className="mt-0.5 h-5 w-5 shrink-0 text-stabilizer" aria-hidden="true" />
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-wider text-stabilizer">Invariant claim</p>
+          <p className="mt-1 text-sm leading-6 text-text-hi">{sketch.invariant}</p>
+        </div>
+      </div>
 
-      {/* 3D Spacetime Canvas Container */}
-      <div className="relative mt-6 grid gap-6 md:grid-cols-3">
-        {/* Left 2 Cols: Interactive 3D Orbit Viewport */}
-        <div className="relative col-span-2 overflow-hidden rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between border-b border-ink-800 pb-2 font-mono text-[11px] text-text-low">
-            <span className="flex items-center gap-1.5 text-star font-bold">
-              <Box className="h-4 w-4" /> 3D Space-Time Manifold (x, y, t)
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRotY((y) => y - 15)}
-                className="rounded bg-ink-800 px-1.5 py-0.5 text-[10px] text-text-mid hover:text-text-hi"
-              >
-                ↺ Rot Y
-              </button>
-              <button
-                type="button"
-                onClick={() => setRotX((x) => (x + 10 > 60 ? 10 : x + 10))}
-                className="rounded bg-ink-800 px-1.5 py-0.5 text-[10px] text-text-mid hover:text-text-hi"
-              >
-                Tilt X
-              </button>
-              <button
-                type="button"
-                onClick={resetRotation}
-                className="inline-flex items-center gap-1 rounded bg-ink-800 px-1.5 py-0.5 text-[10px] text-text-mid hover:text-text-hi"
-                title="Reset View"
-              >
-                <RotateCcw className="h-2.5 w-2.5" /> Reset
-              </button>
-            </div>
+      <div className="mt-5 grid min-w-0 gap-5 xl:grid-cols-[1.5fr_0.75fr]">
+        <figure className="min-w-0 rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <div className="overflow-x-auto" role="region" aria-label={`${sketch.title} diagram; scroll horizontally on a small screen`} tabIndex={0}>
+            {sketch.id === 'surgery-cnot' ? <SurgeryDiagram step={step} /> : <BraidDiagram step={step} />}
           </div>
+          <figcaption className="mt-3 border-t border-ink-800 pt-3 text-xs leading-5 text-text-low">
+            Diagram boundary: {sketch.boundary}
+          </figcaption>
+        </figure>
 
-          {/* SVG 3D Isometric View */}
-          <div className="relative flex h-80 w-full items-center justify-center cursor-grab active:cursor-grabbing">
-            <svg
-              viewBox="0 0 300 240"
-              className="h-full w-full select-none"
-              style={{
-                transform: `rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-                transformStyle: 'preserve-3d',
-                transition: 'transform 0.1s ease-out',
-              }}
-            >
-              <defs>
-                <linearGradient id={`${gradId}-pipe1`} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#22D3EE" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.9" />
-                </linearGradient>
-              </defs>
+        <div className="min-w-0 rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-text-low">Stage {step + 1} of {sketch.steps.length}</p>
+          <h4 className="mt-1 font-display text-lg font-bold text-text-hi">{sketch.steps[step].title}</h4>
+          <p className="mt-3 text-sm leading-6 text-text-mid">{sketch.steps[step].body}</p>
 
-              {/* Spacetime Grid Planes */}
-              {[0, 80, 160].map((zPlane) => (
-                <g key={zPlane} opacity={zPlane === 80 ? 0.6 : 0.2}>
-                  <rect
-                    x="30"
-                    y={30 + zPlane * 0.4}
-                    width="240"
-                    height="80"
-                    fill="none"
-                    stroke="#3D5178"
-                    strokeWidth="1"
-                    strokeDasharray="4 4"
-                  />
-                  <text
-                    x="35"
-                    y={45 + zPlane * 0.4}
-                    fill="#64748B"
-                    fontSize="9"
-                    fontFamily="monospace"
-                  >
-                    t = {Math.round(zPlane / 20)} (Round {zPlane / 40})
-                  </text>
-                </g>
-              ))}
-
-              {/* 3D Pipe Splines */}
-              {selectedPreset.pipes.map((pipe) => {
-                const pathD = pipe.points.reduce((acc, p, idx) => {
-                  const x3d = p.x;
-                  const y3d = p.y + p.z * 0.4;
-                  return idx === 0 ? `M ${x3d} ${y3d}` : `${acc} L ${x3d} ${y3d}`;
-                }, '');
-
-                return (
-                  <g key={pipe.id}>
-                    {/* Shadow / Tube Outline */}
-                    <path
-                      d={pathD}
-                      fill="none"
-                      stroke={pipe.color}
-                      strokeWidth="12"
-                      strokeOpacity="0.2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d={pathD}
-                      fill="none"
-                      stroke={pipe.color}
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-
-                    {/* Pipe Nodes */}
-                    {pipe.points.map((pt, i) => (
-                      <circle
-                        key={i}
-                        cx={pt.x}
-                        cy={pt.y + pt.z * 0.4}
-                        r="5"
-                        fill={pipe.color}
-                        className="transition-transform hover:scale-150"
-                      />
-                    ))}
-                  </g>
-                );
-              })}
-
-              {/* Active Time Slice Plane */}
-              <rect
-                x="20"
-                y={20 + currentTime * 0.4}
-                width="260"
-                height="90"
-                fill="none"
-                stroke="#22D3EE"
-                strokeWidth="2"
-                strokeDasharray="6 3"
-                opacity="0.9"
-              />
-            </svg>
-          </div>
-
-          {/* Time Scrubber Controls */}
-          <div className="mt-4 border-t border-ink-800 pt-3">
-            <div className="flex items-center justify-between text-xs font-mono text-text-mid mb-2">
-              <span className="flex items-center gap-1.5 text-plaquette font-bold">
-                <Layers className="h-3.5 w-3.5" /> Spacetime Time-Slice: t = {Math.round(currentTime / 20)}
-              </span>
-              <button
-                type="button"
-                onClick={togglePlay}
-                className="inline-flex items-center gap-1 rounded bg-plaquette/15 px-2.5 py-1 text-plaquette hover:bg-plaquette/25"
-              >
-                {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                {isPlaying ? 'Pause' : 'Play Anim'}
-              </button>
-            </div>
-
+          <label className="mt-6 block font-mono text-xs text-text-mid">
+            Walk through the declared stages
             <input
               type="range"
               min="0"
-              max="160"
-              step="4"
-              value={currentTime}
-              onChange={(e) => setCurrentTime(Number(e.target.value))}
-              className="w-full accent-plaquette cursor-pointer"
+              max={sketch.steps.length - 1}
+              step="1"
+              value={step}
+              onChange={(event) => setStep(Number(event.target.value))}
+              aria-valuetext={`Stage ${step + 1}: ${sketch.steps[step].title}`}
+              className="mt-3 w-full accent-plaquette"
             />
-          </div>
-        </div>
-
-        {/* Right 1 Col: 2D Cross-Section & Code Inspector */}
-        <div className="flex flex-col gap-4">
-          {/* 2D Slice View at t = currentTime */}
-          <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-            <div className="flex items-center justify-between border-b border-ink-800 pb-2">
-              <span className="font-mono text-[11px] font-bold text-stabilizer">
-                2D Surface Code Slice at t={Math.round(currentTime / 20)}
-              </span>
-            </div>
-
-            <div className="relative mt-3 flex h-32 w-full items-center justify-center rounded-lg border border-ink-800 bg-ink-900/60 p-2">
-              <svg viewBox="0 0 120 80" className="h-full w-full">
-                <rect x="10" y="10" width="100" height="60" fill="none" stroke="#3D5178" strokeWidth="1" strokeDasharray="3 3" />
-                {selectedPreset.pipes.map((p) => {
-                  const currentPoint = p.points.find((pt) => Math.abs(pt.z - currentTime) <= 20) ?? p.points[0];
-                  return (
-                    <g key={p.id}>
-                      <circle cx={currentPoint.x / 2} cy={currentPoint.y / 2} r="10" fill={p.color} fillOpacity="0.3" stroke={p.color} strokeWidth="2" />
-                      <circle cx={currentPoint.x / 2} cy={currentPoint.y / 2} r="4" fill={p.color} />
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-            <p className="mt-2 font-mono text-[10px] text-text-low text-center">
-              Active patch boundary cross-section
-            </p>
-          </div>
-
-          {/* ZX Diagram & Stim Snippet Toggle */}
-          <div className="rounded-xl border border-ink-700 bg-ink-950 p-4 flex-1 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between border-b border-ink-800 pb-2">
-                <span className="font-mono text-[11px] font-bold text-star">
-                  ZX-Calculus & Stim Output
-                </span>
+          </label>
+          <ol className="mt-4 grid grid-cols-4 gap-2" aria-label="Stage controls">
+            {sketch.steps.map((item, index) => (
+              <li key={item.title}>
                 <button
                   type="button"
-                  onClick={() => setShowStim(!showStim)}
-                  className="inline-flex items-center gap-1 font-mono text-[10px] text-plaquette hover:underline"
+                  onClick={() => setStep(index)}
+                  aria-label={`Show stage ${index + 1}: ${item.title}`}
+                  aria-pressed={step === index}
+                  className={step === index
+                    ? 'flex h-9 w-full items-center justify-center rounded border border-plaquette bg-plaquette/15 font-mono text-xs font-bold text-plaquette'
+                    : 'flex h-9 w-full items-center justify-center rounded border border-ink-600 bg-ink-850 font-mono text-xs text-text-low hover:text-text-hi'}
                 >
-                  <Code2 className="h-3 w-3" /> {showStim ? 'Show ZX Graph' : 'Show Stim Code'}
+                  {index + 1}
                 </button>
-              </div>
+              </li>
+            ))}
+          </ol>
 
-              <AnimatePresence mode="wait">
-                {showStim ? (
-                  <motion.pre
-                    key="stim"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="mt-3 overflow-x-auto rounded-lg bg-ink-900 p-2.5 font-mono text-[10px] leading-relaxed text-stabilizer"
-                  >
-                    {selectedPreset.stimSnippet}
-                  </motion.pre>
-                ) : (
-                  <motion.div
-                    key="zx"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="mt-3 text-xs leading-relaxed text-text-mid"
-                  >
-                    <p className="font-mono text-[11px] text-magic font-bold">{selectedPreset.zxDescription}</p>
-                    <p className="mt-2 text-[11px] text-text-low">
-                      Topological invariants guarantee fault-tolerance regardless of continuous spatial deformations.
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <a
-              href="https://github.com/tqec/TopoLS"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-lg border border-plaquette/40 bg-plaquette/10 py-2 font-mono text-xs font-bold text-plaquette hover:bg-plaquette/20"
-            >
-              <ExternalLink className="h-3.5 w-3.5" /> Export to TopoLS Compiler
-            </a>
-          </div>
+          <a href={sketch.source.href} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-1.5 font-mono text-xs text-plaquette hover:underline">
+            {sketch.source.label} <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
+          <a href="https://github.com/tqec/TopoLS" target="_blank" rel="noreferrer" className="mt-3 flex items-center gap-1.5 font-mono text-xs text-star hover:underline">
+            Open the real TopoLS compiler repository <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

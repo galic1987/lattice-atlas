@@ -63,7 +63,7 @@
 
 ## Section 4 — List view (alternate)
 
-**Layout**: Same data, vertical accordion grouped by tier (shadcn accordion). Each tier header row: TierBadge + name + `x/y understood` + chevron. Expanded tier shows its topics as full-width rows: check toggle, topic name (h3), short (body-sm `text-mid`), dependency chips, `Details →` button (opens drawer). Rows are compact (py-4), border-bottom `ink-600`.
+**Layout**: Same data, accessible vertical disclosure groups by tier. Each tier header row: TierBadge + name + `x/y explored` + chevron. Expanded tiers show full-width topic rows, dependency chips, `Details →`, and separate self-marked exploration versus local check evidence.
 
 **Purpose**: Accessibility + mobile fallback + fast scanning. List view is the default on viewports <768px.
 

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
-import DynamicThresholdPlotter from '@/components/DynamicThresholdPlotter';
 import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -83,9 +82,9 @@ function facePath(lat: Lattice, s: Stabilizer): string {
 const PLAYBACK_STEPS = [
   {
     step: 0,
-    title: 'Initial State',
-    subtitle: '|0⟩ Ground State',
-    description: 'Data qubits initialized to clean ground state |0⟩. Stabilizers measure +1 (no syndromes).',
+    title: 'Clean Error Frame',
+    subtitle: 'No Pauli errors',
+    description: 'The classical model starts with no Pauli errors, so every ideal stabilizer check returns +1.',
   },
   {
     step: 1,
@@ -95,27 +94,27 @@ const PLAYBACK_STEPS = [
   },
   {
     step: 2,
-    title: 'Stabilizer Compute',
-    subtitle: 'Ancilla Parity Readout',
-    description: 'Ancilla qubits execute CNOT parity measurement circuits. Stabilizers that anticommute with errors flip to -1 eigenvalue (rose syndrome).',
+    title: 'Ideal Check Readout',
+    subtitle: 'Parity from the error frame',
+    description: 'The model computes ideal stabilizer parities. Checks that anticommute with the painted Pauli errors return -1 (rose syndrome).',
   },
   {
     step: 3,
     title: 'Defect Identification',
-    subtitle: 'Graph Vertices',
-    description: 'Syndrome detection events are isolated as topological defect vertices in the MWPM decoding graph.',
+    subtitle: 'Matching-graph vertices',
+    description: 'The fired X- and Z-type checks become separate vertices in the built-in decoder’s spatial matching graphs.',
   },
   {
     step: 4,
-    title: 'MWPM Matching Path',
-    subtitle: 'Minimum Weight Matching',
-    description: 'PyMatching / Blossom V matching algorithm finds minimum-weight correction paths between defect pairs and boundaries.',
+    title: 'Built-in Matching',
+    subtitle: 'Exact small cases · greedy fallback',
+    description: 'The local model pairs same-type defects or boundaries by shortest graph paths. It uses exact dynamic programming up to 16 defects per type, then a greedy fallback—not PyMatching.',
   },
   {
     step: 5,
     title: 'Correction Applied',
-    subtitle: 'Pauli Recovery & Verification',
-    description: 'Matching Pauli correction operators are applied to data qubits. Stabilizers return to +1 and logical state recovery is verified.',
+    subtitle: 'Syndrome + logical-sector check',
+    description: 'The model combines error and candidate correction, confirms the residual syndrome clears, then tests whether the residual crosses a chosen logical support. This verifies the toy-model outcome, not hardware recovery.',
   },
 ] as const;
 
@@ -159,8 +158,8 @@ function LatticeView({
     <svg
       viewBox={`0 0 ${size} ${size}`}
       className="w-full"
-      role="img"
-      aria-label={`Distance-${lat.d} rotated surface code lattice`}
+      role="group"
+      aria-label={`Interactive distance-${lat.d} rotated surface code lattice`}
     >
       {/* stabilizer faces */}
       {lat.stabilizers.map((s) => {
@@ -181,7 +180,7 @@ function LatticeView({
               x={faceCenter(s).x}
               y={faceCenter(s).y + 3.5}
               textAnchor="middle"
-              fontSize={11}
+              fontSize={12}
               fontFamily="'JetBrains Mono', monospace"
               fill={hot ? SYNDROME : base}
               fillOpacity={hot ? 1 : 0.55}
@@ -253,28 +252,17 @@ function LatticeView({
             key={q}
             role="button"
             tabIndex={0}
-            aria-label={`Data qubit ${q}, ${
-              activeError === 0 ? 'no error' : `${PAULI_LABEL[activeError]} error`
-            } — press Enter to paint`}
+            aria-label={`Data qubit ${q + 1}, ${e === 0 ? 'no painted error' : `painted ${PAULI_LABEL[e]} error`}`}
             onClick={() => onQubitClick(q)}
-            onKeyDown={(ev) => {
-              if (ev.key === 'Enter' || ev.key === ' ') {
-                ev.preventDefault();
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
                 onQubitClick(q);
               }
             }}
-            className="group/qb cursor-pointer outline-none"
+            className="group cursor-pointer outline-none"
           >
-            {/* keyboard focus ring */}
-            <circle
-              cx={x}
-              cy={y}
-              r={14}
-              fill="none"
-              stroke="#EAF0FB"
-              strokeWidth={2}
-              className="opacity-0 transition-opacity group-focus-visible/qb:opacity-100"
-            />
+            <circle cx={x} cy={y} r={21} fill="transparent" />
             {corrected && (
               <circle cx={x} cy={y} r={16} fill="none" stroke={OK} strokeWidth={2} strokeDasharray="4 3" />
             )}
@@ -285,7 +273,7 @@ function LatticeView({
               fill={activeError === 0 ? '#1B2743' : PAULI_COLORS[activeError]}
               stroke={activeError === 0 ? '#3D5178' : PAULI_COLORS[activeError]}
               strokeWidth={1.5}
-              className="transition-[fill,stroke] duration-150 hover:stroke-[#EAF0FB]"
+              className="transition-[fill,stroke] duration-150 group-hover:stroke-[#EAF0FB] group-focus-visible:stroke-[#EAF0FB] group-focus-visible:stroke-[3px]"
             />
             {activeError !== 0 && (
               <text
@@ -330,13 +318,43 @@ interface SeriesPoint {
   fails: number;
 }
 
+interface BinomialEstimate {
+  rate: number;
+  lo: number;
+  hi: number;
+}
+
+/** Two-sided 95% Wilson score interval; remains meaningful at 0 failures. */
+function wilsonEstimate(fails: number, trials: number): BinomialEstimate | null {
+  if (trials <= 0) return null;
+  const z = 1.96;
+  const z2 = z * z;
+  const rate = fails / trials;
+  const denominator = 1 + z2 / trials;
+  const center = (rate + z2 / (2 * trials)) / denominator;
+  const halfWidth =
+    (z / denominator) *
+    Math.sqrt((rate * (1 - rate)) / trials + z2 / (4 * trials * trials));
+  return {
+    rate,
+    lo: Math.max(0, center - halfWidth),
+    hi: Math.min(1, center + halfWidth),
+  };
+}
+
 function seriesFor(cells: McCell[], d: number): SeriesPoint[] {
   return cells
-    .filter((c) => c.d === d && c.fails >= 1)
+    .filter((c) => c.d === d && c.trials > 0)
     .map((c) => {
-      const f = c.fails / c.trials;
-      const se = Math.sqrt((f * (1 - f)) / c.trials);
-      return { p: c.p, f, ciLo: Math.max(f - 1.96 * se, 1e-5), ciHi: Math.min(f + 1.96 * se, 1), trials: c.trials, fails: c.fails };
+      const estimate = wilsonEstimate(c.fails, c.trials)!;
+      return {
+        p: c.p,
+        f: estimate.rate,
+        ciLo: estimate.lo,
+        ciHi: estimate.hi,
+        trials: c.trials,
+        fails: c.fails,
+      };
     })
     .sort((a, b) => a.p - b.p);
 }
@@ -372,7 +390,7 @@ function ThresholdChart({ cells, hoverP, onHoverP }: {
       viewBox={`0 0 ${W} ${H}`}
       className="w-full"
       role="img"
-      aria-label="Logical error rate versus physical error rate for distances 3, 5, and 7"
+      aria-label="Logical error rate versus physical error rate for distances 3, 5, and 7, with 95 percent Wilson intervals and upper-bound markers for zero failures"
       onMouseMove={handleMove}
       onMouseLeave={() => onHoverP(null)}
     >
@@ -380,7 +398,7 @@ function ThresholdChart({ cells, hoverP, onHoverP }: {
       {[1, 0.1, 0.01, 0.001, 0.0001].map((f, i) => (
         <g key={f}>
           <line x1={M.left} x2={W - M.right} y1={y(f)} y2={y(f)} stroke="#2A3A5F" strokeWidth={1} strokeOpacity={0.55} />
-          <text x={M.left - 8} y={y(f) + 3.5} textAnchor="end" fontSize={11} fontFamily="'JetBrains Mono', monospace" fill="#64708E">
+          <text x={M.left - 8} y={y(f) + 4} textAnchor="end" fontSize={12} fontFamily="'JetBrains Mono', monospace" fill="#7B89A7">
             {i === 0 ? '1' : `10${'⁻'}${['¹', '²', '³', '⁴'][i - 1]}`}
           </text>
         </g>
@@ -389,7 +407,7 @@ function ThresholdChart({ cells, hoverP, onHoverP }: {
       {[0.04, 0.08, 0.12, 0.16, 0.2].map((p) => (
         <g key={p}>
           <line x1={x(p)} x2={x(p)} y1={M.top} y2={H - M.bottom} stroke="#2A3A5F" strokeWidth={1} strokeOpacity={0.3} />
-          <text x={x(p)} y={H - M.bottom + 18} textAnchor="middle" fontSize={11} fontFamily="'JetBrains Mono', monospace" fill="#64708E">
+          <text x={x(p)} y={H - M.bottom + 19} textAnchor="middle" fontSize={12} fontFamily="'JetBrains Mono', monospace" fill="#7B89A7">
             {(p * 100).toFixed(0)}%
           </text>
         </g>
@@ -409,18 +427,31 @@ function ThresholdChart({ cells, hoverP, onHoverP }: {
       {/* series */}
       {MC_DISTANCES.map((d) => {
         const pts = seriesFor(cells, d);
+        const observed = pts.filter((pt) => pt.fails > 0);
         const color = SERIES_COLORS[d];
-        const path = pts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${x(pt.p)} ${y(pt.f)}`).join(' ');
-        const last = pts[pts.length - 1];
+        const path = observed.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${x(pt.p)} ${y(pt.f)}`).join(' ');
+        const last = observed[observed.length - 1];
         return (
           <g key={d}>
-            {pts.length > 1 && <path d={path} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />}
-            {pts.map((pt) => (
-              <g key={pt.p}>
-                <line x1={x(pt.p)} x2={x(pt.p)} y1={y(pt.ciLo)} y2={y(pt.ciHi)} stroke={color} strokeWidth={1.5} strokeOpacity={0.55} />
-                <circle cx={x(pt.p)} cy={y(pt.f)} r={4} fill={color} stroke="#121B31" strokeWidth={2} />
-              </g>
-            ))}
+            {observed.length > 1 && <path d={path} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />}
+            {pts.map((pt) => {
+              const px = x(pt.p);
+              if (pt.fails === 0) {
+                const upperY = y(pt.ciHi);
+                return (
+                  <g key={pt.p}>
+                    <line x1={px} x2={px} y1={upperY} y2={H - M.bottom} stroke={color} strokeWidth={1.25} strokeOpacity={0.55} strokeDasharray="3 3" />
+                    <path d={`M ${px - 5} ${upperY - 4} L ${px + 5} ${upperY - 4} L ${px} ${upperY + 5} Z`} fill={color} />
+                  </g>
+                );
+              }
+              return (
+                <g key={pt.p}>
+                  <line x1={px} x2={px} y1={y(pt.ciLo)} y2={y(pt.ciHi)} stroke={color} strokeWidth={1.5} strokeOpacity={0.65} />
+                  <circle cx={px} cy={y(pt.f)} r={4} fill={color} stroke="#121B31" strokeWidth={2} />
+                </g>
+              );
+            })}
             {last && (
               <text x={x(last.p) + 10} y={y(last.f) + 4} fontSize={11} fontFamily="'JetBrains Mono', monospace" fill="#A9B4CC">
                 d={d}
@@ -438,18 +469,34 @@ function ThresholdSection() {
   const [cells, setCells] = useState<McCell[]>([]);
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
+  const [workerError, setWorkerError] = useState<string | null>(null);
   const [tps, setTps] = useState(0);
   const [hoverP, setHoverP] = useState<number | null>(null);
   const [refP, setRefP] = useState(0.06);
 
   useEffect(() => () => workerRef.current?.terminate(), []);
 
-  const post = (msg: McCommand) => workerRef.current?.postMessage(msg);
+  const stopFailedWorker = (worker: Worker, message: string) => {
+    worker.terminate();
+    if (workerRef.current === worker) workerRef.current = null;
+    setRunning(false);
+    setDone(false);
+    setTps(0);
+    setWorkerError(message);
+  };
 
-  const ensureWorker = () => {
-    if (workerRef.current) return;
-    const w = new Worker(new URL('../lib/threshold.worker.ts', import.meta.url), { type: 'module' });
+  const ensureWorker = (): Worker | null => {
+    if (workerRef.current) return workerRef.current;
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('../lib/threshold.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      setWorkerError('The Monte Carlo worker could not start in this browser.');
+      return null;
+    }
+    const w = worker;
     w.onmessage = (e: MessageEvent<McProgress>) => {
+      setWorkerError(null);
       setCells(e.data.cells);
       setTps(e.data.trialsPerSec);
       if (e.data.done) {
@@ -457,44 +504,109 @@ function ThresholdSection() {
         setRunning(false);
       }
     };
+    w.onerror = (event) => {
+      event.preventDefault();
+      stopFailedWorker(w, event.message || 'The Monte Carlo worker stopped unexpectedly.');
+    };
+    w.onmessageerror = () => {
+      stopFailedWorker(w, 'The browser could not read a Monte Carlo worker result.');
+    };
     workerRef.current = w;
+    return w;
   };
 
   const toggle = () => {
-    ensureWorker();
+    const worker = ensureWorker();
+    if (!worker) return;
     if (running) {
-      post({ cmd: 'pause' });
+      worker.postMessage({ cmd: 'pause' } satisfies McCommand);
       setRunning(false);
     } else if (cells.length > 0 && !done) {
-      post({ cmd: 'resume' });
+      worker.postMessage({ cmd: 'resume' } satisfies McCommand);
+      setWorkerError(null);
       setRunning(true);
     } else {
-      post({ cmd: 'start', distances: MC_DISTANCES, pValues: MC_P_VALUES, maxTrials: MC_MAX_TRIALS });
+      worker.postMessage({
+        cmd: 'start',
+        distances: MC_DISTANCES,
+        pValues: MC_P_VALUES,
+        maxTrials: MC_MAX_TRIALS,
+      } satisfies McCommand);
       setDone(false);
+      setWorkerError(null);
       setRunning(true);
     }
   };
 
   const reset = () => {
-    post({ cmd: 'pause' });
+    workerRef.current?.postMessage({ cmd: 'pause' } satisfies McCommand);
     setCells([]);
     setRunning(false);
     setDone(false);
+    setWorkerError(null);
     setTps(0);
+  };
+
+  const retryWorker = () => {
+    if (workerRef.current) workerRef.current.terminate();
+    workerRef.current = null;
+    setCells([]);
+    setDone(false);
+    setRunning(false);
+    setTps(0);
+    setWorkerError(null);
+    const worker = ensureWorker();
+    if (!worker) return;
+    worker.postMessage({
+      cmd: 'start',
+      distances: MC_DISTANCES,
+      pValues: MC_P_VALUES,
+      maxTrials: MC_MAX_TRIALS,
+    } satisfies McCommand);
+    setRunning(true);
   };
 
   const totalTrials = cells.reduce((acc, c) => acc + c.trials, 0);
   const trialsByD = (d: number) => cells.filter((c) => c.d === d).reduce((a, c) => a + c.trials, 0);
 
-  const rateAt = (d: number, p: number) => {
-    const cell = cells.find((c) => c.d === d && Math.abs(c.p - p) < 1e-9);
-    if (!cell || cell.fails < 3) return null;
-    return cell.fails / cell.trials;
-  };
-  const lambda = (dLo: number, dHi: number) => {
-    const a = rateAt(dLo, refP);
-    const b = rateAt(dHi, refP);
-    return a !== null && b !== null && b > 0 ? a / b : null;
+  type LambdaEstimate =
+    | { status: 'waiting' | 'insufficient'; reason: string }
+    | { status: 'estimated'; value: number; lo: number; hi: number; conclusion: string; counts: string };
+
+  const lambda = (dLo: number, dHi: number): LambdaEstimate => {
+    const lowDistance = cells.find((cell) => cell.d === dLo && Math.abs(cell.p - refP) < 1e-9);
+    const highDistance = cells.find((cell) => cell.d === dHi && Math.abs(cell.p - refP) < 1e-9);
+    if (!lowDistance || !highDistance || lowDistance.trials === 0 || highDistance.trials === 0) {
+      return { status: 'waiting', reason: 'run the sweep' };
+    }
+    if (lowDistance.fails < 20 || highDistance.fails < 20) {
+      return {
+        status: 'insufficient',
+        reason: `${lowDistance.fails} vs ${highDistance.fails} failures · need ≥20 each`,
+      };
+    }
+    const lowEstimate = wilsonEstimate(lowDistance.fails, lowDistance.trials)!;
+    const highEstimate = wilsonEstimate(highDistance.fails, highDistance.trials)!;
+    if (highEstimate.rate <= 0 || highEstimate.lo <= 0) {
+      return { status: 'insufficient', reason: 'denominator unresolved' };
+    }
+    const value = lowEstimate.rate / highEstimate.rate;
+    const ratioLo = lowEstimate.lo / highEstimate.hi;
+    const ratioHi = lowEstimate.hi / highEstimate.lo;
+    const conclusion =
+      ratioLo > 1
+        ? 'suppression supported'
+        : ratioHi < 1
+          ? 'larger code is worse'
+          : 'range crosses 1';
+    return {
+      status: 'estimated',
+      value,
+      lo: ratioLo,
+      hi: ratioHi,
+      conclusion,
+      counts: `${lowDistance.fails}/${lowDistance.trials} vs ${highDistance.fails}/${highDistance.trials}`,
+    };
   };
   const l35 = lambda(3, 5);
   const l57 = lambda(5, 7);
@@ -517,10 +629,10 @@ function ThresholdSection() {
       >
         <p className="eyebrow !text-magic">{'// THE EXPERIMENT'}</p>
         <h2 className="mt-4 max-w-2xl font-display text-[32px] font-semibold leading-[1.1] text-text-hi md:text-[40px]">
-          Reproduce the scaling law.
+          Explore a finite-size scaling signal.
         </h2>
         <p className="mt-5 max-w-2xl leading-[1.7] text-text-mid">
-          This is the plot the whole field is built on. Sample random noise at
+          This is a browser-scale version of a canonical threshold diagnostic. Sample independent data-qubit Pauli noise at
           each physical error rate, decode, and count logical failures — live,
           in your browser. Below threshold, bigger codes win: the curves
           separate, with <span className="mono-pill">d = 7</span> below{' '}
@@ -542,7 +654,7 @@ function ThresholdSection() {
               </span>
             ))}
             <span className="ml-auto font-mono text-[11px] text-text-low">
-              error bars: 95% CI · log scale
+              95% Wilson intervals · ▼ = zero-failure upper bound
             </span>
           </div>
           <ThresholdChart cells={cells} hoverP={hoverP} onHoverP={setHoverP} />
@@ -556,7 +668,7 @@ function ThresholdSection() {
                   {cell && cell.trials > 0
                     ? cell.fails > 0
                       ? fmtRate(cell.fails / cell.trials)
-                      : `0/${cell.trials}`
+                      : `≤ ${fmtRate(wilsonEstimate(0, cell.trials)!.hi)} (95%)`
                     : '—'}
                 </p>
               ))}
@@ -586,7 +698,11 @@ function ThresholdSection() {
                         const cell = cells.find((c) => c.d === d && Math.abs(c.p - p) < 1e-9);
                         return (
                           <td key={d} className="py-1 pr-4">
-                            {cell && cell.trials > 0 ? `${cell.fails}/${cell.trials}` : '—'}
+                            {cell && cell.trials > 0
+                              ? cell.fails > 0
+                                ? `${cell.fails}/${cell.trials}`
+                                : `0/${cell.trials} (upper ≤${fmtRate(wilsonEstimate(0, cell.trials)!.hi)})`
+                              : '—'}
                           </td>
                         );
                       })}
@@ -602,8 +718,16 @@ function ThresholdSection() {
         <aside className="flex flex-col gap-6">
           <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
             <p className="eyebrow mb-3">{'// RUN'}</p>
+            {workerError && (
+              <div role="alert" className="mb-3 rounded-lg border border-syndrome/50 bg-syndrome/[0.08] p-3">
+                <p className="text-[12px] leading-relaxed text-text-mid">{workerError}</p>
+                <button type="button" onClick={retryWorker} className="btn-secondary mt-2 !px-3 !py-1.5 text-[12px]">
+                  Retry sweep
+                </button>
+              </div>
+            )}
             <div className="flex gap-2">
-              <button type="button" onClick={toggle} disabled={done} className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" onClick={toggle} disabled={done || Boolean(workerError)} className="btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-40">
                 {running ? (
                   <>
                     <Pause className="h-4 w-4" /> Pause
@@ -618,9 +742,11 @@ function ThresholdSection() {
                 <RotateCcw className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-3 font-mono text-[11px] leading-relaxed text-text-low">
-              {done
-                ? `finished · ${(totalTrials / 1000).toFixed(0)}k trials`
+            <p aria-live="polite" className="mt-3 font-mono text-[11px] leading-relaxed text-text-low">
+              {workerError
+                ? 'worker stopped · results incomplete'
+                : done
+                  ? `finished · ${(totalTrials / 1000).toFixed(0)}k trials`
                 : running
                   ? `${tps.toLocaleString()} trials/s · ${(totalTrials / 1000).toFixed(0)}k total`
                   : totalTrials > 0
@@ -657,18 +783,28 @@ function ThresholdSection() {
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-lg border border-ink-700 bg-ink-850 p-3 text-center">
                   <p className="font-display text-2xl font-bold text-text-hi">
-                    {value !== null ? value.toFixed(1) : '…'}
+                    {value.status === 'estimated' ? value.value.toFixed(2) : '—'}
                   </p>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-text-low">{label}</p>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-text-low">{label}</p>
+                  <p className="mt-1 font-mono text-[11px] leading-relaxed text-text-low">
+                    {value.status === 'estimated'
+                      ? <>
+                          <span className="block">Wilson endpoint range {value.lo.toFixed(2)}–{value.hi.toFixed(2)} · {value.conclusion}</span>
+                          <span className="mt-1 block">failures/trials: {value.counts}</span>
+                        </>
+                      : value.reason}
+                  </p>
                 </div>
               ))}
             </div>
             <p className="mt-3 font-mono text-[11px] leading-relaxed text-text-low">
-              Λ &gt; 1 means error correction is winning.{' '}
+              A point estimate Λ &gt; 1 suggests suppression in this model. The lab
+              reports a conclusion only after both codes record at least 20 failures,
+              and only calls it supported when the conservative Wilson endpoint range excludes 1.{' '}
               <Link to="/papers#2408.13687" className="link-slide text-star hover:text-text-hi">
                 Google&apos;s 2024 experiment
               </Link>{' '}
-              measured Λ ≈ 2.1 on real hardware.
+              reported Λ ≈ 2.1 on its hardware experiment.
             </p>
           </div>
 
@@ -678,8 +814,14 @@ function ThresholdSection() {
               Here the curves cross near p ≈ 15% because this lab uses
               code-capacity noise: errors strike once and measurements are
               perfect. Real devices measure syndromes with noisy circuits,
-              which drops the threshold to the famous ~1%. The scaling law is
-              the same — only the crossing point moves.
+              producing a much lower, model-dependent crossing often near 1%.
+              The qualitative test—whether larger distances help—survives, but
+              this crossing value does not transfer to hardware.
+            </p>
+            <p className="mt-3 font-mono text-[11px] leading-relaxed text-text-low">
+              Decoder disclosure: exact shortest-path matching is used for up
+              to 16 defects per check type; larger cases use a greedy fallback.
+              This page does not execute PyMatching.
             </p>
           </div>
         </aside>
@@ -941,8 +1083,8 @@ export default function SurfaceCodeLab() {
           >
             A live distance-{d} rotated surface code. Click data qubits to inject
             errors and watch the stabilizers light up. Step through error correction
-            with the interactive playback controller or toggle 3D spacetime view to
-            explore syndrome evolution across time rounds T=1..d.
+            with the interactive playback controller, or inspect an explicitly scoped
+            phenomenological history with cumulative data faults and noisy measurements.
           </motion.p>
         </div>
       </header>
@@ -951,15 +1093,16 @@ export default function SurfaceCodeLab() {
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
         {/* View Mode Toggle Bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-600 bg-ink-800 p-4">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center">
             <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-text-low">
               Visualization Mode:
             </span>
-            <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850">
+            <div className="grid w-full min-w-0 grid-cols-3 overflow-hidden rounded-lg border border-ink-600 bg-ink-850 sm:flex sm:w-auto">
               <button
                 type="button"
                 onClick={() => setLabViewMode('2d')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                aria-pressed={labViewMode === '2d'}
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === '2d'
                     ? 'bg-plaquette/20 text-plaquette font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -970,7 +1113,8 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={() => setLabViewMode('3d')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                aria-pressed={labViewMode === '3d'}
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === '3d'
                     ? 'bg-magic/20 text-magic font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -981,7 +1125,8 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={() => setLabViewMode('dual')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-[12px] transition-colors ${
+                aria-pressed={labViewMode === 'dual'}
+                className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-1.5 font-mono text-[12px] transition-colors sm:px-3 ${
                   labViewMode === 'dual'
                     ? 'bg-star/20 text-star font-bold'
                     : 'text-text-mid hover:text-text-hi'
@@ -1008,7 +1153,7 @@ export default function SurfaceCodeLab() {
             </div>
 
             {/* Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto">
               <button
                 type="button"
                 onClick={() => goToStep(Math.max(0, currentStep - 1))}
@@ -1046,12 +1191,13 @@ export default function SurfaceCodeLab() {
               </button>
 
               {/* Speed Selector */}
-              <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850 ml-2">
+              <div className="flex overflow-hidden rounded-lg border border-ink-600 bg-ink-850">
                 {[0.5, 1, 2].map((spd) => (
                   <button
                     key={spd}
                     type="button"
                     onClick={() => setPlaybackSpeed(spd)}
+                    aria-pressed={playbackSpeed === spd}
                     className={`px-2.5 py-1 font-mono text-[11px] transition-colors ${
                       playbackSpeed === spd
                         ? 'bg-plaquette/20 text-plaquette font-bold'
@@ -1066,7 +1212,7 @@ export default function SurfaceCodeLab() {
               <button
                 type="button"
                 onClick={clear}
-                className="btn-ghost !p-2 ml-2"
+                className="btn-ghost !p-2"
                 title="Reset to Initial State"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -1085,6 +1231,7 @@ export default function SurfaceCodeLab() {
                   key={s.step}
                   type="button"
                   onClick={() => goToStep(s.step)}
+                  aria-current={active ? 'step' : undefined}
                   className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-all duration-150 ${
                     active
                       ? 'border-magic bg-magic/15 shadow-lg shadow-magic/10'
@@ -1124,9 +1271,9 @@ export default function SurfaceCodeLab() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           {/* Main Visualization Column */}
-          <div className="flex flex-col gap-6">
+          <div className="flex min-w-0 flex-col gap-6">
             {/* 2D Lattice View */}
             {(labViewMode === '2d' || labViewMode === 'dual') && (
               <div className="rounded-xl border border-ink-600 bg-ink-850 p-4 md:p-6">
@@ -1165,6 +1312,7 @@ export default function SurfaceCodeLab() {
             {/* 3D Spacetime View */}
             {(labViewMode === '3d' || labViewMode === 'dual') && (
               <SpacetimeView3D
+                key={d}
                 lat={lat}
                 errors={errors}
                 result={result}
@@ -1287,7 +1435,7 @@ export default function SurfaceCodeLab() {
                       result.success ? 'text-stabilizer' : 'text-syndrome'
                     }`}
                   >
-                    {result.success ? '✓ corrected — state recovered' : '✗ logical error'}
+                    {result.success ? '✓ corrected — logical sector preserved' : '✗ logical error'}
                   </p>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-text-mid">
                     {result.success
@@ -1396,16 +1544,11 @@ export default function SurfaceCodeLab() {
             <div className="rounded-xl border border-star/40 bg-star/[0.07] p-5">
               <p className="eyebrow mb-3 !text-star">{'// TAKE IT TO REAL SOFTWARE'}</p>
               <p className="text-[13px] leading-relaxed text-text-mid">
-                Download this d={d} lattice as a noisy memory experiment in{' '}
-                <span className="mono-pill">.stim</span> format — the simulator
-                used in the below-threshold experiments. Paste it into Crumble
-                to step through the circuit, or sample it with Stim + PyMatching.
-                The repo&apos;s{' '}
-                <span className="font-mono text-[12px] text-star">
-                  notebooks/first-threshold-curve.ipynb
-                </span>{' '}
-                walks the full pipeline and reproduces this page&apos;s plot with
-                circuit-level noise — where the threshold drops to the famous ~1%.
+                Download this d={d} lattice as a generated noisy-memory circuit
+                in <span className="mono-pill">.stim</span> format. This page does
+                not execute the file: inspect it in Crumble or run it separately
+                with Stim and a decoder such as PyMatching. Its circuit-level
+                noise model is different from the ideal-measurement browser sweep above.
               </p>
               <button type="button" onClick={downloadStim} className="btn-secondary mt-4 w-full !border-star/50 !text-star hover:!bg-star/10">
                 <Download className="h-4 w-4" /> Download .stim circuit
@@ -1479,10 +1622,6 @@ export default function SurfaceCodeLab() {
 
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
         <WasmQuantumSandbox />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-6 md:px-8">
-        <DynamicThresholdPlotter />
       </section>
 
       <ThresholdSection />

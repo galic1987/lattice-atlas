@@ -1,20 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
-import { Download } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { AlertTriangle, Download } from 'lucide-react';
 import { topics, papers } from '@/data';
 import { useProgress } from '@/store/progress';
+import { FOUNDATION_STAGE_IDS } from '@/lib/learningRecord';
 
 /**
- * Completion certificate for the learning path (canvas-rendered, PNG export).
- * Client-side only, matching the app's no-backend design; the wording is
- * explicit that this is a self-study certificate tracked in the browser.
+ * Downloadable activity record for the learning path. It deliberately records
+ * local actions and checks without claiming accreditation, mastery, identity,
+ * retention, or independent work.
  */
 
 const W = 1600;
 const H = 1131; // ≈ A4 landscape ratio
 
-const NAME_KEY = 'lattice-atlas-name';
-
-function drawCertificate(canvas: HTMLCanvasElement, name: string, readCount: number) {
+function drawCertificate(
+  canvas: HTMLCanvasElement,
+  name: string,
+  exploredCount: number,
+  checkedCount: number,
+  readCount: number,
+  evidenceLine: string,
+) {
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -43,7 +49,7 @@ function drawCertificate(canvas: HTMLCanvasElement, name: string, readCount: num
   // logo mark: 3×3 lattice with a glowing center plaquette diamond
   const lx = W / 2;
   const ly = 150;
-  ctx.fillStyle = '#64708E';
+  ctx.fillStyle = '#A9B4CC';
   for (let i = -1; i <= 1; i++) {
     for (let j = -1; j <= 1; j++) {
       ctx.beginPath();
@@ -70,19 +76,19 @@ function drawCertificate(canvas: HTMLCanvasElement, name: string, readCount: num
   if ('letterSpacing' in ctx) spaced.letterSpacing = '5px';
   ctx.fillStyle = '#22D3EE';
   ctx.font = mono(21);
-  ctx.fillText('// LATTICE ATLAS — SELF-STUDY CERTIFICATE', W / 2, 254);
+  ctx.fillText('// LATTICE ATLAS — LOCAL SELF-STUDY RECORD', W / 2, 254);
   if ('letterSpacing' in ctx) spaced.letterSpacing = '0px';
 
   // title
   ctx.fillStyle = '#EAF0FB';
   ctx.font = display(74);
-  ctx.fillText('Certificate of Completion', W / 2, 350);
+  ctx.fillText('Learning Activity Record', W / 2, 350);
 
   // certifies
   if ('letterSpacing' in ctx) spaced.letterSpacing = '4px';
-  ctx.fillStyle = '#64708E';
+  ctx.fillStyle = '#A9B4CC';
   ctx.font = mono(19);
-  ctx.fillText('THIS CERTIFIES THAT', W / 2, 452);
+  ctx.fillText('RECORDED LOCALLY FOR', W / 2, 452);
   if ('letterSpacing' in ctx) spaced.letterSpacing = '0px';
 
   // learner name + gradient rule
@@ -91,30 +97,37 @@ function drawCertificate(canvas: HTMLCanvasElement, name: string, readCount: num
   ctx.fillText(name || 'Your Name', W / 2, 560);
   const rule = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
   rule.addColorStop(0, '#22D3EE');
-  rule.addColorStop(1, '#8B5CF6');
+  rule.addColorStop(1, '#9B7BFA');
   ctx.fillStyle = rule;
   ctx.fillRect(W / 2 - 300, 596, 600, 3);
 
   // achievement
   ctx.fillStyle = '#A9B4CC';
   ctx.font = body(27);
-  ctx.fillText('completed the full prerequisite tree of the Lattice Atlas learning path in', W / 2, 676);
+  const explorationLine = exploredCount === topics.length
+    ? 'self-marked all Lattice Atlas prerequisite topics as explored in'
+    : `self-marked ${exploredCount} of ${topics.length} prerequisite topics as explored in`;
+  ctx.fillText(explorationLine, W / 2, 676);
   ctx.fillStyle = '#EAF0FB';
   ctx.font = display(34, 600);
   ctx.fillText('Topological Quantum Error Correction', W / 2, 730);
   ctx.fillStyle = '#A9B4CC';
   ctx.font = body(27);
-  ctx.fillText('from linear algebra to the research frontier', W / 2, 780);
+  ctx.fillText('activity is separated from the open-book checks recorded below', W / 2, 780);
 
   // stats
   if ('letterSpacing' in ctx) spaced.letterSpacing = '3px';
   ctx.fillStyle = '#F5B83D';
   ctx.font = mono(22);
   ctx.fillText(
-    `${topics.length} TOPICS · 6 TIERS · ${readCount}/${papers.length} PAPERS READ`,
+    `${exploredCount}/${topics.length} EXPLORED · ${checkedCount}/${topics.length} CHECKED · ${readCount}/${papers.length} PAPERS READ`,
     W / 2,
-    866,
+    850,
   );
+
+  ctx.fillStyle = '#34D399';
+  ctx.font = mono(18);
+  ctx.fillText(evidenceLine, W / 2, 894);
 
   // issue date
   const date = new Date().toLocaleDateString('en-US', {
@@ -122,48 +135,60 @@ function drawCertificate(canvas: HTMLCanvasElement, name: string, readCount: num
     month: 'long',
     day: 'numeric',
   });
-  ctx.fillStyle = '#64708E';
+  ctx.fillStyle = '#A9B4CC';
   ctx.font = mono(18);
-  ctx.fillText(`ISSUED ${date.toUpperCase()}`, W / 2, 920);
+  ctx.fillText(`ISSUED ${date.toUpperCase()}`, W / 2, 944);
   if ('letterSpacing' in ctx) spaced.letterSpacing = '0px';
 
   // footer
-  ctx.fillStyle = '#64708E';
+  ctx.fillStyle = '#A9B4CC';
   ctx.font = body(17);
   ctx.fillText(
-    'Self-study achievement · progress tracked locally in the learner’s browser · not an accredited credential',
+    'Self-reported activity + local unsigned checks · not proof of mastery, identity, or an accredited credential',
     W / 2,
     H - 96,
   );
 }
 
 export default function CertificatePanel() {
-  const { readCount } = useProgress();
+  const {
+    exploredCount,
+    checkedCount,
+    readCount,
+    displayName: name,
+    setDisplayName,
+    evidenceFor,
+    storageStatus,
+  } = useProgress();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [name, setName] = useState(() => {
-    try {
-      return localStorage.getItem(NAME_KEY) ?? '';
-    } catch {
-      return '';
-    }
-  });
+  const foundations = new Map(evidenceFor('foundation-prediction').map((entry) => [entry.stageId, entry]));
+  const foundationCorrect = FOUNDATION_STAGE_IDS.filter((stageId) => foundations.get(stageId)?.correct).length;
+  const reviews = evidenceFor('review-recall');
+  const reviewAttempts = reviews.reduce((sum, entry) => sum + entry.attempts, 0);
+  const reviewSuccesses = reviews.reduce(
+    (sum, entry) => sum + (entry.successfulAttempts ?? (entry.rating === 'easy' ? entry.attempts : 0)),
+    0,
+  );
+  const duel = evidenceFor('duel-result')
+    .filter((entry) => entry.mode === 'daily' && entry.compatible === true)
+    .sort((left, right) => right.recordedAt.localeCompare(left.recordedAt))[0];
+  const capstone = evidenceFor('capstone')
+    .sort((left, right) => (right.correct / right.total) - (left.correct / left.total))[0];
+  const evidenceLine = `LOCAL EVIDENCE · FOUNDATIONS ${foundationCorrect}/${FOUNDATION_STAGE_IDS.length} · REVIEW ${reviewSuccesses}/${reviewAttempts} · DUEL ${duel?.score ?? 0}/${duel?.maxScore ?? 150} · CAPSTONE ${capstone?.correct ?? 0}/${capstone?.total ?? 0}`;
 
   useEffect(() => {
-    try {
-      localStorage.setItem(NAME_KEY, name);
-    } catch {
-      /* storage unavailable */
-    }
     let cancelled = false;
     document.fonts.ready
       .then(() => {
-        if (!cancelled && canvasRef.current) drawCertificate(canvasRef.current, name, readCount);
+        if (!cancelled && canvasRef.current) {
+          drawCertificate(canvasRef.current, name, exploredCount, checkedCount, readCount, evidenceLine);
+        }
       })
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [name, readCount]);
+  }, [name, exploredCount, checkedCount, readCount, evidenceLine]);
 
   const download = () => {
     canvasRef.current?.toBlob((blob) => {
@@ -178,7 +203,7 @@ export default function CertificatePanel() {
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '') || 'learner';
-      a.download = `lattice-atlas-certificate-${slug}.png`;
+      a.download = `lattice-atlas-activity-record-${slug}.png`;
       a.click();
       URL.revokeObjectURL(url);
     }, 'image/png');
@@ -186,17 +211,20 @@ export default function CertificatePanel() {
 
   return (
     <div className="mt-8 border-t border-ink-700 pt-6">
-      <p className="eyebrow mb-3">{'// YOUR CERTIFICATE'}</p>
+      <p className="eyebrow mb-3">{'// YOUR LOCAL ACTIVITY RECORD'}</p>
+      <p className="mb-4 max-w-2xl text-sm leading-6 text-text-low">
+        This download records self-marked exploration and local checks. It is not a certificate of mastery or an accredited credential.
+      </p>
       <div className="flex flex-wrap items-end gap-3">
         <label className="min-w-[220px] flex-1 sm:max-w-xs">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-low">
-            Name on the certificate
+            Name on the activity record
           </span>
           <input
             type="text"
             value={name}
             maxLength={40}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Ada Lovelace"
             className="mt-1.5 w-full rounded-lg border border-ink-600 bg-ink-800 px-3 py-2 text-sm text-text-hi placeholder:text-text-low focus:border-plaquette/60 focus:outline-none"
           />
@@ -210,10 +238,14 @@ export default function CertificatePanel() {
           <Download className="h-4 w-4" /> Download PNG
         </button>
       </div>
+      <div className={`mt-3 flex max-w-2xl items-start gap-2 rounded-lg border p-3 text-xs leading-5 ${storageStatus.state === 'saved' ? 'border-stabilizer/30 bg-stabilizer/[0.06] text-text-low' : 'border-syndrome/40 bg-syndrome/[0.08] text-text-hi'}`} role="status">
+        {storageStatus.state === 'memory-only' && <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-syndrome" aria-hidden="true" />}
+        <span>{storageStatus.message}</span>
+      </div>
       <canvas
         ref={canvasRef}
         role="img"
-        aria-label={`Certificate of completion${name ? ` for ${name}` : ''}`}
+        aria-label={`Local Lattice Atlas learning activity record${name ? ` for ${name}` : ''}`}
         className="mt-4 w-full max-w-2xl rounded-lg border border-ink-600"
       />
     </div>

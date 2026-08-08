@@ -1,241 +1,162 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { Cpu, Download, Play, Terminal } from 'lucide-react';
 import {
-  Cpu,
-  Play,
-  Download,
-  Terminal,
-  Zap
-} from 'lucide-react';
-import { buildLattice, decode, sampleDepolarizing, toStimCircuit } from '@/lib/surfaceCode';
+  MAX_EXACT_DEFECTS,
+  buildLattice,
+  decode,
+  sampleDepolarizing,
+  toStimCircuit,
+} from '@/lib/surfaceCode';
+
+interface Results {
+  totalShots: number;
+  logicalErrors: number;
+  logicalErrorRate: number;
+  interval: [number, number];
+  executionTimeMs: number;
+  stimCircuit: string;
+  seed: number;
+}
+
+function seededRandom(seed: number) {
+  let state = seed >>> 0;
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function wilson95(failures: number, shots: number): [number, number] {
+  const z = 1.959963984540054;
+  const observed = failures / shots;
+  const denominator = 1 + z * z / shots;
+  const center = (observed + z * z / (2 * shots)) / denominator;
+  const half = z * Math.sqrt((observed * (1 - observed) + z * z / (4 * shots)) / shots) / denominator;
+  return [Math.max(0, center - half), Math.min(1, center + half)];
+}
+
+function percent(value: number) {
+  return `${(value * 100).toFixed(value < 0.001 ? 4 : 3)}%`;
+}
 
 export default function WasmQuantumSandbox() {
-  const [distance, setDistance] = useState<number>(3);
-  const [errorRate, setErrorRate] = useState<number>(0.005);
-  const [shots, setShots] = useState<number>(1000);
-  const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [results, setResults] = useState<{
-    totalShots: number;
-    logicalErrors: number;
-    logicalErrorRate: number;
-    executionTimeMs: number;
-    shotsPerSec: number;
-    stimCircuit: string;
-    verifiedInvariants: boolean;
-  } | null>(null);
+  const [distance, setDistance] = useState(3);
+  const [errorRate, setErrorRate] = useState(0.005);
+  const [shots, setShots] = useState(1000);
+  const [seed, setSeed] = useState(20260807);
+  const [isRunning, setIsRunning] = useState(false);
+  const [results, setResults] = useState<Results | null>(null);
 
-  const runWasmSimulation = useCallback(() => {
+  const runSimulation = useCallback(() => {
     setIsRunning(true);
-
-    const timer = setTimeout(() => {
-      const startTime = performance.now();
-      const lat = buildLattice(distance);
-      let fails = 0;
-
-      for (let i = 0; i < shots; i++) {
-        const errors = sampleDepolarizing(lat.n, errorRate);
-        const res = decode(lat, errors);
-        if (!res.success) {
-          fails++;
-        }
+    window.setTimeout(() => {
+      const start = performance.now();
+      const lattice = buildLattice(distance);
+      const rng = seededRandom(seed);
+      let failures = 0;
+      for (let shot = 0; shot < shots; shot += 1) {
+        const errors = sampleDepolarizing(lattice.n, errorRate, rng);
+        if (!decode(lattice, errors).success) failures += 1;
       }
-
-      const endTime = performance.now();
-      const durationMs = Math.max(endTime - startTime, 1);
-      const stimCode = toStimCircuit(lat, errorRate);
-
       setResults({
         totalShots: shots,
-        logicalErrors: fails,
-        logicalErrorRate: fails / shots,
-        executionTimeMs: durationMs,
-        shotsPerSec: Math.round((shots / durationMs) * 1000),
-        stimCircuit: stimCode,
-        verifiedInvariants: true,
+        logicalErrors: failures,
+        logicalErrorRate: failures / shots,
+        interval: wilson95(failures, shots),
+        executionTimeMs: Math.max(performance.now() - start, 0),
+        stimCircuit: toStimCircuit(lattice, errorRate),
+        seed,
       });
-
       setIsRunning(false);
-    }, 10);
+    }, 0);
+  }, [distance, errorRate, seed, shots]);
 
-    return () => clearTimeout(timer);
-  }, [distance, errorRate, shots]);
-
-  useEffect(() => {
-    // Run simulation asynchronously on initial load
-    const timeout = setTimeout(() => {
-      runWasmSimulation();
-    }, 50);
-    return () => clearTimeout(timeout);
-  }, [runWasmSimulation]);
+  const downloadStim = () => {
+    if (!results) return;
+    const blob = new Blob([results.stimCircuit], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `surface_code_d${distance}_p${errorRate}.stim`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
-      {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-ink-700 pb-4">
+    <section className="rounded-2xl border border-plaquette/40 bg-ink-900 p-5 shadow-glow-cyan md:p-6" aria-labelledby="browser-sandbox-title">
+      <div className="flex flex-col gap-3 border-b border-ink-700 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette">
-            <Cpu className="h-6 w-6" />
-          </div>
+          <div className="rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette"><Cpu className="h-6 w-6" aria-hidden="true" /></div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// IN-BROWSER WASM & WORKER ENGINE</span>
-              <span className="rounded bg-stabilizer/20 px-2 py-0.5 font-mono text-[10px] text-stabilizer font-bold">100% CLIENT-SIDE</span>
-            </div>
-            <h3 className="font-display text-xl font-bold text-text-hi">WASM Quantum Simulation Sandbox</h3>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// MAIN-THREAD TYPESCRIPT TOY MODEL</span>
+            <h3 id="browser-sandbox-title" className="font-display text-xl font-bold text-text-hi">Browser code-capacity sandbox</h3>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 font-mono text-xs text-text-mid">
-          <span className="inline-block h-2 w-2 rounded-full bg-stabilizer animate-pulse" />
-          WebAssembly / Web Worker Active
-        </div>
+        <span className="rounded border border-magic/40 bg-magic/10 px-3 py-1 font-mono text-xs text-magic">NOT WASM · NOT A WORKER · NOT HARDWARE</span>
       </div>
 
-      {/* Control Sliders */}
-      <div className="mt-6 grid gap-6 md:grid-cols-3">
-        {/* Code Distance */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-text-mid">Code Distance (d):</span>
-            <span className="font-bold text-plaquette">d = {distance}</span>
-          </div>
-          <div className="mt-3 flex gap-2">
-            {[3, 5, 7].map((dVal) => (
-              <button
-                key={dVal}
-                type="button"
-                onClick={() => setDistance(dVal)}
-                className={
-                  distance === dVal
-                    ? 'flex-1 rounded-lg border border-plaquette bg-plaquette/20 py-1.5 font-mono text-xs font-bold text-plaquette'
-                    : 'flex-1 rounded-lg border border-ink-600 bg-ink-850 py-1.5 font-mono text-xs text-text-mid hover:border-ink-500'
-                }
-              >
-                d={dVal} ({dVal * dVal} qubits)
-              </button>
+      <div className="mt-5 rounded-xl border border-magic/30 bg-magic/5 p-4 text-xs leading-5 text-text-mid">
+        Each shot samples independent X/Y/Z data-qubit errors with total probability <span className="font-mono text-magic">p</span>, measures ideal syndromes once, and applies this site&apos;s exact-small/greedy-large decoder. It omits gate, reset, measurement, leakage, correlation, and time-dependent faults; it cannot establish a hardware or universal threshold.
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <fieldset className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <legend className="px-1 font-mono text-xs text-text-mid">Code distance</legend>
+          <div className="mt-2 flex gap-2">
+            {[3, 5, 7].map((value) => (
+              <button key={value} type="button" onClick={() => setDistance(value)} aria-pressed={distance === value} className={distance === value ? 'flex-1 rounded-lg border border-plaquette bg-plaquette/20 py-2 font-mono text-xs font-bold text-plaquette' : 'flex-1 rounded-lg border border-ink-600 bg-ink-850 py-2 font-mono text-xs text-text-mid hover:border-ink-500'}>d={value}</button>
             ))}
           </div>
-        </div>
+        </fieldset>
 
-        {/* Physical Error Rate */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-text-mid">Physical Error Rate (p):</span>
-            <span className="font-bold text-syndrome">{(errorRate * 100).toFixed(2)}%</span>
-          </div>
-          <input
-            type="range"
-            min="0.001"
-            max="0.03"
-            step="0.001"
-            value={errorRate}
-            onChange={(e) => setErrorRate(parseFloat(e.target.value))}
-            className="mt-3 w-full accent-syndrome cursor-pointer h-2 rounded-lg bg-ink-700"
-          />
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-            <span>0.1%</span>
-            <span>1.0% (p_th)</span>
-            <span>3.0%</span>
-          </div>
-        </div>
+        <label className="rounded-xl border border-ink-700 bg-ink-950 p-4 font-mono text-xs text-text-mid">
+          <span className="flex justify-between gap-3">Data-Pauli error p <output className="font-bold text-syndrome">{percent(errorRate)}</output></span>
+          <input type="range" min="0.001" max="0.15" step="0.001" value={errorRate} onChange={(event) => setErrorRate(Number(event.target.value))} aria-valuetext={`${percent(errorRate)} independent data-Pauli error probability`} className="mt-4 w-full accent-syndrome" />
+        </label>
 
-        {/* Shot Count */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-text-mid">Shots to Sample:</span>
-            <span className="font-bold text-star">{shots.toLocaleString()}</span>
-          </div>
-          <div className="mt-3 flex gap-2">
-            {[100, 1000, 5000].map((sVal) => (
-              <button
-                key={sVal}
-                type="button"
-                onClick={() => setShots(sVal)}
-                className={
-                  shots === sVal
-                    ? 'flex-1 rounded-lg border border-star bg-star/20 py-1.5 font-mono text-xs font-bold text-star'
-                    : 'flex-1 rounded-lg border border-ink-600 bg-ink-850 py-1.5 font-mono text-xs text-text-mid hover:border-ink-500'
-                }
-              >
-                {sVal.toLocaleString()}
-              </button>
+        <fieldset className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <legend className="px-1 font-mono text-xs text-text-mid">Shots</legend>
+          <div className="mt-2 flex gap-2">
+            {[100, 1000, 5000].map((value) => (
+              <button key={value} type="button" onClick={() => setShots(value)} aria-pressed={shots === value} className={shots === value ? 'flex-1 rounded-lg border border-star bg-star/20 py-2 font-mono text-xs font-bold text-star' : 'flex-1 rounded-lg border border-ink-600 bg-ink-850 py-2 font-mono text-xs text-text-mid hover:border-ink-500'}>{value >= 1000 ? `${value / 1000}k` : value}</button>
             ))}
           </div>
-        </div>
+        </fieldset>
+
+        <label className="rounded-xl border border-ink-700 bg-ink-950 p-4 font-mono text-xs text-text-mid">
+          Deterministic seed
+          <input type="number" value={seed} min="0" max="4294967295" onChange={(event) => setSeed(Number(event.target.value) >>> 0)} className="mt-3 w-full rounded border border-ink-600 bg-ink-850 px-3 py-2 text-text-hi" />
+        </label>
       </div>
 
-      {/* Action Button */}
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={runWasmSimulation}
-          disabled={isRunning}
-          className="btn-primary w-full justify-center text-sm"
-        >
-          {isRunning ? (
-            <>
-              <Zap className="h-4 w-4 animate-spin text-plaquette" /> Executing WASM Monte Carlo Sampling...
-            </>
-          ) : (
-            <>
-              <Play className="h-4 w-4" /> Run WASM Simulation ({shots.toLocaleString()} shots, d={distance})
-            </>
-          )}
-        </button>
-      </div>
+      <button type="button" onClick={runSimulation} disabled={isRunning} className="btn-primary mt-6 w-full">
+        <Play className="h-4 w-4" aria-hidden="true" /> {isRunning ? 'Sampling on the browser main thread…' : `Run ${shots.toLocaleString()} deterministic shots`}
+      </button>
 
-      {/* Results Display */}
       {results && (
-        <div className="mt-6 rounded-xl border border-ink-700 bg-ink-950 p-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-ink-800 pb-4">
-            <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-stabilizer">
-                ✓ WASM EXECUTION RESULTS (100% IN-BROWSER)
-              </span>
-              <h4 className="font-display text-lg font-bold text-text-hi">
-                Logical Error Rate: <span className={results.logicalErrorRate < errorRate ? 'text-stabilizer' : 'text-syndrome'}>{(results.logicalErrorRate * 100).toFixed(3)}%</span>
-              </h4>
-            </div>
+        <div className="mt-6 rounded-xl border border-ink-700 bg-ink-950 p-5" role="status" aria-live="polite">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-stabilizer">Local toy-model result</span>
+          <h4 className="mt-1 font-display text-lg font-bold text-text-hi">Logical failures: {results.logicalErrors} / {results.totalShots}</h4>
+          <p className="mt-2 font-mono text-sm text-text-mid">
+            estimate {percent(results.logicalErrorRate)} · Wilson 95% interval [{percent(results.interval[0])}, {percent(results.interval[1])}]
+          </p>
+          {results.logicalErrors === 0 && <p className="mt-2 text-xs text-magic">Zero observed failures does not mean zero risk; the interval&apos;s upper bound is the supported statement.</p>}
+          <p className="mt-2 text-xs leading-5 text-text-low">
+            Seed {results.seed} · {results.executionTimeMs.toFixed(1)} ms on this device · decoder is exact only while each check type has at most {MAX_EXACT_DEFECTS} defects, then greedy.
+          </p>
 
-            <div className="flex flex-wrap gap-3 font-mono text-xs text-text-mid">
-              <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5">
-                SPEED: <span className="text-plaquette font-bold">{results.shotsPerSec.toLocaleString()} shots/sec</span>
-              </div>
-              <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5">
-                TIME: <span className="text-text-hi">{results.executionTimeMs.toFixed(1)} ms</span>
-              </div>
-              <div className="rounded-lg border border-ink-700 bg-ink-900 px-3 py-1.5">
-                FAILS: <span className="text-syndrome">{results.logicalErrors} / {results.totalShots}</span>
-              </div>
+          <div className="mt-5 min-w-0">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-text-mid">
+              <span className="flex items-center gap-1.5"><Terminal className="h-3.5 w-3.5 text-plaquette" aria-hidden="true" /> Generated Stim text—not executed here</span>
+              <button type="button" onClick={downloadStim} className="inline-flex items-center gap-1 text-plaquette hover:underline"><Download className="h-3 w-3" aria-hidden="true" /> Download text</button>
             </div>
-          </div>
-
-          {/* Stim Code Preview */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between font-mono text-xs text-text-low mb-2">
-              <span className="flex items-center gap-1.5 text-text-mid">
-                <Terminal className="h-3.5 w-3.5 text-plaquette" /> Generated In-Browser Stim Circuit (.stim):
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  const blob = new Blob([results.stimCircuit], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `surface_code_d${distance}_p${errorRate}.stim`;
-                  a.click();
-                }}
-                className="inline-flex items-center gap-1 text-plaquette hover:underline"
-              >
-                <Download className="h-3 w-3" /> Download .stim
-              </button>
-            </div>
-            <pre className="max-h-36 overflow-y-auto rounded-lg border border-ink-800 bg-ink-900 p-3 font-mono text-xs text-text-mid">
-              {results.stimCircuit}
-            </pre>
+            <pre className="max-h-40 max-w-full overflow-auto rounded-lg border border-ink-800 bg-ink-900 p-3 font-mono text-xs text-text-mid">{results.stimCircuit}</pre>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

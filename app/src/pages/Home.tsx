@@ -7,11 +7,13 @@ import {
   animate,
   motion,
   useInView,
+  useReducedMotion,
   type Variants,
 } from 'framer-motion';
 import {
   ArrowRight,
   Gamepad2,
+  Layers3,
   Map as MapIcon,
   MoveRight,
   Route as RouteIcon,
@@ -110,6 +112,7 @@ function SplitLine({
 
 function Hero() {
   const [tourOpen, setTourOpen] = useState(false);
+  const reduce = useReducedMotion();
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
@@ -117,11 +120,11 @@ function Hero() {
       <div className="absolute inset-0" aria-hidden>
         <motion.img
           src={asset('hero_quantum_lattice.jpg')}
-          alt="Topological Quantum Error Correction Torus Lattice"
+          alt=""
           className="h-full w-full object-cover opacity-60"
-          initial={{ scale: 1.02 }}
-          animate={{ scale: [1.02, 1.06, 1.02] }}
-          transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
+          initial={reduce ? false : { scale: 1.02 }}
+          animate={reduce ? { scale: 1.02 } : { scale: [1.02, 1.06, 1.02] }}
+          transition={reduce ? { duration: 0 } : { duration: 36, repeat: Infinity, ease: 'easeInOut' }}
         />
         {/* lattice texture overlay at 20% */}
         <div className="lattice-bg absolute inset-0 opacity-20" />
@@ -196,7 +199,7 @@ function Hero() {
               onClick={() => setTourOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl border border-plaquette/50 bg-plaquette/10 px-5 py-3 font-display text-sm font-semibold text-plaquette transition-all duration-200 hover:border-plaquette hover:bg-plaquette/20"
             >
-              <Sparkles className="h-4 w-4 text-plaquette animate-pulse" />
+              <Sparkles className={`h-4 w-4 text-plaquette ${reduce ? '' : 'animate-pulse'}`} />
               60-Sec Guided Tour
             </button>
           </motion.div>
@@ -229,6 +232,8 @@ function WhatIsTqec() {
         src={asset('braid-divider.svg')}
         alt=""
         aria-hidden
+        loading="lazy"
+        decoding="async"
         className="mx-auto w-full max-w-6xl px-6 opacity-60 md:px-8"
       />
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:px-8 md:py-28">
@@ -261,10 +266,10 @@ function WhatIsTqec() {
             remove a hole in a torus, and a small error cannot remove it.
           </motion.p>
           <motion.p variants={riseChild} className="mt-4 leading-[1.7] text-text-mid">
-            The surface code is the workhorse of the field. It needs only
-            nearest-neighbor interactions on a 2D grid, and it tolerates error
-            rates near <span className="mono-pill">p_th ≈ 1%</span>. That is why
-            Google, IBM, and dozens of startups are betting on it.
+            The surface code is a leading architecture because it uses local
+            interactions on a 2D grid. In commonly studied circuit-level noise
+            models, threshold estimates are often roughly <span className="mono-pill">0.5–1%</span>;
+            the value depends on the circuit, noise, leakage handling, and decoder.
           </motion.p>
           <motion.p variants={riseChild} className="mt-6 flex flex-wrap gap-2">
             <span className="mono-pill">[[n, k, d]]</span>
@@ -283,19 +288,23 @@ function WhatIsTqec() {
           <div className="overflow-hidden rounded-xl border border-ink-600 bg-ink-800">
             <img
               src={asset('surface-code-diagram.svg')}
-              alt="A distance-3 rotated surface code lattice with data qubits, stabilizer plaquettes, and an error chain"
-              className="w-full transition group-hover:animate-error-pulse"
+              alt="Distance-3 rotated surface-code patch: nine data qubits and eight checks. A center X error flips exactly the two adjacent Z checks, Z2 and Z3."
+              loading="lazy"
+              decoding="async"
+              className="w-full transition group-hover:animate-error-pulse motion-reduce:animate-none"
             />
           </div>
           <motion.figcaption
-            className="mt-3 font-mono text-[13px] leading-relaxed text-text-low"
+            className="mt-3 font-mono text-[13px] leading-relaxed text-text-mid"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.4 }}
           >
-            A distance-3 rotated surface code. Data qubits (circles), stabilizer
-            plaquettes (cyan/violet), and an error chain (rose).
+            Exact distance-3 geometry used by the browser lab: 9 data qubits,
+            4 X checks, and 4 Z checks. Four boundary checks touch 2 data qubits;
+            four interior checks touch 4. Here one X error on D4 produces the
+            two rose-ringed outcomes Z2 = −1 and Z3 = −1.
           </motion.figcaption>
         </motion.figure>
       </div>
@@ -593,6 +602,8 @@ function Canon() {
         src={asset('era-strip.svg')}
         alt=""
         aria-hidden
+        loading="lazy"
+        decoding="async"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10"
       />
       <div className="relative mx-auto max-w-6xl px-6 py-20 md:px-8 md:py-28">
@@ -700,6 +711,15 @@ function EntryPoints() {
       stat: null,
     },
     {
+      icon: Layers3,
+      color: '#9B7BFA',
+      title: 'Five Explanation Depths',
+      body: 'Hold one scientific claim steady while moving from a concrete story through causes and models to formal evidence.',
+      cta: 'Change the depth',
+      to: '/altitudes',
+      stat: null,
+    },
+    {
       icon: Gamepad2,
       color: '#FB7185',
       title: 'Decoder Duel',
@@ -715,7 +735,7 @@ function EntryPoints() {
       body: 'See the whole prerequisite tree. Click any topic for explanations, key points, and resources.',
       cta: 'Explore the map',
       to: '/map',
-      stat: understoodCount > 0 ? `${understoodCount}/${topics.length} understood` : null,
+      stat: understoodCount > 0 ? `${understoodCount}/${topics.length} self-marked` : null,
     },
     {
       icon: RouteIcon,
@@ -724,11 +744,11 @@ function EntryPoints() {
       body: 'A guided, ordered walk through every topic with progress tracking and papers unlocked at each step.',
       cta: 'Follow the path',
       to: '/path',
-      stat: understoodCount > 0 ? `Step ${understoodCount + 1} of ${topics.length}` : null,
+      stat: understoodCount > 0 ? `Next checklist item: ${Math.min(understoodCount + 1, topics.length)} of ${topics.length}` : null,
     },
     {
       icon: ScrollText,
-      color: '#8B5CF6',
+      color: '#9B7BFA',
       title: 'The Papers',
       body: 'The 23-paper canon on a chronological timeline, with plain-English summaries and difficulty ratings.',
       cta: 'Browse the timeline',
@@ -809,6 +829,8 @@ function EntryPoints() {
         src={asset('braid-divider.svg')}
         alt=""
         aria-hidden
+        loading="lazy"
+        decoding="async"
         className="mx-auto mt-20 w-full opacity-60 md:mt-28"
       />
     </section>

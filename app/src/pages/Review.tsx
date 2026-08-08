@@ -1,139 +1,180 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, BookOpen, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import { CATEGORY_COLORS, TERMS, type GlossaryTerm } from '@/data/glossary';
-import { useProgress } from '@/store/progress';
+import { useProgress, type ReviewScheduleEntry } from '@/store/progress';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 
 /**
- * Spaced review of glossary terms. Cards unlock as their related topics
- * are marked understood; grading (again / good / easy) schedules the next
- * appearance with a simple expanding-interval rule, stored locally.
+ * Spaced review of glossary terms. Learners produce a response before seeing
+ * the reference, then self-rate the semantic match. Ratings are local evidence,
+ * not an independently graded assessment.
  */
 
-const REVIEW_KEY = 'lattice-atlas-review';
+const DAILY_SESSION_LIMIT = 5;
 
-interface ReviewRecord {
-  due: string; // ISO date
-  interval: number; // days
-}
+const FOUNDATION_TERMS: Record<string, string[]> = {
+  'bit-amplitude': ['amplitude', 'probability'],
+  interference: ['superposition', 'phase'],
+  'ket-born': ['born-rule', 'measurement'],
+  phase: ['global-phase', 'complex-number'],
+  'two-qubit': ['tensor-product', 'entanglement'],
+};
+
+const ALTITUDE_TERMS: Record<string, string[]> = {
+  'error-correction': ['surface-code', 'syndrome'],
+  superposition: ['superposition', 'phase'],
+  topology: ['topological-order', 'toric-code'],
+  decoding: ['decoder', 'mwpm-decoder'],
+  'magic-states': ['magic-state', 'non-clifford-gate'],
+};
+
+type ReviewRecord = ReviewScheduleEntry;
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
 const addDays = (days: number) => {
   const d = new Date();
-  d.setDate(d.getDate() + days);
+  d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 };
 
-function loadRecords(): Record<string, ReviewRecord> {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(REVIEW_KEY) ?? '{}');
-    return typeof parsed === 'object' && parsed !== null
-      ? (parsed as Record<string, ReviewRecord>)
-      : {};
-  } catch {
-    return {};
-  }
-}
-
-const TERM_BY_SLUG = new Map(TERMS.map((t) => [t.slug, t]));
+const TERM_BY_SLUG = new Map(TERMS.map((term) => [term.slug, term]));
 
 export default function Review() {
   useDocumentTitle('Daily Review');
-  const { isUnderstood, understoodCount } = useProgress();
-  const [records, setRecords] = useState<Record<string, ReviewRecord>>(loadRecords);
+  const reduce = useReducedMotion();
+  const {
+    evidenceFor,
+    isExplored,
+    exploredCount,
+    recordEvidence,
+    reviewSchedule: records,
+    setReviewScheduleEntry,
+  } = useProgress();
 
-  // Terms whose backing topics the learner has studied; with zero progress,
-  // the whole glossary is open so the deck is still usable.
-  const reviewingEverything = understoodCount === 0;
-  const unlocked = reviewingEverything
-    ? TERMS
-    : TERMS.filter((t) => t.related_topics.some((id) => isUnderstood(id)));
+  const earlyCourseSlugs = useMemo(() => {
+    const slugs = new Set<string>();
+    const latestFoundation = new Map(
+      evidenceFor('foundation-prediction').map((event) => [event.stageId, event]),
+    );
+    for (const event of latestFoundation.values()) {
+      for (const slug of FOUNDATION_TERMS[event.stageId] ?? []) slugs.add(slug);
+    }
+    for (const event of evidenceFor('altitude-study')) {
+      for (const slug of ALTITUDE_TERMS[event.conceptId] ?? []) slugs.add(slug);
+    }
+    return slugs;
+  }, [evidenceFor]);
 
-  const [queue, setQueue] = useState<string[]>(() => {
-    const recs = loadRecords();
-    const now = todayIso();
-    return (understoodCount === 0
-      ? TERMS
-      : TERMS.filter((t) => t.related_topics.some((id) => isUnderstood(id)))
-    )
-      .filter((t) => {
-        const r = recs[t.slug];
-        return !r || r.due <= now;
-      })
-      .map((t) => t.slug);
-  });
+  const unlocked = TERMS.filter(
+    (term) => earlyCourseSlugs.has(term.slug) || term.related_topics.some((id) => isExplored(id)),
+  );
+
+  const dueSlugs = unlocked
+    .filter((term) => {
+      const record = records[term.slug];
+      return !record || record.due <= todayIso();
+    })
+    .map((term) => term.slug);
+
+  const [session] = useState(() => ({
+    queue: dueSlugs.slice(0, DAILY_SESSION_LIMIT),
+    dueCount: dueSlugs.length,
+  }));
+  const queue = session.queue;
   const [pos, setPos] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [response, setResponse] = useState('');
   const [graded, setGraded] = useState(0);
+  const responseRef = useRef<HTMLTextAreaElement>(null);
 
   const currentSlug = queue[pos];
   const current: GlossaryTerm | undefined = currentSlug
     ? TERM_BY_SLUG.get(currentSlug)
     : undefined;
   const remaining = queue.length - pos;
+  const deferred = Math.max(0, session.dueCount - queue.length);
+
+  useEffect(() => {
+    if (!revealed) responseRef.current?.focus();
+  }, [pos, revealed]);
 
   const grade = (kind: 'again' | 'good' | 'easy') => {
     if (!current) return;
-    const prev = records[current.slug]?.interval ?? 0;
+    const previous = records[current.slug];
+    const prev = previous?.interval ?? 0;
     let rec: ReviewRecord;
-    if (kind === 'again') rec = { due: todayIso(), interval: 0 };
-    else if (kind === 'good') rec = { due: addDays(Math.max(1, Math.round(prev * 2.5))), interval: Math.max(1, Math.round(prev * 2.5)) };
-    else rec = { due: addDays(Math.max(4, prev * 4)), interval: Math.max(4, prev * 4) };
-    const next = { ...records, [current.slug]: rec };
-    setRecords(next);
-    try {
-      localStorage.setItem(REVIEW_KEY, JSON.stringify(next));
-    } catch {
-      /* storage unavailable */
+    const attempts = (previous?.attempts ?? 0) + 1;
+    const recalled = (previous?.recalled ?? 0) + (kind === 'easy' ? 1 : 0);
+    if (kind === 'again') rec = { due: addDays(1), interval: 0, attempts, recalled };
+    else if (kind === 'good') {
+      const interval = Math.max(1, Math.round(prev * 2.5));
+      rec = { due: addDays(interval), interval, attempts, recalled };
+    } else {
+      const interval = Math.max(4, prev * 4);
+      rec = { due: addDays(interval), interval, attempts, recalled };
     }
-    if (kind === 'again') setQueue((q) => [...q, current.slug]);
+    setReviewScheduleEntry(current.slug, rec);
+    recordEvidence({
+      kind: 'review-recall',
+      termSlug: current.slug,
+      rating: kind,
+      responseProvided: response.trim().length >= 3,
+      attempts: 1,
+    });
     setGraded((g) => g + 1);
     setPos((p) => p + 1);
     setRevealed(false);
+    setResponse('');
   };
 
   const scheduled = Object.keys(records).length;
+  const nextDue = Object.values(records)
+    .map((record) => record.due)
+    .filter((due) => due > todayIso())
+    .sort()[0];
 
   return (
     <div className="bg-ink-900">
       <header className="lattice-bg">
         <div className="mx-auto max-w-4xl px-6 pb-10 pt-16 md:px-8">
           <motion.p
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduce ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}
             className="eyebrow"
           >
             {'// DAILY REVIEW'}
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.08, ease: [0.22, 1, 0.36, 1] }}
             className="mt-4 font-display text-4xl font-bold tracking-tight text-text-hi md:text-display-lg"
           >
             Keep it fresh.
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduce ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.16, ease: [0.22, 1, 0.36, 1] }}
             className="mt-5 max-w-xl text-[17px] leading-[1.7] text-text-mid"
           >
-            Understanding decays; a few minutes of recall stops it. Terms enter
-            this deck as you mark their topics understood, and each grade
-            schedules the next appearance further out.
+            Retrieval strengthens access. Produce a definition before revealing
+            the reference, compare meaning rather than wording, then rate the match.
+            Terms enter this deck as you explore their topics.
           </motion.p>
-          <p className="mt-6 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[13px] text-text-low">
-            <span>{unlocked.length} unlocked</span>
+          <p className="mt-6 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[13px] text-text-low" role="status" aria-live="polite">
+            <span>{unlocked.length} available</span>
             <span className={remaining > 0 ? 'text-magic' : 'text-stabilizer'}>
               {remaining} due now
             </span>
             <span>{scheduled} scheduled</span>
-            {reviewingEverything && <span>(no progress yet — reviewing everything)</span>}
+            <span>{queue.length}-card session · about 3 minutes</span>
+            {deferred > 0 && <span>{deferred} deferred to another session</span>}
+            {exploredCount === 0 && earlyCourseSlugs.size === 0 && <span>(finish a Foundation prediction or explore a topic to begin)</span>}
           </p>
         </div>
       </header>
@@ -143,10 +184,10 @@ export default function Review() {
           {current ? (
             <motion.div
               key={`${current.slug}-${pos}`}
-              initial={{ opacity: 0, x: 32 }}
+              initial={reduce ? false : { opacity: 0, x: 32 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -32 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: reduce ? 0 : 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="rounded-xl border border-ink-600 bg-ink-800 p-8"
             >
               <div className="flex items-center justify-between gap-3">
@@ -169,16 +210,40 @@ export default function Review() {
 
               {!revealed ? (
                 <>
-                  <p className="mt-4 font-mono text-[13px] text-text-low">
-                    Say the definition out loud — then check.
-                  </p>
-                  <button type="button" onClick={() => setRevealed(true)} className="btn-primary mt-6">
-                    Show definition
+                  <label htmlFor="review-response" className="mt-5 block font-mono text-[12px] text-text-low">
+                    Recall first: explain it in your own words
+                  </label>
+                  <textarea
+                    ref={responseRef}
+                    id="review-response"
+                    value={response}
+                    maxLength={500}
+                    rows={3}
+                    onChange={(event) => setResponse(event.target.value)}
+                    placeholder="Type the mechanism, not just a keyword…"
+                    className="mt-2 w-full resize-y rounded-lg border border-ink-600 bg-ink-900 p-3 text-sm leading-6 text-text-hi placeholder:text-text-low focus:border-plaquette/60 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={response.trim().length < 3}
+                    onClick={() => setRevealed(true)}
+                    className="btn-primary mt-4 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Compare with reference
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="mt-5 text-[17px] leading-[1.7] text-text-mid">{current.short}</p>
+                  <div className="mt-5 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-lg border border-ink-600 bg-ink-900/70 p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-text-low">Your response</p>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-text-mid">{response}</p>
+                    </div>
+                    <div className="rounded-lg border border-plaquette/30 bg-plaquette/[0.06] p-4">
+                      <p className="font-mono text-[10px] uppercase tracking-wider text-plaquette">Reference meaning</p>
+                      <p className="mt-2 text-sm leading-6 text-text-hi">{current.short}</p>
+                    </div>
+                  </div>
                   <Link
                     to={`/glossary#${current.slug}`}
                     className="link-slide mt-3 inline-flex items-center gap-1.5 font-mono text-[12px] text-plaquette"
@@ -191,15 +256,15 @@ export default function Review() {
                       onClick={() => grade('again')}
                       className="flex-1 rounded-lg border border-syndrome/50 px-4 py-2.5 text-sm font-semibold text-syndrome transition-colors hover:bg-syndrome/10"
                     >
-                      Again
-                      <span className="ml-2 font-mono text-[10px] font-normal opacity-70">today</span>
+                      Missed it
+                      <span className="ml-2 font-mono text-[10px] font-normal opacity-70">1d</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => grade('good')}
                       className="flex-1 rounded-lg border border-plaquette/50 px-4 py-2.5 text-sm font-semibold text-plaquette transition-colors hover:bg-plaquette/10"
                     >
-                      Good
+                      Close
                       <span className="ml-2 font-mono text-[10px] font-normal opacity-70">
                         {Math.max(1, Math.round((records[current.slug]?.interval ?? 0) * 2.5))}d
                       </span>
@@ -209,21 +274,24 @@ export default function Review() {
                       onClick={() => grade('easy')}
                       className="flex-1 rounded-lg border border-stabilizer/50 px-4 py-2.5 text-sm font-semibold text-stabilizer transition-colors hover:bg-stabilizer/10"
                     >
-                      Easy
+                      Recalled
                       <span className="ml-2 font-mono text-[10px] font-normal opacity-70">
                         {Math.max(4, (records[current.slug]?.interval ?? 0) * 4)}d
                       </span>
                     </button>
                   </div>
+                  <p className="mt-3 text-xs leading-5 text-text-low">
+                    These are honest self-ratings after comparison. “Recalled” records a local retrieval claim; it is not independently graded.
+                  </p>
                 </>
               )}
             </motion.div>
           ) : (
             <motion.div
               key="done"
-              initial={{ opacity: 0, y: 24 }}
+              initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: reduce ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="rounded-xl border border-stabilizer/40 bg-ink-850 p-10 text-center"
             >
               <p className="eyebrow !text-stabilizer">{'// DONE FOR TODAY'}</p>
@@ -234,13 +302,23 @@ export default function Review() {
               </h2>
               <p className="mx-auto mt-3 max-w-md leading-relaxed text-text-mid">
                 {unlocked.length === 0
-                  ? 'Mark topics as understood on the map or path and their vocabulary starts appearing here.'
-                  : 'Cards return as their intervals expire. Learning more topics unlocks more of the deck.'}
+                  ? 'Complete a Foundation prediction, study an Altitude, or explore a map topic; its vocabulary then starts appearing here.'
+                  : deferred > 0
+                    ? `${deferred} more card${deferred === 1 ? '' : 's'} remain due, but this session stops here to protect focus.`
+                    : nextDue
+                      ? `Next scheduled card: ${nextDue}. Exploring more topics adds more of the deck.`
+                      : 'Cards return as their intervals expire. Exploring more topics adds more of the deck.'}
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                <Link to="/path" className="btn-primary">
-                  <RouteIcon className="h-4 w-4" /> Continue the path
-                </Link>
+                {unlocked.length === 0 ? (
+                  <Link to="/foundations" className="btn-primary">
+                    Start Foundations <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <Link to="/path" className="btn-primary">
+                    <RouteIcon className="h-4 w-4" /> Continue the path
+                  </Link>
+                )}
                 <Link to="/map" className="btn-secondary">
                   <MapIcon className="h-4 w-4" /> Open the map
                 </Link>

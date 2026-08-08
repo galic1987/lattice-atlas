@@ -88,7 +88,7 @@ function CheckToggle({
       type="button"
       aria-pressed={active}
       aria-label={label}
-      title={active ? 'Marked as understood ✓ — click to unmark' : label}
+      title={active ? 'Marked explored ✓ — click to unmark' : label}
       onClick={(e) => {
         e.stopPropagation();
         onToggle();
@@ -170,8 +170,19 @@ function PageHeader({ understoodCount }: { understoodCount: number }) {
         <motion.p {...block(0.16)} className="mt-6 max-w-2xl text-[17px] leading-[1.7] text-text-mid">
           Every concept you need before the key papers make sense — arranged in
           six tiers, each building on the last. Click any topic for a full
-          explanation, key points, and curated resources. Mark topics as
-          understood when you master them. The map saves your marks.
+          explanation, key points, and curated resources. Mark a topic explored
+          after engaging with it; that self-mark is separate from check evidence.
+          The map saves both locally.
+        </motion.p>
+        <motion.p
+          {...block(0.24)}
+          className="mt-5 max-w-2xl rounded-lg border border-star/30 bg-star/10 px-3 py-2 text-sm leading-relaxed text-text-mid"
+        >
+          <span className="font-mono text-[12px] font-semibold uppercase tracking-wider text-star">Toric-code braid:</span>{' '}
+          a spatial <span className="font-mono text-star">e</span> loop enclosing one{' '}
+          <span className="font-mono text-plaquette">m</span> contributes mutual phase{' '}
+          <span className="font-mono text-text-hi">−1</span> relative to enclosing none.
+          A time-directed worldline braid needs an explicit time axis; the decorative header image does not encode one.
         </motion.p>
         <motion.div
           {...block(0.4)}
@@ -179,8 +190,8 @@ function PageHeader({ understoodCount }: { understoodCount: number }) {
         >
           <span className="text-text-mid">{topics.length} TOPICS</span>
           <span className="text-text-mid">{TIER_LIST.length} TIERS</span>
-          <span className="text-stabilizer">
-            <motion.span>{rounded}</motion.span> UNDERSTOOD
+          <span className="text-stabilizer" role="status" aria-live="polite">
+            <motion.span>{rounded}</motion.span> EXPLORED
           </span>
           <span className="text-text-low">{topics.length - understoodCount} REMAINING</span>
         </motion.div>
@@ -215,6 +226,14 @@ function ControlsBar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const moveTab = (current: 'tree' | 'list', direction: -1 | 1) => {
+    const tabs = ['tree', 'list'] as const;
+    const index = tabs.indexOf(current);
+    const next = tabs[(index + direction + tabs.length) % tabs.length];
+    setView(next);
+    window.requestAnimationFrame(() => document.getElementById(`map-view-tab-${next}`)?.focus());
+  };
+
   return (
     <div
       className={`sticky top-16 z-30 border-b border-ink-600 bg-ink-900/90 backdrop-blur transition-shadow duration-300 ${
@@ -231,9 +250,26 @@ function ControlsBar({
           {(['tree', 'list'] as const).map((v) => (
             <button
               key={v}
+              id={`map-view-tab-${v}`}
               role="tab"
               aria-selected={view === v}
+              aria-controls={`map-view-panel-${v}`}
+              tabIndex={view === v ? 0 : -1}
               onClick={() => setView(v)}
+              onKeyDown={(event) => {
+                if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                  event.preventDefault();
+                  moveTab(v, 1);
+                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                  event.preventDefault();
+                  moveTab(v, -1);
+                } else if (event.key === 'Home' || event.key === 'End') {
+                  event.preventDefault();
+                  const next = event.key === 'Home' ? 'tree' : 'list';
+                  setView(next);
+                  window.requestAnimationFrame(() => document.getElementById(`map-view-tab-${next}`)?.focus());
+                }
+              }}
               className={`relative cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-200 ${
                 view === v ? 'text-ink-950' : 'text-text-mid hover:text-text-hi'
               }`}
@@ -299,7 +335,7 @@ function ControlsBar({
                 className="absolute right-0 top-full z-40 mt-2 w-72 rounded-xl border border-ink-600 bg-ink-850 p-4 shadow-xl"
               >
                 <p className="text-sm leading-relaxed text-text-mid">
-                  Clear all understood marks? This only affects your browser.
+                  Clear all explored marks and topic-check evidence? This only affects your browser.
                 </p>
                 <div className="mt-3 flex justify-end gap-2">
                   <button
@@ -425,7 +461,7 @@ function TopicNode({
             <CheckToggle
               active={isUnderstood}
               onToggle={onToggle}
-              label={`Mark ${shortName(topic)} as understood`}
+              label={`Mark ${shortName(topic)} as explored`}
             />
           </div>
           <h3 className="mt-2.5 font-display text-lg font-semibold leading-snug text-text-hi">
@@ -538,9 +574,9 @@ function TreeView({
                     </h2>
                   </div>
                   <p className="mt-1.5 font-mono text-[12px] text-text-low">
-                    {tierTopics.length} topics · {done} understood
+                    {tierTopics.length} topics · {done} explored
                   </p>
-                  {/* understood-by-tier track */}
+                  {/* self-marked exploration by tier */}
                   <div className="mt-2 h-[3px] overflow-hidden rounded-full bg-ink-700">
                     <div
                       className="h-full rounded-full transition-[width] duration-300"
@@ -685,7 +721,7 @@ function ListView({
                   {tierNames[tier]}
                 </span>
                 <span className="ml-auto font-mono text-[12px] text-text-low">
-                  {done}/{tierTopics.length} understood
+                  {done}/{tierTopics.length} explored
                 </span>
                 <ChevronDown
                   className={`h-4 w-4 text-text-low transition-transform duration-250 ${
@@ -718,7 +754,7 @@ function ListView({
                           <CheckToggle
                             active={isUnderstood(topic.id)}
                             onToggle={() => toggleUnderstood(topic.id)}
-                            label={`Mark ${shortName(topic)} as understood`}
+                            label={`Mark ${shortName(topic)} as explored`}
                           />
                           <div className="min-w-[200px] flex-1">
                             <h3 className="font-display text-base font-semibold text-text-hi">
@@ -803,18 +839,44 @@ function TopicDrawer({
   const reduce = useReducedMotion();
   const { isUnderstood, toggleUnderstood } = useProgress();
   const topic = topicById.get(stack[stack.length - 1]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === titleRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      returnFocusRef.current?.focus();
     };
   }, [onClose]);
+
+  useEffect(() => {
+    window.requestAnimationFrame(() => titleRef.current?.focus());
+  }, [topic?.id]);
 
   if (!topic) return null;
 
@@ -826,8 +888,15 @@ function TopicDrawer({
     .join(' ← ');
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={topic.name}>
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`map-topic-title-${topic.id}`}
+    >
       <motion.div
+        aria-hidden="true"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -879,7 +948,12 @@ function TopicDrawer({
               {stack.length > 1 && (
                 <p className="mt-2 font-mono text-[12px] text-text-low">{breadcrumb}</p>
               )}
-              <h2 className="mt-4 font-display text-2xl font-semibold leading-tight text-text-hi md:text-[26px]">
+              <h2
+                ref={titleRef}
+                id={`map-topic-title-${topic.id}`}
+                tabIndex={-1}
+                className="mt-4 font-display text-2xl font-semibold leading-tight text-text-hi outline-none md:text-[26px]"
+              >
                 {topic.name}
               </h2>
               <p className="mt-2 font-mono text-[12px] text-text-low">
@@ -888,7 +962,7 @@ function TopicDrawer({
                 {unlocks.length === 1 ? '' : 's'}
               </p>
 
-              {/* Understood toggle */}
+              {/* Self-marked exploration toggle */}
               <button
                 type="button"
                 onClick={() => toggleUnderstood(topic.id)}
@@ -908,7 +982,7 @@ function TopicDrawer({
                 >
                   <Check className="h-4 w-4" strokeWidth={understood ? 3 : 2} />
                 </motion.span>
-                {understood ? 'Understood — click to unmark' : 'Mark as understood'}
+                {understood ? 'Explored — click to unmark' : 'Mark as explored'}
               </button>
 
               <div className="mt-8 flex flex-col gap-8">
@@ -941,7 +1015,7 @@ function TopicDrawer({
                 </DrawerSection>
 
                 {topic.depends_on.length > 0 && (
-                  <DrawerSection eyebrow="// BEFORE THIS, UNDERSTAND:">
+                  <DrawerSection eyebrow="// BEFORE THIS, EXPLORE:">
                     <div className="flex flex-wrap gap-2">
                       {topic.depends_on.map((depId) => {
                         const dep = topicById.get(depId);
@@ -1060,7 +1134,7 @@ function BottomCta() {
         </h2>
         <p className="mx-auto mt-4 max-w-xl leading-[1.7] text-text-mid">
           The learning path shows the same 26 topics in dependency order. You
-          learn one topic at a time, and papers unlock as you go.
+          can explore one topic at a time, then use checks and challenges to build evidence.
         </p>
         <motion.div
           animate={reduce ? undefined : {
@@ -1149,15 +1223,22 @@ export default function KnowledgeMap() {
         setSearch={setSearch}
         onReset={resetProgress}
       />
+      <p className="sr-only" role="status" aria-live="polite">
+        {topics.filter((topic) => matchesQuery(topic, search.trim().toLowerCase())).length} topics match the current filter.
+      </p>
       {view === 'tree' ? (
-        <TreeView
-          search={search}
-          hoveredId={hoveredId}
-          setHoveredId={setHoveredId}
-          onOpen={openTopic}
-        />
+        <div id="map-view-panel-tree" role="tabpanel" aria-labelledby="map-view-tab-tree" tabIndex={0}>
+          <TreeView
+            search={search}
+            hoveredId={hoveredId}
+            setHoveredId={setHoveredId}
+            onOpen={openTopic}
+          />
+        </div>
       ) : (
-        <ListView search={search} onOpen={openTopic} />
+        <div id="map-view-panel-list" role="tabpanel" aria-labelledby="map-view-tab-list" tabIndex={0}>
+          <ListView search={search} onOpen={openTopic} />
+        </div>
       )}
       <BottomCta />
 

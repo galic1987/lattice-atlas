@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Atom, Sparkles } from 'lucide-react';
 import { useProgress, type LensMode } from '@/store/progress';
 
@@ -9,7 +9,8 @@ export default function CognitiveLensToggle({
   className?: string;
   compact?: boolean;
 }) {
-  const { lensMode, setLensMode } = useProgress();
+  const { lensMode, setLensMode, explanationDepth } = useProgress();
+  const reduceMotion = useReducedMotion();
 
   if (compact) {
     return (
@@ -21,7 +22,8 @@ export default function CognitiveLensToggle({
         <button
           type="button"
           onClick={() => setLensMode('intuition')}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[12px] font-medium transition-all duration-200 ${
+          aria-pressed={lensMode === 'intuition'}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[12px] font-medium ${reduceMotion ? '' : 'transition-all duration-200'} ${
             lensMode === 'intuition'
               ? 'bg-plaquette/20 text-plaquette shadow-glow-cyan border border-plaquette/50'
               : 'text-text-low hover:text-text-mid'
@@ -33,7 +35,8 @@ export default function CognitiveLensToggle({
         <button
           type="button"
           onClick={() => setLensMode('rigor')}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[12px] font-medium transition-all duration-200 ${
+          aria-pressed={lensMode === 'rigor'}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[12px] font-medium ${reduceMotion ? '' : 'transition-all duration-200'} ${
             lensMode === 'rigor'
               ? 'bg-magic/20 text-magic shadow-glow-violet border border-magic/50'
               : 'text-text-low hover:text-text-mid'
@@ -59,7 +62,10 @@ export default function CognitiveLensToggle({
             Choose Your Mindset
           </h3>
           <p className="mt-1 text-xs text-text-mid">
-            Switch between real-world analogies and formal quantum mechanics across the path.
+            This two-position shortcut moves the same five-level depth preference used across the Atlas.
+          </p>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-text-low">
+            Current depth · <span className="text-text-hi">{explanationDepth}</span>
           </p>
         </div>
 
@@ -89,7 +95,7 @@ export default function CognitiveLensToggle({
                         ? 'bg-gradient-to-r from-plaquette to-cyan-300'
                         : 'bg-gradient-to-r from-magic to-purple-300'
                     }`}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-2">
@@ -109,9 +115,9 @@ export default function CognitiveLensToggle({
       {/* Mode callout preview */}
       <motion.div
         key={lensMode}
-        initial={{ opacity: 0, y: 6 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: reduceMotion ? 0 : 0.25 }}
         className={`mt-4 flex items-start gap-3 rounded-lg border p-3 text-xs leading-relaxed ${
           lensMode === 'intuition'
             ? 'border-plaquette/30 bg-plaquette/10 text-text-hi'

@@ -131,8 +131,8 @@ for (const k of Object.keys(aliases))
 const selfChecks = readJson('src/data/self_checks.json');
 for (const [topicId, questions] of Object.entries(selfChecks)) {
   if (!topicIds.has(topicId)) err(`self_checks key "${topicId}" is not a topic id`);
-  if (!Array.isArray(questions) || questions.length === 0)
-    err(`self_checks["${topicId}"] has no questions`);
+  if (!Array.isArray(questions) || questions.length !== 2)
+    err(`self_checks["${topicId}"] must contain exactly 2 questions (learning-record schema 1)`);
   for (const [i, q] of (questions ?? []).entries()) {
     if (typeof q.q !== 'string' || !q.q.trim()) err(`self_checks["${topicId}"][${i}] missing q`);
     if (!Array.isArray(q.options) || q.options.length !== 4)

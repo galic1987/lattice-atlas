@@ -7,10 +7,10 @@
       <stop offset="1" stop-color="#22D3EE" stop-opacity="0.1"/>
     </linearGradient>
     <linearGradient id="braidViolet" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.1"/>
-      <stop offset="0.2" stop-color="#8B5CF6"/>
-      <stop offset="0.8" stop-color="#8B5CF6"/>
-      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0.1"/>
+      <stop offset="0" stop-color="#9B7BFA" stop-opacity="0.1"/>
+      <stop offset="0.2" stop-color="#9B7BFA"/>
+      <stop offset="0.8" stop-color="#9B7BFA"/>
+      <stop offset="1" stop-color="#9B7BFA" stop-opacity="0.1"/>
     </linearGradient>
   </defs>
   <!-- two anyon world-lines crossing twice -->
@@ -21,8 +21,8 @@
   <!-- endpoint dots -->
   <circle cx="40" cy="78" r="3" fill="#22D3EE"/>
   <circle cx="1160" cy="42" r="3" fill="#22D3EE"/>
-  <circle cx="40" cy="42" r="3" fill="#8B5CF6"/>
-  <circle cx="1160" cy="78" r="3" fill="#8B5CF6"/>
+  <circle cx="40" cy="42" r="3" fill="#9B7BFA"/>
+  <circle cx="1160" cy="78" r="3" fill="#9B7BFA"/>
   <!-- crossing markers -->
   <circle cx="530" cy="60" r="2.5" fill="#EAF0FB" fill-opacity="0.5"/>
   <circle cx="720" cy="60" r="2.5" fill="#EAF0FB" fill-opacity="0.5"/>

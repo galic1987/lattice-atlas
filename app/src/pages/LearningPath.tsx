@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { Link } from 'react-router-dom';
 import {
   AnimatePresence,
   animate,
   motion,
+  useReducedMotion,
   useMotionValue,
   useMotionValueEvent,
   useScroll,
@@ -56,12 +57,12 @@ import Expandable3B1BCard from '@/components/Expandable3B1BCard';
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
 const MILESTONE_COPY: Record<number, string> = {
-  1: 'You finished the foundations. Vectors, bras and kets are now tools, not obstacles. Every step above this line uses them.',
-  2: 'You finished the quantum computing basics. You can read circuit diagrams and reason about gates, Paulis and measurements.',
-  3: 'You finished Tier 3. You can now read the threshold-theorem papers with understanding.',
-  4: 'You finished the topological core: toric code, surface code, syndrome extraction. The practical literature is open.',
-  5: 'You finished computation and decoding. You know how a surface-code machine actually runs and corrects itself.',
-  6: 'You finished the frontier. Nothing left between you and the live literature.',
+  1: 'You have explored the foundations used later: vectors, bras, kets, and measurement. Use the checks to test what you can retrieve.',
+  2: 'You have explored circuit diagrams, gates, Paulis, and measurements. The next tier builds on those self-marked steps.',
+  3: 'You have explored the code and threshold vocabulary needed to begin reading the linked papers critically.',
+  4: 'You have explored the toric code, surface code, and syndrome extraction. The practical literature is now easier to navigate.',
+  5: 'You have explored computation and decoding. Apply the ideas in the Lab and Decoder Duel to produce stronger evidence.',
+  6: 'You have explored every atlas topic. The live literature remains an ongoing practice, not a final unlocked state.',
 };
 
 /* ---------- derived path data (name→id resolution lives in @/data) ---------- */
@@ -122,14 +123,14 @@ function TierBadge({ tier, compact = false }: { tier: number; compact?: boolean 
 function PaperChip({ paper, dim = false }: { paper: Paper; dim?: boolean }) {
   return (
     <Link
-      to="/papers"
+      to={`/papers#${paper.arxiv_id}`}
       title={paper.title}
-      className={`group flex items-center gap-2 rounded-lg border border-star/30 bg-star/10 px-2.5 py-1.5 text-left transition-colors duration-200 hover:border-star/70 hover:bg-star/20 ${
+      className={`group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-star/30 bg-star/10 px-2.5 py-1.5 text-left transition-colors duration-200 hover:border-star/70 hover:bg-star/20 ${
         dim ? 'opacity-60' : ''
       }`}
     >
-      <span className="font-mono text-[11px] text-star">{paper.year}</span>
-      <span className="truncate text-xs text-text-mid transition-colors group-hover:text-text-hi">
+      <span className="shrink-0 font-mono text-[11px] text-star">{paper.year}</span>
+      <span className="min-w-0 flex-1 truncate text-xs text-text-mid transition-colors group-hover:text-text-hi">
         {paper.title}
       </span>
     </Link>
@@ -171,8 +172,8 @@ function ProgressRing({ pct, bump }: { pct: number; bump: number }) {
   }, [bump]);
 
   return (
-    <div className="relative h-[120px] w-[120px] shrink-0">
-      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+    <div className="relative h-[120px] w-[120px] shrink-0" role="img" aria-label={`${pct}% of path topics self-marked explored`}>
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden="true">
         <defs>
           <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#22D3EE" />
@@ -197,7 +198,7 @@ function ProgressRing({ pct, bump }: { pct: number; bump: number }) {
           {display}%
         </span>
         <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-text-low">
-          of {topics.length} steps
+          explored
         </span>
       </div>
       {bursts.map((id) => (
@@ -236,18 +237,41 @@ function TopicDrawer({
   onClose: () => void;
   data: PathData;
 }) {
+  const reduce = useReducedMotion();
   const { isUnderstood, toggleUnderstood } = useProgress();
+  const dialogRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     if (!topic) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === titleRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    window.requestAnimationFrame(() => titleRef.current?.focus());
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      previous?.focus();
     };
   }, [topic, onClose]);
 
@@ -256,6 +280,7 @@ function TopicDrawer({
       {topic && (
         <>
           <motion.div
+            aria-hidden="true"
             className="fixed inset-0 z-50 bg-ink-950/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -264,18 +289,25 @@ function TopicDrawer({
             onClick={onClose}
           />
           <motion.aside
+            ref={dialogRef}
             role="dialog"
-            aria-label={topic.name}
+            aria-modal="true"
+            aria-labelledby={`path-topic-title-${topic.id}`}
             className="fixed inset-y-0 right-0 z-50 flex w-full flex-col overflow-y-auto border-l border-ink-600 bg-ink-850 sm:max-w-[480px]"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
+            initial={reduce ? { opacity: 0 } : { x: '100%' }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={reduce ? { opacity: 0 } : { x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             <div className="flex items-start justify-between gap-4 border-b border-ink-600 p-6">
               <div>
                 <TierBadge tier={topic.tier} />
-                <h2 className="mt-3 font-display text-[22px] font-semibold leading-snug text-text-hi">
+                <h2
+                  ref={titleRef}
+                  id={`path-topic-title-${topic.id}`}
+                  tabIndex={-1}
+                  className="mt-3 font-display text-[22px] font-semibold leading-snug text-text-hi outline-none"
+                >
                   {topic.name}
                 </h2>
               </div>
@@ -295,7 +327,6 @@ function TopicDrawer({
               <p className="leading-relaxed text-text-mid">
                 <GlossaryText text={topic.detail} />
               </p>
-
 
               <TopicLensInsight topicId={topic.id} />
 
@@ -389,6 +420,7 @@ function TopicDrawer({
               <button
                 type="button"
                 onClick={() => toggleUnderstood(topic.id)}
+                aria-pressed={isUnderstood(topic.id)}
                 className={
                   isUnderstood(topic.id)
                     ? 'inline-flex w-full items-center justify-center gap-2 rounded-lg border border-stabilizer/50 bg-stabilizer/15 px-5 py-2.5 text-sm font-semibold text-stabilizer transition-all duration-200'
@@ -397,10 +429,10 @@ function TopicDrawer({
               >
                 {isUnderstood(topic.id) ? (
                   <>
-                    <Check className="h-4 w-4" /> Understood — tap to undo
+                    <Check className="h-4 w-4" /> Explored — tap to undo
                   </>
                 ) : (
-                  'Mark understood'
+                  'Mark explored'
                 )}
               </button>
             </div>
@@ -444,7 +476,7 @@ function StepCard({
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.5, ease: [...EASE_OUT_EXPO] }}
-      className={`ripple-card relative ml-12 mb-6 rounded-xl border bg-ink-800 p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-glow-cyan ${
+      className={`ripple-card relative ml-12 mb-6 min-w-0 rounded-xl border bg-ink-800 p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-glow-cyan sm:p-6 ${
         flash
           ? 'border-stabilizer/60 shadow-[0_0_24px_rgba(52,211,153,0.15)]'
           : done
@@ -458,7 +490,7 @@ function StepCard({
         e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
       }}
     >
-      <div className="grid gap-6 md:grid-cols-[1fr_200px]">
+      <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(0,1fr)_200px]">
         <div className="min-w-0">
           <p className="font-mono text-[13px] text-text-low">
             STEP {String(index + 1).padStart(2, '0')}
@@ -499,15 +531,15 @@ function StepCard({
 
           {missingDeps.length > 0 && !done && (
             <p className="mt-3 font-mono text-xs text-magic/90">
-              heads-up: you did not mark {missingDeps.length} prerequisite
-              {missingDeps.length > 1 ? 's' : ''} above as understood yet
+              heads-up: you have not marked {missingDeps.length} prerequisite
+              {missingDeps.length > 1 ? 's' : ''} above as explored yet
             </p>
           )}
         </div>
 
         <div className="min-w-0 md:border-l md:border-ink-700 md:pl-5">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-star">
-            Unlocks
+            Related papers
           </p>
           {unlocks.length > 0 ? (
             <div className="mt-2 flex flex-col gap-1.5">
@@ -553,10 +585,10 @@ function StepCard({
         >
           {done ? (
             <>
-              <Check className="h-4 w-4" /> Understood
+              <Check className="h-4 w-4" /> Explored
             </>
           ) : (
-            'Mark understood'
+            'Mark explored'
           )}
         </button>
       </div>
@@ -579,23 +611,23 @@ function Milestone({ tier, data }: { tier: number; data: PathData }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, ease: [...EASE_OUT_EXPO] }}
-      className={`relative ml-12 mb-10 rounded-xl border border-dashed bg-ink-850 p-6 ${
+      className={`relative ml-12 mb-10 min-w-0 rounded-xl border border-dashed bg-ink-850 p-4 sm:p-6 ${
         complete ? '' : 'opacity-75'
       }`}
       style={{ borderColor: `${color}80` }}
     >
       <p className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color }}>
-        {complete ? '✓ Milestone reached' : 'Milestone — preview'}
+        {complete ? '✓ Tier explored' : 'Tier activity — preview'}
       </p>
       <p className="mt-2 font-display text-lg font-semibold text-text-hi">
-        Tier {tier} · {tierNames[tier]} {complete ? 'finished' : 'awaits'}
+        Tier {tier} · {tierNames[tier]} {complete ? 'self-marked' : 'in progress'}
       </p>
       <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-text-mid">
         {MILESTONE_COPY[tier]}
       </p>
       {unlocked.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[11px] text-text-low">reading unlocked:</span>
+        <div className="mt-4 flex min-w-0 flex-wrap items-center gap-2">
+          <span className="font-mono text-[11px] text-text-low">related reading:</span>
           {unlocked.map((p) => (
             <PaperChip key={p.arxiv_id} paper={p} dim={!complete} />
           ))}
@@ -650,7 +682,7 @@ function PapersPanel({ data, fixed }: { data: PathData; fixed: boolean }) {
     <>
       <div className="flex items-center justify-between gap-2">
         <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-star">
-          Papers unlocked
+          Papers whose prerequisites were explored
         </p>
         {fixed && (
           <button
@@ -675,7 +707,7 @@ function PapersPanel({ data, fixed }: { data: PathData; fixed: boolean }) {
           <div
             className="mt-2 flex h-2 overflow-hidden rounded-full bg-ink-700"
             role="img"
-            aria-label={`${unlockedPapers.length} of ${papers.length} papers unlocked`}
+            aria-label={`${unlockedPapers.length} of ${papers.length} papers have all prerequisites self-marked explored`}
           >
             {eraCounts.map(({ era, total, unlocked }) =>
               unlocked > 0 ? (
@@ -705,7 +737,7 @@ function PapersPanel({ data, fixed }: { data: PathData; fixed: boolean }) {
               ))
             ) : (
               <p className="text-xs leading-relaxed text-text-low">
-                Mark topics as understood to unlock the papers that depend on them.
+                Mark topics explored to reveal which papers list them as prerequisites.
               </p>
             )}
           </div>
@@ -738,9 +770,11 @@ function PapersPanel({ data, fixed }: { data: PathData; fixed: boolean }) {
 /* ---------- completion band ---------- */
 
 function CompletionBand() {
+  const reduce = useReducedMotion();
   const [celebrate, setCelebrate] = useState(false);
 
   useEffect(() => {
+    if (reduce) return undefined;
     try {
       if (sessionStorage.getItem('lattice-atlas-celebrated')) return undefined;
       sessionStorage.setItem('lattice-atlas-celebrated', '1');
@@ -753,13 +787,13 @@ function CompletionBand() {
     } catch {
       return undefined;
     }
-  }, []);
+  }, [reduce]);
 
   return (
     <motion.section
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={reduce ? false : { opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [...EASE_OUT_EXPO] }}
+      transition={{ duration: reduce ? 0 : 0.5, ease: [...EASE_OUT_EXPO] }}
       className="relative overflow-hidden rounded-xl border border-stabilizer/40 bg-ink-850 p-8 md:p-10"
     >
       {celebrate && (
@@ -784,19 +818,23 @@ function CompletionBand() {
           ))}
         </div>
       )}
-      <p className="eyebrow !text-stabilizer">// PATH COMPLETE</p>
+      <p className="eyebrow !text-stabilizer">// ALL TOPICS EXPLORED</p>
       <h2 className="mt-3 font-display text-[32px] font-semibold leading-tight text-text-hi">
-        You finished the whole path.
+        You marked every path topic as explored.
       </h2>
       <p className="mt-3 max-w-2xl leading-relaxed text-text-mid">
-        You understood every prerequisite. The 23 core papers and today&apos;s research frontier
-        are fully unlocked. Go read the field&apos;s latest results like an insider.
+        This is a complete activity pass, not proof of mastery. Use the recorded
+        topic checks, delayed Review, Lab, and Decoder Duel to build evidence of what
+        you can retrieve and apply. All readings remain available for critical study.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
+        <Link to="/capstone" className="btn-primary">
+          <Check className="h-4 w-4" /> Take the synthesis capstone
+        </Link>
         <Link to="/papers" className="btn-secondary !border-star/50 !text-star hover:!border-star hover:!bg-star/10">
           <ScrollText className="h-4 w-4" /> Browse the papers
         </Link>
-        <Link to="/field-today" className="btn-primary">
+        <Link to="/field-today" className="btn-secondary">
           <Telescope className="h-4 w-4" /> Visit the frontier
         </Link>
         <Link to="/glossary" className="btn-ghost">
@@ -813,8 +851,9 @@ function CompletionBand() {
 
 export default function LearningPath() {
   useDocumentTitle('TQEC Learning Path & Curriculum');
+  const reduce = useReducedMotion();
   const data = useMemo(() => buildPathData(), []);
-  const { isUnderstood, understoodCount, resetProgress } = useProgress();
+  const { isUnderstood, understoodCount, checkedCount, resetProgress } = useProgress();
   const [drawerTopic, setDrawerTopic] = useState<Topic | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [flashId, setFlashId] = useState<string | null>(null);
@@ -841,7 +880,8 @@ export default function LearningPath() {
   }, [understoodCount, flashId]);
 
   // Track which card to flash: intercept toggles via a wrapper.
-  const handleOpen = (t: Topic) => setDrawerTopic(t);
+  const handleOpen = useCallback((topic: Topic) => setDrawerTopic(topic), []);
+  const closeTopic = useCallback(() => setDrawerTopic(null), []);
 
   // Papers panel appears past 40% scroll.
   const { scrollYProgress } = useScroll();
@@ -889,7 +929,7 @@ export default function LearningPath() {
           Twenty-six steps from your first vector space to reading this year&apos;s
           surface-code papers. The path respects dependencies — each step assumes only what
           came before it. The app saves your progress on this device. You can leave and come
-          back any time.
+          back any time. Topic marks mean “explored”; checks and applied challenges are shown separately.
         </p>
 
         <div className="mt-8">
@@ -929,12 +969,15 @@ export default function LearningPath() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-2 font-mono text-[13px] text-text-mid md:text-right">
+              <div className="flex flex-col gap-2 font-mono text-[13px] text-text-mid md:text-right" role="status" aria-live="polite">
                 <p>
-                  STEPS DONE <span className="text-text-hi">{understoodCount}/{data.ordered.length}</span>
+                  TOPICS EXPLORED <span className="text-text-hi">{understoodCount}/{data.ordered.length}</span>
                 </p>
                 <p>
-                  PAPERS UNLOCKED <span className="text-text-hi">{unlockedPaperCount}/{papers.length}</span>
+                  TOPIC CHECKS PASSED <span className="text-text-hi">{checkedCount}/{data.ordered.length}</span>
+                </p>
+                <p>
+                  PAPER PREREQS EXPLORED <span className="text-text-hi">{unlockedPaperCount}/{papers.length}</span>
                 </p>
                 <p>
                   CURRENT TIER <span className="text-text-hi">T{nextTopic?.tier ?? 6}</span>
@@ -966,7 +1009,7 @@ export default function LearningPath() {
                       className="absolute bottom-full left-0 z-20 mb-2 w-64 rounded-lg border border-ink-500 bg-ink-850 p-4 shadow-glow-cyan"
                     >
                       <p className="text-sm leading-relaxed text-text-mid">
-                        Clear all {understoodCount} understood marks and start over?
+                        Clear all {understoodCount} explored marks and topic-check evidence?
                       </p>
                       <div className="mt-3 flex gap-2">
                         <button
@@ -997,7 +1040,7 @@ export default function LearningPath() {
       </section>
 
       {/* Section 2 — the path */}
-      <section ref={pathRef} className="relative mx-auto max-w-4xl px-6 py-16 md:px-8">
+      <section ref={pathRef} className="relative mx-auto max-w-4xl overflow-x-clip px-6 py-16 md:px-8">
         {/* spine */}
         <div className="absolute bottom-16 left-[30px] top-16 w-0.5 bg-ink-500 md:left-[34px]" aria-hidden>
           <motion.div
@@ -1065,11 +1108,13 @@ export default function LearningPath() {
                         </span>
                       ) : isCurrent ? (
                         <span className="relative flex h-7 w-7 items-center justify-center">
-                          <motion.span
-                            className="absolute inset-0 rounded-full border-2 border-plaquette"
-                            animate={{ scale: [1, 1.6], opacity: [0.8, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
-                          />
+                          {!reduce && (
+                            <motion.span
+                              className="absolute inset-0 rounded-full border-2 border-plaquette"
+                              animate={{ scale: [1, 1.6], opacity: [0.8, 0] }}
+                              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
+                            />
+                          )}
                           <span className="h-7 w-7 rounded-full border-2 border-plaquette bg-ink-900" />
                           <span className="absolute h-2.5 w-2.5 rounded-full bg-plaquette" />
                         </span>
@@ -1129,12 +1174,12 @@ export default function LearningPath() {
         </div>
       </section>
 
-      <TopicDrawer topic={drawerTopic} onClose={() => setDrawerTopic(null)} data={data} />
+      <TopicDrawer topic={drawerTopic} onClose={closeTopic} data={data} />
     </div>
   );
 }
 
-/** Wrapper that flashes the card green for 800ms when it is marked understood. */
+/** Wrapper that flashes the card green when it is newly marked explored. */
 function StepCardWithFlash(props: {
   topic: Topic;
   index: number;

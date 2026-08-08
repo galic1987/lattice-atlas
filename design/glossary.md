@@ -2,7 +2,7 @@
 
 **Purpose**: A searchable, cross-linked reference of key TQEC terms. Fast, dense, keyboard-friendly. Every term links back to related topics (knowledge map) and papers. Supports deep links (`/glossary#stabilizer`) from other pages.
 
-**Data**: `glossary.json` — 28 terms: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }`. Categories: `code theory` · `topology & anyons` · `computation` · `decoding` · `hardware & experiment`.
+**Data**: `app/src/data/glossary.ts` — 61 terms: `{ term, slug, category, aliases (optional), short, long, notation (optional), related_terms[], related_topics[], related_papers[] }`. Selection matching is case-insensitive exact matching against a term or an explicit alias; it does not use substring matching or automatic stemming. Categories: `code theory` · `topology & anyons` · `computation` · `decoding` · `hardware & experiment`.
 
 ---
 
@@ -12,7 +12,7 @@
 - Eyebrow (mono, cyan): `// REFERENCE`
 - H1 (display-lg): `Glossary`
 - Lead (body-lg, `text-mid`, max-w-2xl): *"The vocabulary of topological quantum error correction, defined plainly. Terms cross-link to the knowledge map and the paper canon, so a definition is never a dead end."*
-- Stat row (mono-sm): `26 TERMS` · `5 CATEGORIES`
+- Stat row (mono-sm): `61 TERMS` · `5 CATEGORIES`
 
 **Animation**: H1 + lead block-stagger (24px rise, 0.08s); stat row fades +0.3s.
 
@@ -23,7 +23,7 @@
 **Layout**: Sticky `top-16`, z-30, `ink-900/90 backdrop-blur`, border-bottom, `py-3`, `max-w-6xl` flex gap-3 wrap.
 - **Search input** (flex-1, min 240px): icon Search, mono placeholder `search terms… ( / to focus )`. Live-filters as you type (matches term, short, long; matched substring highlighted cyan in results). Keyboard `/` focuses input (documented hint kbd-style chip: `/`).
 - **Category chips** (toggle, rounded-full body-sm): `All` + five categories, each with a distinct dot color (code theory = cyan, topology & anyons = violet, computation = amber, decoding = rose, hardware & experiment = emerald). Multi-select.
-- Right: count (mono-sm `text-low`): `SHOWING n OF 24`.
+- Right: count (mono-sm `text-low`): `SHOWING n OF 61`.
 
 **Animation**: input focus ring expands (border + glow 200ms); chips toggle 200ms; result count cross-fade.
 
@@ -50,8 +50,7 @@
 
 **Deep-link behavior**: loading `/glossary#stabilizer` scrolls the term to center, expands it automatically, and pulses a cyan outline (2 pulses, 1.2s).
 
-**Full term list** (28 terms, with notation where applicable — final copy in `glossary.json`; implementers should write 1–2 sentence `short` + 1 paragraph `long` for each):
-`ancilla qubit` · `anyon` · `braiding` · `Clifford gate` · `non-Clifford gate` (notation: `T`) · `code distance` (`d`) · `CSS code` · `defect / hole` · `error chain` · `fault tolerance` · `flag qubit` · `hook error` · `lattice surgery` · `logical operator` · `logical qubit` · `magic state` (`|T⟩`) · `measurement-based QC (MBQC)` · `MWPM decoder` · `plaquette` · `real-time decoding` · `rotated surface code` · `space-time diagram` · `stabilizer` · `surface code` · `syndrome` · `threshold theorem` (`p_th ≈ 1%`) · `topological order` · `toric code` · `ZX-calculus`.
+**Full term list**: `app/src/data/glossary.ts` is the canonical inventory. It includes 32 beginner-boundary entries covering probability, complex numbers, linear algebra, quantum states and measurement, plus the 29 established TQEC terms. Do not duplicate the inventory here; the data checker validates all topic, paper, and related-term references from the canonical file.
 
 **Animation**: Letter groups reveal with 0.05s row stagger (rise 16px + fade, trigger 15% viewport). Ghost letter parallaxes slightly (0.9× scroll). Expand: height-auto 250ms + chevron rotate. Search filtering uses Framer Motion `layout` springs so rows reflow smoothly (400/35).
 

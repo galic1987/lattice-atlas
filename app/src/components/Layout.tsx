@@ -1,15 +1,24 @@
 import { asset } from '@/lib/asset';
 import { useEffect, useRef, useState } from 'react';
-import { NavLink, Link, Outlet } from 'react-router-dom';
+import {
+  Link,
+  NavLink,
+  NavigationType,
+  Outlet,
+  useLocation,
+  useNavigationType,
+} from 'react-router-dom';
 import { Menu, Share2, X } from 'lucide-react';
 import { useProgress } from '@/store/progress';
 import { topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
 import SoundToggle from '@/components/SoundToggle';
+import { FOUNDATION_STAGE_IDS } from '@/lib/learningRecord';
 
-const NAV_ITEMS = [
+const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }> = [
   { to: '/foundations', label: 'Start', ariaLabel: 'Start with quantum foundations' },
+  { to: '/altitudes', label: 'Depths', ariaLabel: 'One concept at five explanation depths' },
   { to: '/map', label: 'Map', ariaLabel: 'Knowledge map' },
   { to: '/path', label: 'Path', ariaLabel: 'Learning path' },
   { to: '/lab', label: 'Lab', ariaLabel: 'Surface code lab' },
@@ -18,7 +27,13 @@ const NAV_ITEMS = [
   { to: '/field-today', label: 'Frontier', ariaLabel: 'Field today' },
   { to: '/glossary', label: 'Glossary' },
   { to: '/review', label: 'Review', ariaLabel: 'Daily spaced review' },
-] as const;
+];
+
+const ROUTE_NAMES = new Map<string, string>([
+  ['/', 'Home'],
+  ['/capstone', 'Synthesis capstone'],
+  ...NAV_ITEMS.map(({ to, ariaLabel, label }) => [to, ariaLabel ?? label] as const),
+]);
 
 function Logo() {
   return (
@@ -35,15 +50,35 @@ function Logo() {
   );
 }
 
+function useResumeDestination() {
+  const { understoodCount, evidenceFor } = useProgress();
+  const latestFoundation = new Map(
+    evidenceFor('foundation-prediction').map((event) => [event.stageId, event]),
+  );
+  const foundationCorrect = FOUNDATION_STAGE_IDS.filter(
+    (stageId) => latestFoundation.get(stageId)?.correct,
+  ).length;
+  const altitudeStudied = evidenceFor('altitude-study').length > 0;
+  const capstonePassed = evidenceFor('capstone').some((event) => event.passed);
+
+  if (foundationCorrect < 5) return { to: '/foundations', label: 'Foundations' };
+  if (!altitudeStudied) return { to: '/altitudes', label: 'Five depths' };
+  if (understoodCount < topics.length) return { to: '/path', label: 'Learning path' };
+  if (!capstonePassed) return { to: '/capstone', label: 'Capstone' };
+  return { to: '/review', label: 'Daily review' };
+}
+
 function ProgressPill({ onShare }: { onShare: () => void }) {
   const { understoodCount } = useProgress();
+  const resume = useResumeDestination();
   const pct = Math.max(0, Math.min(100, Math.round((understoodCount / topics.length) * 100)));
   const filled = Math.round(pct / 20);
   return (
     <div className="hidden items-center gap-2 sm:flex">
       <Link
-        to="/path"
-        title={`${understoodCount} of ${topics.length} topics understood`}
+        to={resume.to}
+        title={`Resume course at ${resume.label}. ${understoodCount} of ${topics.length} topics self-marked.`}
+        aria-label={`Resume course at ${resume.label}`}
         className="rounded-full border border-ink-600 bg-ink-800 px-3 py-1 font-mono text-xs text-text-mid transition-colors duration-200 hover:border-plaquette/50 hover:text-plaquette"
       >
         {'▓'.repeat(filled)}
@@ -62,7 +97,7 @@ function ProgressPill({ onShare }: { onShare: () => void }) {
 
 function DesktopNav() {
   return (
-    <nav className="hidden items-center lg:flex" aria-label="Main">
+    <nav className="hidden items-center xl:flex" aria-label="Main">
       {NAV_ITEMS.map(({ to, label, ...item }) => (
         <NavLink
           key={to}
@@ -91,9 +126,10 @@ function DesktopNav() {
   );
 }
 
-function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+function MobileNav({ open, onClose, onShare }: { open: boolean; onClose: () => void; onShare: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const resume = useResumeDestination();
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +166,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
 
   if (!open) return null;
   return (
-    <div ref={dialogRef} className="fixed inset-0 z-50 bg-ink-950/[0.98] lg:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
+    <div ref={dialogRef} className="fixed inset-0 z-50 overflow-y-auto bg-ink-950/[0.98] xl:hidden" role="dialog" aria-modal="true" aria-label="Site menu">
       <div className="flex h-16 items-center justify-between px-6">
         <Logo />
         <button
@@ -143,7 +179,15 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
           <X className="h-6 w-6" />
         </button>
       </div>
-      <nav className="flex flex-col gap-2 px-6 pt-10" aria-label="Main">
+      <nav className="flex flex-col gap-2 px-6 pb-8 pt-10" aria-label="Main">
+        <Link
+          to={resume.to}
+          onClick={onClose}
+          className="mb-5 inline-flex min-h-11 items-center justify-between rounded-xl border border-plaquette/50 bg-plaquette/10 px-4 py-3 font-display text-base font-semibold text-plaquette"
+        >
+          <span>Resume course</span>
+          <span className="font-mono text-xs font-normal">{resume.label} →</span>
+        </Link>
         {NAV_ITEMS.map(({ to, label, ...item }, i) => (
           <NavLink
             key={to}
@@ -163,6 +207,16 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
             {label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onShare();
+          }}
+          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-plaquette/50 bg-plaquette/10 px-4 py-3 font-display text-base font-semibold text-plaquette"
+        >
+          <Share2 className="h-4 w-4" aria-hidden="true" /> Share activity and evidence
+        </button>
       </nav>
     </div>
   );
@@ -171,6 +225,41 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  const mainRef = useRef<HTMLElement>(null);
+  const initialRoute = useRef(true);
+  const location = useLocation();
+  const navigationType = useNavigationType();
+
+  useEffect(() => {
+    if (initialRoute.current) {
+      initialRoute.current = false;
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      if (location.hash) {
+        const target = document.getElementById(location.hash.slice(1));
+        if (target) {
+          target.scrollIntoView({ block: 'start' });
+          if (target instanceof HTMLElement) {
+            target.setAttribute('tabindex', '-1');
+            target.focus({ preventScroll: true });
+          }
+        }
+      } else {
+        if (navigationType !== NavigationType.Pop) {
+          window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        }
+        mainRef.current?.focus({ preventScroll: true });
+      }
+
+      const routeName = ROUTE_NAMES.get(location.pathname) ?? 'Page not found';
+      setRouteAnnouncement(`${routeName} page loaded`);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [location.hash, location.pathname, navigationType]);
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
@@ -180,6 +269,9 @@ export default function Layout() {
       >
         Skip to content
       </a>
+      <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {routeAnnouncement}
+      </p>
       <UniversalExplainer />
       <ShareableScoreCard isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
@@ -193,7 +285,7 @@ export default function Layout() {
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="rounded-lg p-2 text-text-mid transition-colors hover:text-text-hi lg:hidden"
+              className="rounded-lg p-2 text-text-mid transition-colors hover:text-text-hi xl:hidden"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -201,9 +293,13 @@ export default function Layout() {
         </div>
       </header>
 
-      <MobileNav open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <MobileNav
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onShare={() => setShareOpen(true)}
+      />
 
-      <main id="main-content" className="flex-1 pt-16">
+      <main ref={mainRef} id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none">
         <Outlet />
       </main>
 
@@ -238,7 +334,9 @@ export default function Layout() {
                 23 papers · 26 topics · 6 tiers · 1998 → 2026
               </p>
               <p className="mt-3 text-sm leading-relaxed text-text-low">
-                Progress is stored locally in your browser. No account, no tracking.
+                Progress is stored locally in your browser. No account or analytics;
+                display fonts are fetched from Google Fonts. Opening an embedded visual lesson
+                makes an on-demand request to YouTube&apos;s privacy-enhanced domain.
               </p>
             </div>
           </div>

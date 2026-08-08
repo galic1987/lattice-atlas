@@ -3,7 +3,7 @@
     <linearGradient id="eraBlend" x1="0" y1="0" x2="1920" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#1E3A8A"/>
       <stop offset="0.28" stop-color="#22D3EE"/>
-      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="0.52" stop-color="#9B7BFA"/>
       <stop offset="0.76" stop-color="#F5B83D"/>
       <stop offset="1" stop-color="#FB7185"/>
     </linearGradient>
