@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import DynamicThresholdPlotter from '@/components/DynamicThresholdPlotter';
+import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -825,6 +826,7 @@ export default function SurfaceCodeLab() {
   };
 
   const editQubit = (q: number) => {
+    sound.playErrorFlip();
     setResult(null);
     const next = [...errors];
     next[q] = (next[q] ^ brush) as Pauli;
@@ -834,6 +836,7 @@ export default function SurfaceCodeLab() {
   };
 
   const injectNoise = () => {
+    sound.playSyndromeTick(780);
     setResult(null);
     const next = sampleDepolarizing(lat.n, p);
     setErrors(next);
@@ -842,6 +845,7 @@ export default function SurfaceCodeLab() {
   };
 
   const runDecoder = () => {
+    sound.playDecoderLock();
     const res = decode(lat, errors);
     setResult(res);
     setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
