@@ -7,7 +7,7 @@ Multiple AI agents (and humans) work in this repo. Read this before editing.
 ## Workflow: pull requests only (as of 2026-08-07)
 
 `main` is branch-protected: direct pushes are rejected, and merging requires the
-`gates` check (CI: lint + verify-lattice + check-data + build) to pass. Deploys
+`gates` check (CI: lint + fail-closed Stim verification + build + budgets + browser checks) to pass. Deploys
 still happen automatically — on merge to `main`.
 
 ```bash
@@ -39,33 +39,30 @@ Claude works in `../lattice-atlas-claude`. The main checkout
 your own worktree; integrate through PRs, never through the other agent's
 working directory.
 
-## Open review findings — needs owner (2026-08-07, four-reviewer audit)
+## Closed review findings — regression history (2026-08-07, four-reviewer audit)
 
-> **→ Gemini: the 3 remaining items are filed as GitHub issues [#25](https://github.com/galic1987/lattice-atlas/issues/25) (Lab qubit a11y), [#26](https://github.com/galic1987/lattice-atlas/issues/26) (name-key split), and [#27](https://github.com/galic1987/lattice-atlas/issues/27) (orphaned QuantumArcade). Each has a full spec + reference implementation. Please pick these up — they're in your files (SurfaceCodeLab, Certificate/ShareableScoreCard, QuantumArcade), which is why Claude handed them off rather than racing your edits.**
+A full review (physics / code / security / perf-a11y) ran against main. All nine
+items below are now addressed; the list remains as regression context for future
+agents.
 
-A full review (physics / code / security / perf-a11y) ran against main. Claude
-fixed everything cleanly in the data lane + Decoder Duel (merged PRs #14, #16).
-The items below live in files Gemini has been actively editing, so they're
-handed off rather than raced. Ranked by severity; each has a concrete fix. Items 1, 2, 6-9 DONE by Claude (PRs #19, #20, #23). Items 3-5 remain (SurfaceCodeLab a11y, name-key split, orphaned QuantumArcade) — all in Gemini-owned, actively-edited files (3D components, SurfaceCodeLab, Certificate/ShareableScoreCard); Gemini owns these to avoid clobbering live edits.
-
-1. **[DONE — PR #23]** ~~HIGH — WebGL GPU leak~~ `components/SpacetimeView3D.tsx`: cleanup now disposes all geometries/materials + forceContextLoss. (RAF-idle/reduced-motion gating still open.) Was: The scene-build
+1. **[DONE] HIGH — WebGL GPU leak** `components/SpacetimeView3D.tsx`. The scene-build
    `useEffect` re-runs on every playback step and reallocates a `WebGLRenderer`
    + many geometries/materials; cleanup only calls `renderer.dispose()`.
    Fix: `.dispose()` every geometry/material (or reuse them across renders), and
    `renderer.forceContextLoss()` on unmount. Also gate the RAF loop on
    interaction + `prefers-reduced-motion`, and pause via IntersectionObserver.
-2. **[DONE — PR #23]** ~~HIGH — timer leak~~ `components/SpacetimeBraidWeaver.tsx`: interval moved into an isPlaying-keyed useEffect with cleanup. Was: `setInterval`
+2. **[DONE] HIGH — timer leak** `components/SpacetimeBraidWeaver.tsx:133`. `setInterval`
    created in `togglePlay`, never cleared on pause/unmount. Fix: move it into a
    `useEffect` keyed on `isPlaying` with `clearInterval` cleanup (mirror
    `SurfaceCodeLab.tsx`'s worker/interval pattern).
-3. **[→ issue #25]** HIGH — a11y `pages/SurfaceCodeLab.tsx` lattice qubits are bare
+3. **[DONE] HIGH — a11y** `pages/SurfaceCodeLab.tsx` lattice qubits are bare
    `<g onClick>`. Give them `role="button"`, `tabIndex`, `aria-label`,
    `onKeyDown` (Enter/Space), and a focus ring — see the pattern just landed in
    `pages/DecoderDuel.tsx` (PR #16).
-4. **[→ issue #26]** MEDIUM — name key split: `Certificate.tsx` uses `lattice-atlas-name`,
+4. **[DONE] MEDIUM — name key split**: `Certificate.tsx` uses `lattice-atlas-name`,
    `ShareableScoreCard.tsx` uses `lattice-atlas-user-name`. Same field, two keys.
    Pick one canonical key (suggest `lattice-atlas-name`) in both.
-5. **[→ issue #27]** MEDIUM — dead code / unreachable points: `components/QuantumArcade.tsx` is
+5. **[DONE] MEDIUM — dead code / unreachable points**: `components/QuantumArcade.tsx` is
    never imported, yet is the only writer of `lattice-atlas-game-scores`, which
    `ShareableScoreCard.tsx` reads for up to 120/1000 points → permanently
    unreachable. Either mount the arcade or drop the arcade-points path.
@@ -80,7 +77,7 @@ handed off rather than raced. Ranked by severity; each has a concrete fix. Items
 8. **[DONE — PR #20]** ~~LOW — contrast~~: `text-low` is now `#7B89A7` (4.87:1).  // old note: `#64708E` ≈ 4.0:1 (below AA
    for small text). `design/design.md` already documents the intended fix to a
    lighter value — apply it to the config.
-9. **[PARTIAL — PR #20]** `manualChunks` split done (framer-motion + react vendor out of entry). REMAINING: add `loading="lazy"` to below-fold <img> in Home.tsx / ActChapterCard.tsx / FieldToday.tsx (Gemini-owned). Was: split framer-motion
+9. **[DONE — PR #20 + follow-up]** `manualChunks` split done (framer-motion + react vendor out of entry); below-fold imagery now uses lazy decoding. Was: split framer-motion
    (~177KB gzip) out of the entry chunk; add `loading="lazy"` to below-fold
    `<img>` in `Home.tsx`, `ActChapterCard.tsx`, `FieldToday.tsx`.
 
@@ -95,8 +92,9 @@ mobile drawer exemplary, all 52 quiz answers correct.
    `/lattice-atlas/` base path; raw absolute paths 404 in production. CSS `url()` and
    `index.html` refs are rebased by Vite automatically; JSX strings are not.
 2. **Run the gates before committing** (all from `app/`):
-   `npm run check-data && npm run verify-lattice && npx eslint src scripts && npm run build`
-   The build runs check-data automatically; CI runs all of them and blocks deploy on failure.
+   `npm run verify-lattice -- --require-stim && npx eslint src scripts tests && npm run build:e2e && npm run check-bundles && npm run test:e2e`
+   The build runs data/trust/type checks automatically; CI and deploy run all of
+   these and block publication on failure.
 3. **Data files have enforced coverage.** `scripts/check-data.mjs` requires every topic to
    have self-checks and insights, every paper to have reading prompts, and every
    cross-link id to resolve. Adding a topic/paper means adding its companions.
