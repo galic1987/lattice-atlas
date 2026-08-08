@@ -1167,12 +1167,21 @@ export default function SurfaceCodeLab() {
 
               <button
                 type="button"
-                onClick={() => setIsPlaying((prev) => !prev)}
+                onClick={() => {
+                  if (currentStep === 5 && !isPlaying) {
+                    setCurrentStep(0);
+                  }
+                  setIsPlaying((prev) => !prev);
+                }}
                 className="btn-primary !px-4 !py-2"
               >
                 {isPlaying ? (
                   <>
                     <Pause className="h-4 w-4" /> Pause
+                  </>
+                ) : currentStep === 5 ? (
+                  <>
+                    <RotateCcw className="h-4 w-4" /> Replay Steps
                   </>
                 ) : (
                   <>
