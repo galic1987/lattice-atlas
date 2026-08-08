@@ -41,7 +41,7 @@
 
 **Tier transition moments**: Between tier groups, a full-width interstitial card (`ink-850`, dashed tier-color border) announces: `MILESTONE — You've finished Tier 3. You can now read the threshold-theorem papers with understanding.` + chips of the 2–3 papers unlocked at that tier boundary + link `/papers?era=…`. Shows even if incomplete (as a preview of what's coming, dimmed with `upcoming` styling).
 
-**Animation**: Spine draws downward as user scrolls (scaleY tied to scroll progress via GSAP ScrollTrigger scrub across the section). Node markers pop (scale 0→1, 250ms spring) when entering viewport (15%). Step cards slide from right 32px + fade, 0.07s stagger within each tier group. Milestone interstitials: dashed border draws on (dash-offset loop 20s infinite) + content block-reveal. On marking a step understood: card flashes a green left-border glow (800ms decay), node marker fills with spring, and the next card's marker begins pulsing.
+**Animation**: Framer Motion reveals nodes/cards in viewport and updates completion state. Reduced-motion users receive final states without offscreen transforms. Completion feedback is brief and nonessential.
 
 **Mobile**: spine at 12px, cards full-width, right rail stacks below main content.
 

@@ -2,13 +2,13 @@
 
 **Purpose**: Explain what TQEC is in one screen, sell the learning journey, and route users to the four main tools (Map, Path, Papers, Field Today). Sets the visual tone: dark observatory, lattice motifs, cyan/violet duality.
 
-**Scroll length**: ~6 sections, long-form storytelling with one GSAP pinned sequence.
+**Scroll length**: ~6 sections, long-form storytelling with Framer Motion reveals and native scrolling.
 
 ---
 
 ## Section 1 — Hero (100vh, sticky-feeling)
 
-**Layout**: Full viewport height. Background: Three.js scene (React Three Fiber) — a slowly rotating **wireframe torus** (torus geometry, `0.4` radial tilt, rotation ~0.05 rad/s on Y, subtle 0.02 wobble on X) wrapped in a lattice: points placed on the torus surface in a grid (cyan and violet points alternating like X/Z stabilizers), with 2–3 points at a time emitting a soft rose "syndrome flash" (sprite scale + opacity pulse, 1.4s cycle). Deep fog fade to `ink-900`. Fallback: `hero-torus-fallback.png` poster (WebGL unavailable / reduced-motion / mobile low-power). A dim `lattice-texture.svg` overlays the whole hero at 20% opacity. Gradient scrim at bottom (`ink-900` 0%→100%) blends into next section.
+**Layout**: Full viewport height. Background: compressed `hero_quantum_lattice.jpg` used strictly as decorative mood art, with empty alt text, a dim lattice overlay, and a gradient scrim into `ink-900`. It is not presented as a torus, rotated surface-code patch, or scientific diagram. One slow scale cycle stops under reduced motion.
 
 **Content** (left-aligned, `max-w-6xl`, vertically centered, z-index above canvas):
 - Eyebrow (mono, cyan): `// A LEARNING COMPANION FOR QUANTUM ERROR CORRECTION`
@@ -23,8 +23,8 @@
 
 **Animation**:
 - Load sequence: eyebrow fades in (300ms) → headline lines slide up 40px + opacity, character-split per line (SplitText-style, 0.02s char stagger, 700ms) → subhead word-level reveal (0.01s word stagger) → CTAs scale 0.95→1 + fade (400ms, stagger 100ms) → stat line fades (300ms, +200ms delay).
-- Torus: continuous slow rotation; on mouse move, camera parallax ±2° (lerped).
-- Scroll: hero content parallaxes up at 0.5× scroll speed and fades out by 60% scroll of the section (GSAP ScrollTrigger). Torus scales 1→1.08 and dims 30%.
+- Backdrop: slow 1.02→1.06→1.02 scale; reduced-motion users see a static frame.
+- Text and CTAs use short Framer Motion entrances; scrolling remains native.
 
 ---
 
@@ -40,7 +40,7 @@
     2. *"Topological quantum error correction fights back with geometry. Information is encoded non-locally — spread across a lattice of physical qubits so that no single local error can destroy it. The logical qubit lives in the topology of the lattice, the way a hole in a torus can't be removed by a small deformation."*
     3. *"The surface code — the workhorse of the field — needs only nearest-neighbor interactions on a 2D grid and tolerates error rates near" + mono pill `p_th ≈ 1%` + ", which is why Google, IBM, and dozens of startups are betting on it."*
   - Inline mono pills used for notation: `[[n, k, d]]`, `d = 3`, `X ⊗ Z`.
-- **Right column**: `surface-code-diagram.svg` in an `ink-800` rounded-xl frame with 1px border and a mono-sm caption below: *"A distance-3 rotated surface code. Data qubits (circles), stabilizer plaquettes (cyan/violet), and an error chain (rose)."* On hover, the diagram's error chain gently pulses (CSS animation on SVG, rose glow, 2s cycle).
+- **Right column**: `surface-code-diagram.svg` in an `ink-800` rounded-xl frame. It exactly matches `buildLattice(3)`: 9 data qubits, 4 X checks, 4 Z checks, and one center X error component whose syndrome is the two adjacent Z checks. Caption and legend state that scope; motion is nonessential and reduced-motion safe.
 
 **Animation**: Left column children stagger up 24px, 0.08s stagger, trigger at 20% viewport. Diagram slides in from right 40px + fade (600ms), slight `rotate(0.5deg)`→0. Caption fades in +300ms delay.
 
@@ -58,9 +58,9 @@
 
 ---
 
-## Section 4 — The Journey (GSAP pinned scroll story) ★ signature section
+## Section 4 — The Journey
 
-**Layout**: Section height `300vh`; inner viewport pinned for the middle 200vh (ScrollTrigger pin). Content is a horizontal-feeling progression through **6 tier cards** that translate in from the right as scroll advances — a "climbing the tree" moment. Background: `ink-900` with a large, very dim vertical ladder of lattice dots down the left edge (nodes light up tier-color as you pass each tier).
+**Layout**: Six responsive tier cards in a native-flow progression. Background: `ink-900` with a dim ladder/lattice motif; each card keeps its full text and paper-unlock cue visible without scroll hijacking.
 
 - Pinned header (top-left): eyebrow `// THE JOURNEY` + H1 `Six tiers from linear algebra to the frontier.`
 - Each tier card (520px wide, `ink-800`, tier-colored left border 4px):
@@ -78,9 +78,9 @@
 5. **T5 Computation & Decoding** — MWPM decoding · defects & braiding · lattice surgery · cluster states/MBQC · magic states · flag FT · ZX-calculus — *unlocks the architecture era*
 6. **T6 Frontier** — advanced & real-time decoding · magic state cultivation · compilers · hybrid simulation · below-threshold experiments — *unlocks today's research news*
 
-**Animation**: GSAP ScrollTrigger with `pin: true`, `scrub: 0.5`. Scroll progress drives: cards translateX from +120vw to 0 sequentially (each card gets ~1/6 of pin distance), previous card shifts left -30% and dims to 35% opacity (depth stack). Left ladder nodes fill tier-color as their card is active. On unpin, final card (T6) remains centered and a CTA fades in below: `See the full map →` (secondary button → `/map`).
+**Animation**: Each card uses one short in-view reveal; all content remains in DOM flow and renders immediately under reduced motion. CTA: `See the full map →`.
 
-**Mobile**: pinning disabled; tiers render as a vertical stack of cards with standard stagger reveals.
+**Mobile**: tiers render as a vertical stack with no horizontal overflow.
 
 ---
 
@@ -97,7 +97,7 @@ Below: a horizontal scroll-snap strip (overflow-x-auto, snap-x) of **5 era cards
 
 Each card: era name (h3, era color), year range (mono), 1-line description, paper count, mini list of its 2–3 landmark paper titles (body-sm, truncated). Click card → `/papers?era=<era>` (Papers page pre-filtered).
 
-**Animation**: Strip container fades in; cards stagger in from right (x +60px, opacity, 0.1s stagger, trigger 20% viewport). Scroll-snap strip has a subtle "scroll →" hint (mono-sm `text-low`, animated arrow nudge loop) on desktop; on hover, cards lift -4px with era-color glow. `era-strip.png` as a very dim backdrop behind the strip (10% opacity, absolute, covered by scrim).
+**Animation**: Strip container fades in; cards use a short stagger and scroll-snap. `era-strip.svg` stays a very dim, empty-alt backdrop behind readable HTML.
 
 ---
 

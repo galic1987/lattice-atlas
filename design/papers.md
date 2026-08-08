@@ -8,14 +8,14 @@
 
 ## Section 1 — Page header (~40vh)
 
-**Layout**: `max-w-7xl`, `pt-32 pb-10`. Background: `era-strip.png` as full-width backdrop at 12% opacity under an `ink-900` scrim (80%), plus dim LatticeCanvas.
+**Layout**: `max-w-7xl`, `pt-32 pb-10`. Background: decorative `era-strip.svg` at low opacity under an `ink-900` scrim.
 
 - Eyebrow (mono, violet): `// THE CANON`
 - H1 (display-lg): `Twenty-three papers, one field.`
 - Lead (body-lg, `text-mid`, max-w-2xl): *"From the 1998 lattice code with boundaries to below-threshold quantum hardware — the seminal results of topological quantum error correction in chronological order. Every summary is written in plain English, rated for difficulty, and cross-linked to the prerequisites it assumes."*
 - Stat row (mono-sm, gap-6): `23 PAPERS` · `5 ERAS` · `1998 → 2026` · live `N MARKED READ` (violet).
 
-**Animation**: H1 word-level reveal (0.02s stagger); lead block-rise 24px; stat row fades +0.3s; `era-strip.png` slow horizontal drift (translateX -2%→2%, 20s infinite alternate — disabled on reduced motion).
+**Animation**: H1 word-level reveal; lead and stat row use short block rises. The era backdrop remains subtle and becomes static under reduced motion.
 
 ---
 
@@ -25,7 +25,7 @@
 
 - **Era chips** (toggle buttons, rounded-full, body-sm): `All` + five eras (exact data keys in parentheses), each with its era color dot: `Foundations` (cyan, `foundations`) · `Cluster-State Schemes` (sky, `cluster-state schemes`) · `Defect-Based Surface Code` (violet, `defect-based surface code`) · `Lattice Surgery Era` (amber, `lattice surgery era`) · `Experimental Era` (rose, `experimental era`). Multi-select. Active chip: era-color border + 10% tint fill.
 - **Difficulty filter**: segmented control `Any · 1–2 · 3 · 4–5` with DifficultyMeter glyphs.
-- **Topic filter**: dropdown (shadcn select) listing all 26 topics (grouped by tier); selecting shows only papers listing that topic in prerequisites. Chip appears with X to clear.
+- **Topic filter**: accessible native/custom control listing all 26 topics (grouped by tier); selecting shows only papers listing that topic in prerequisites. Chip appears with X to clear.
 - **Search**: text input filtering title/authors/keywords, mono placeholder `search papers…`.
 - Right: result count (mono-sm `text-low`): `SHOWING 8 OF 23` + ghost `Clear all`.
 
@@ -51,7 +51,7 @@
 
 **Deep-linked paper** (`#<arxiv_id>`): on load, card scrolls into center and pulses a violet outline glow (2 pulses, 1.2s).
 
-**Animation**: Spine draws with scroll (GSAP scrub scaleY across section). Cards: desktop alternating slide-in (x ±48px + opacity, 500ms, trigger 20% viewport); mobile slide-up 32px. Year markers count in (opacity + letter-spacing tighten). Era banners: left border draws down (scaleY, 400ms) then content staggers. Expand/collapse: height spring + chevron rotate 180°.
+**Animation**: Framer Motion reveals the spine/cards as they enter the viewport; reduced-motion users receive final states. Expand/collapse uses a short height transition and chevron rotation.
 
 ---
 

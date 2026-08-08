@@ -36,7 +36,7 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
               <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-plaquette">
                 3BLUE1BROWN VISUAL LESSON
               </span>
-              <span className="rounded bg-star/20 px-2 py-0.5 font-mono text-[9px] text-star font-bold">
+              <span className="rounded bg-star/20 px-2 py-0.5 font-mono text-[10px] font-bold text-star">
                 EXPANDABLE VIDEO
               </span>
             </div>
@@ -47,18 +47,6 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
         </div>
 
         <div className="flex items-center gap-2">
-          {resource.link && (
-            <a
-              href={resource.link}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="rounded-lg p-1.5 text-text-mid transition-colors hover:bg-ink-800 hover:text-plaquette"
-              title="Open full URL"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          )}
           <span className="rounded-lg p-1 text-text-mid transition-transform">
             <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${expanded ? 'rotate-180 text-plaquette' : ''}`} />
           </span>
@@ -76,14 +64,20 @@ export default function Expandable3B1BCard({ resource }: { resource: ParsedResou
             className="border-t border-ink-800 bg-ink-950 p-4"
           >
             {embedUrl ? (
-              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-ink-700 bg-black shadow-inner">
-                <iframe
-                  src={embedUrl}
-                  title={resource.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="h-full w-full border-0"
-                />
+              <div>
+                <p className="mb-2 text-xs leading-relaxed text-text-low">
+                  This privacy-enhanced embed loads from YouTube only after you open the lesson.
+                </p>
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-ink-700 bg-black shadow-inner">
+                  <iframe
+                    src={embedUrl}
+                    title={resource.title}
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    className="h-full w-full border-0"
+                  />
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center rounded-lg border border-ink-800 bg-ink-900 p-6 text-center">

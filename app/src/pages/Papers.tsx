@@ -1,6 +1,6 @@
 import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Bookmark, Check, ChevronDown, ExternalLink, Search, X } from 'lucide-react';
@@ -66,7 +66,7 @@ function PrereqChip({ name }: { name: string }) {
         style={{ backgroundColor: understood ? 'var(--stabilizer)' : 'var(--plaquette)' }}
       />
       {label}
-      {understood && <Check className="h-3 w-3 text-stabilizer" aria-label="understood" />}
+      {understood && <Check className="h-3 w-3 text-stabilizer" aria-label="explored" />}
     </>
   );
 
@@ -180,7 +180,7 @@ function PaperCard({ paper, firstOfYear, side, highlighted, onPlan }: PaperCardP
               ready ? 'bg-stabilizer/10 text-stabilizer' : 'bg-magic/10 text-magic'
             }`}
           >
-            {ready ? 'Ready to read' : `${missingCount} prerequisite${missingCount === 1 ? '' : 's'} left`}
+            {ready ? 'Prereqs explored' : `${missingCount} prerequisite${missingCount === 1 ? '' : 's'} unexplored`}
           </span>
         )}
 
@@ -336,17 +336,41 @@ function PaperCard({ paper, firstOfYear, side, highlighted, onPlan }: PaperCardP
 
 function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => void }) {
   const { isUnderstood, toggleUnderstood } = useProgress();
+  const drawerRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!paper) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !drawerRef.current) return;
+      const focusable = Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
     return () => {
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      previouslyFocused?.focus();
     };
   }, [paper, onClose]);
 
@@ -376,7 +400,9 @@ function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => vo
             onClick={onClose}
           />
           <motion.aside
+            ref={drawerRef}
             role="dialog"
+            aria-modal="true"
             aria-label={`Study plan for ${paper.title}`}
             className="fixed inset-y-0 right-0 z-50 flex w-full flex-col border-l border-ink-600 bg-ink-850 sm:max-w-[480px]"
             initial={{ x: '100%' }}
@@ -388,6 +414,7 @@ function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => vo
               <div className="flex items-start justify-between gap-4">
                 <p className="eyebrow text-star">{'// STUDY PLAN'}</p>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
                   aria-label="Close study plan"
@@ -406,7 +433,7 @@ function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => vo
                 <div className="flex items-baseline justify-between font-mono text-[12px]">
                   <span className={remaining === 0 ? 'text-stabilizer' : 'text-text-mid'}>
                     {remaining === 0
-                      ? 'All prerequisites understood — ready to read'
+                      ? 'All prerequisites explored — use the checks to test recall'
                       : `${remaining} of ${closure.length} prerequisite topic${closure.length === 1 ? '' : 's'} to go`}
                   </span>
                   <span className="text-text-low">
@@ -448,7 +475,7 @@ function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => vo
                             <button
                               type="button"
                               aria-pressed={done}
-                              aria-label={`Mark ${topicShortName(topic)} as understood`}
+                              aria-label={`Mark ${topicShortName(topic)} as explored`}
                               onClick={() => toggleUnderstood(topic.id)}
                               className={`flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors duration-200 ${
                                 done
@@ -496,7 +523,7 @@ function PlanDrawer({ paper, onClose }: { paper: Paper | null; onClose: () => vo
                   rel="noopener noreferrer"
                   className="btn-primary w-full"
                 >
-                  Ready — open the paper <ExternalLink className="h-4 w-4" />
+                  Open the paper <ExternalLink className="h-4 w-4" />
                 </a>
               ) : (
                 <Link to="/path" className="btn-secondary w-full">
@@ -533,16 +560,22 @@ function MiniMap({ onJump }: { onJump: (arxivId: string) => void }) {
               transition={{ delay: reduceMotion ? 0 : 0.3 + i * 0.03, type: 'spring', stiffness: 400, damping: 20 }}
               onClick={() => onJump(p.arxiv_id)}
               aria-label={`${p.title} (${p.year})`}
-              className="group absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-150 hover:scale-125"
+              className="group absolute top-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full transition-transform duration-150 hover:scale-110"
               style={{
                 left: `${left}%`,
-                width: size,
-                height: size,
-                backgroundColor: ERA_COLORS[p.era],
-                boxShadow: `0 0 8px ${ERA_COLORS[p.era]}55`,
               }}
             >
-              <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-52 -translate-x-1/2 rounded-lg border border-ink-600 bg-ink-850 p-2.5 text-left shadow-lg group-hover:block">
+              <span
+                aria-hidden="true"
+                className="rounded-full"
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: ERA_COLORS[p.era],
+                  boxShadow: `0 0 8px ${ERA_COLORS[p.era]}55`,
+                }}
+              />
+              <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-52 -translate-x-1/2 rounded-lg border border-ink-600 bg-ink-850 p-2.5 text-left shadow-lg group-hover:block group-focus-visible:block">
                 <span className="block font-mono text-[11px] text-text-low">{p.year}</span>
                 <span className="mt-0.5 block text-xs leading-snug text-text-hi">{p.title}</span>
               </span>
@@ -825,6 +858,7 @@ export default function Papers() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-low" />
             <input
               type="text"
+              aria-label="Search papers"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="search papers…"
@@ -834,7 +868,7 @@ export default function Papers() {
 
           {/* result count + clear */}
           <div className="ml-auto flex items-center gap-4">
-            <span key={filtered.length} className="font-mono text-[13px] uppercase tracking-wider text-text-low">
+            <span key={filtered.length} role="status" aria-live="polite" className="font-mono text-[13px] uppercase tracking-wider text-text-low">
               Showing {filtered.length} of {papers.length}
             </span>
             {hasFilters && (
@@ -928,7 +962,8 @@ export default function Papers() {
           </h2>
           <p className="mx-auto mt-4 max-w-xl leading-relaxed text-text-mid">
             Every prerequisite chip on these cards links to the knowledge map. Learn the topic
-            there. Mark it understood. The paper's readiness ribbon then updates.
+            there, mark it explored, and use its self-check to test recall. The paper card tracks
+            exploration without claiming mastery.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link to="/map" className="btn-primary">

@@ -8,7 +8,7 @@
 
 ## Section 1 — Hero (~70vh)
 
-**Layout**: Full-width, `frontier-hero.png` as background (covered, darkened 65% with an `ink-900` scrim, bottom gradient to `ink-900`). Content `max-w-6xl`, vertically centered.
+**Layout**: Full-width, decorative `frontier-hero.svg` as background (darkened under an `ink-900` scrim and bottom gradient). Content `max-w-6xl`, vertically centered.
 
 - Eyebrow (mono, amber): `// THE FIELD TODAY — 2024 → 2026`
 - H1 (display-lg): `The frontier is a factory.` — "factory." in amber→rose gradient.
@@ -25,7 +25,7 @@
 
 **Main column** — three editorial paragraphs (body, `text-mid`, drop-cap on first paragraph — first letter Space Grotesk 700 64px amber, floated):
 1. *"Google's 2024 below-threshold result changed the conversation: for the first time, a larger surface code demonstrably outperformed a smaller one on real hardware, with logical error rates falling as distance grew. Error correction is now compounding like an engineering technology, not a physics bet."*
-2. *"The bottleneck has moved up the stack. Protecting a qubit is increasingly a solved problem; the expensive part is computation — preparing high-fidelity non-Clifford resources, routing logical qubits through space-time, and decoding syndromes fast enough to keep pace with hardware."*
+2. *"The bottleneck now spans the stack. Below-threshold memory scaling is a major milestone, while fidelity, overhead, control, logical operations, non-Clifford resources, routing, and real-time decoding remain open engineering constraints."*
 3. *"Around this has grown a design-automation ecosystem: compilers that turn quantum algorithms into lattice-surgery instructions, simulators that verify fault-tolerant circuits exactly over billions of shots, and layout tools that make space-time diagrams something you can draw, optimize, and debug."*
 
 **Sidebar** — `ink-800` rounded-xl p-6 "signal board" (sticky, top-24): mono eyebrow `// SIGNALS`, 4 rows of label + amber/violet value (mono-sm), each with a 1-line explainer (body-sm `text-low`):
@@ -44,7 +44,7 @@
 
 ### Block 01 — Magic State Cultivation (amber accent)
 - Eyebrow `// THE BOTTLENECK`, H2 `Growing T gates in a Clifford world.`
-- Body: *"Clifford operations are cheap on a surface code; the T gate is not. It requires distilled 'magic states' — and distillation factories have historically consumed most of the qubits in a fault-tolerant algorithm. Magic state cultivation grows high-quality |T⟩ states directly inside the code with dramatically less overhead, turning the factory into a garden plot."*
+- Body: *"Many surface-code architectures implement logical Clifford effects with tracking, deformation, or surgery, while non-Clifford T operations commonly consume injected |A⟩ = T|+⟩ resources. Factory cost is architecture- and target-dependent. Cultivation is a postselected injection/check/grow/escape proposal whose reported advantage is scoped to specified simulations and baselines."*
 - Key-point list (cyan ◆ bullets): `why non-Clifford gates need magic states` · `distillation → cultivation: the overhead collapse` · `cultivation as the current highest-leverage research problem`.
 - Cross-links: chip → T6 topic `Magic State Cultivation & Injection Advances` (`/map?topic=…`) · chip → 2018 paper *"Efficient magic state factories…"* (`/papers#1812.01238`).
 
@@ -62,14 +62,14 @@
 
 ### Block 04 — Real-Time Decoding & Flag Fault-Tolerance (rose accent)
 - Eyebrow `// THE CLOCK`, H2 `Decoding faster than the noise.`
-- Body: *"A decoder that runs in post-processing is a science experiment; a decoder that runs in real time is a computer. Latency matters because undecoded syndromes backlog exponentially — and because non-Clifford gates need feed-forward decisions. Meanwhile, flag fault-tolerance shrinks syndrome extraction itself: a few extra 'flag' qubits catch hook errors, letting small codes stay fault-tolerant without full-distance circuits."*
+- Body: *"Real-time control needs both enough average throughput and decisions before the operations that consume them. At fixed arrival and service rates, a persistent rate deficit grows queue backlog approximately linearly in time; latency deadlines are a separate constraint. Flag circuits can expose particular correlated faults, but their guarantees depend on the code, circuit, schedule, and decoder."*
 - Key points: `latency vs decoherence race` · `streaming/hierarchical real-time decoders` · `flag qubits: cheap fault-tolerance for small codes`.
 - Cross-links: T6 topics `Real-Time Decoding & Classical Control`, `Advanced Decoders` · T5 topic `Flag Fault-Tolerant Syndrome Extraction` · paper *"Towards practical classical processing for the surface code"* (`/papers#1110.5133`).
 
 ### Block 05 — Below-Threshold Experiments (emerald accent)
 - Eyebrow `// THE HARDWARE`, H2 `Error correction that compounds.`
 - Body: *"The experimental era's defining plot: logical error rate vs code distance, bending downward. Google's 2024 below-threshold demonstration on superconducting hardware showed distance-7 beating distance-5 beating distance-3 — the scaling signature the field has chased since 1998. The roadmap question is now 'how many qubits to factoring-scale machines?'"*
-- Key points: `Λ (lambda): the error-suppression factor per distance step` · `logical qubit lifetime > physical lifetime` · `roadmap: millions of physical qubits`.
+- Key points: `Λ (lambda): εd/εd+2 for the stated task and decoder` · `memory scaling is not universal logical-gate validation` · `resource roadmaps require explicit architecture and error-budget assumptions`.
 - Cross-links: T6 topic `Below-Threshold Experiments…` · papers 2022 (`/papers#2207.06431`) + 2024 (`/papers#2408.13687`).
 
 **Block layout details**: text column (eyebrow, h2, body paragraphs, key-point list, cross-link chip row) + visual column — each block gets a thematic **SVG vignette** (custom, inline, no asset generation needed):
@@ -84,13 +84,13 @@ Each vignette lives in an `ink-800` rounded-xl frame with mono-sm caption. All a
 
 ---
 
-## Section 4 — "How to read the frontier" (GSAP pinned glossary-strip)
+## Section 4 — “How to read the frontier”
 
-**Layout**: `250vh` section, pinned inner viewport (ScrollTrigger). Purpose: teach the five jargon phrases that unlock frontier news. Center stage shows one large term at a time (display-lg, term color) + definition (body-lg `text-mid`, max-w-xl) + related T6 chip; scroll progress cross-fades between terms (opacity + y-shift, blur 4px↔0). Progress rail on left: five mono labels, active one highlights.
+**Layout**: Responsive native-flow cards teach the jargon phrases that unlock frontier news. Each shows the term, scoped definition, related T6 chip, and evidence boundary; no scroll hijacking.
 
 Terms: `magic state` (amber) — *the distilled resource that powers non-Clifford T gates* · `lattice surgery` (violet) — *merging and splitting code patches to perform logical gates* · `space-time diagram` (cyan) — *the 3D blueprint of a fault-tolerant computation* · `real-time decoding` (rose) — *correcting syndromes as fast as the hardware produces them* · `flag qubit` (emerald) — *a sentinel ancilla that catches correlated hook errors*. Each term chip links to `/glossary#<slug>`.
 
-**Animation**: pin with `scrub: 0.4`; each term gets 1/5 of pin distance — outgoing term lifts -30px + fades, incoming rises +30px from blur. Rail indicator slides with spring. Mobile: static stacked list (no pin).
+**Animation**: short in-view cross-fades on desktop; a static stacked list on mobile and under reduced motion.
 
 ---
 

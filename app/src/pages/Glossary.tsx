@@ -14,7 +14,7 @@ import {
 } from '@/data/glossary';
 
 /* ------------------------------------------------------------------ */
-/* Glossary data (design/glossary.md §4 — 29 terms, 5 categories)      */
+/* Glossary data (design/glossary.md §4 — 61 terms, 5 categories)      */
 /* ------------------------------------------------------------------ */
 
 
@@ -261,7 +261,7 @@ export default function Glossary() {
               );
             })}
           </div>
-          <p className="ml-auto font-mono text-[13px] text-text-low">
+          <p className="ml-auto font-mono text-[13px] text-text-low" role="status" aria-live="polite" aria-atomic="true">
             SHOWING {filtered.length} OF {TERMS.length}
           </p>
         </div>
@@ -277,7 +277,8 @@ export default function Glossary() {
                 key={letter}
                 type="button"
                 onClick={() => scrollToLetter(letter)}
-                className="font-mono text-[13px] text-plaquette transition-colors duration-200 hover:text-text-hi"
+                aria-label={`Jump to glossary terms beginning with ${letter}`}
+                className="inline-flex min-h-11 min-w-8 items-center justify-center font-mono text-[13px] text-plaquette transition-colors duration-200 hover:text-text-hi"
               >
                 {letter}
               </button>
@@ -312,12 +313,9 @@ export default function Glossary() {
             transition={{ staggerChildren: 0.05 }}
             className="scroll-mt-44"
           >
-            <div
-              aria-hidden
-              className="-ml-1 select-none font-display text-[96px] font-bold leading-none text-ink-700/50"
-            >
+            <h2 className="-ml-1 select-none font-display text-[96px] font-bold leading-none text-ink-700/50">
               {letter}
-            </div>
+            </h2>
             <div className="mt-2">
               {terms.map((t) => (
                 <TermRow

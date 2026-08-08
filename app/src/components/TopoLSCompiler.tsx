@@ -1,236 +1,133 @@
 import { useState } from 'react';
 import {
   ArrowRight,
-  Sparkles,
-  Download,
   Box,
-  RefreshCw
+  ExternalLink,
+  GitBranch,
+  Network,
+  Route,
 } from 'lucide-react';
 
-interface ZXNode {
-  id: string;
-  type: 'Z' | 'X' | 'H';
-  phase: string;
-  x: number;
-  y: number;
-}
+const TOPOLS_REPO = 'https://github.com/tqec/TopoLS';
+const TOPOLS_PAPER = 'https://arxiv.org/abs/2601.23109';
 
-interface ZXEdge {
-  from: string;
-  to: string;
-}
-
-/** Pre-built ZX-Calculus Circuit Diagrams for Compilation */
-const PRESETS = [
+const STAGES = [
   {
-    name: 'Logical CNOT (Lattice Surgery)',
-    nodes: [
-      { id: 'z1', type: 'Z', phase: '0', x: 60, y: 50 },
-      { id: 'x1', type: 'X', phase: '0', x: 180, y: 50 },
-      { id: 'z2', type: 'Z', phase: '0', x: 60, y: 110 },
-      { id: 'x2', type: 'X', phase: '0', x: 180, y: 110 },
-    ] as ZXNode[],
-    edges: [
-      { from: 'z1', to: 'x1' },
-      { from: 'z1', to: 'z2' },
-      { from: 'x1', to: 'x2' },
-    ] as ZXEdge[],
-    spacetimeDiagram: '3D Space-Time Pipe: Patch A (Z-boundary) welds with Patch B (Z-boundary) over 3 rounds',
-    stimCode: `R 0 1 2 3 4 5 6 7\nTICK\nCX 0 1 2 3\nM 0 1 2 3\nDETECTOR(0, 0, 0) rec[-1] rec[-2]`,
+    title: 'ZX-level topological optimization',
+    short: 'ZX transform',
+    body: 'TopoLS converts the circuit to a ZX diagram, applies spider fusion, and slices the graph by topological connectivity so merge–split structure is explicit.',
+    icon: Network,
+    output: 'Layered ZX graph',
   },
   {
-    name: 'Magic State Distillation (Bravyi-Kitaev T-Factory)',
-    nodes: [
-      { id: 'z1', type: 'Z', phase: 'π/4', x: 40, y: 40 },
-      { id: 'x1', type: 'X', phase: '0', x: 120, y: 40 },
-      { id: 'z2', type: 'Z', phase: 'π/4', x: 200, y: 40 },
-      { id: 'x2', type: 'X', phase: '0', x: 120, y: 110 },
-    ] as ZXNode[],
-    edges: [
-      { from: 'z1', to: 'x1' },
-      { from: 'x1', to: 'z2' },
-      { from: 'x1', to: 'x2' },
-    ] as ZXEdge[],
-    spacetimeDiagram: '15-to-1 Distillation Block: 15 noisy T-state pipes feeding into 1 purified output pipe',
-    stimCode: `R 0 1 2 3 4\nX_ERROR(0.01) 0 1 2 3 4\nMPP Z0*Z1*Z2*Z3\nDETECTOR(1, 0, 0) rec[-1]`,
+    title: '3D layout search with MCTS',
+    short: 'MCTS layout',
+    body: 'Monte Carlo Tree Search explores candidate three-dimensional embeddings. This is an optimization search over space–time volume, not a fixed one-click rewrite.',
+    icon: Route,
+    output: 'Candidate 3D embeddings',
   },
-];
+  {
+    title: 'Topology-aware partitioning',
+    short: 'Partition',
+    body: 'Large circuits are partitioned using spider connectivity to keep each layer tractable while preserving the topological structure used by the layout search.',
+    icon: GitBranch,
+    output: 'Lattice-surgery pipe diagram',
+  },
+] as const;
+
+const EXAMPLES = [
+  {
+    id: 'ghz16',
+    label: '16-qubit GHZ',
+    note: 'Official repository example',
+    command: 'uv run prog.py -f ghz_16 -b 20 -zx 1 -dir 1 -l 4 -r 0 -s 2 -t 2 -i 1000 -csv result -sp 0 -b0 0',
+  },
+  {
+    id: 'random500',
+    label: '500-qubit random circuit',
+    note: 'Reported benchmark family; consult the repository for parameters',
+    command: '# See docs/tutorial.ipynb and docs/exp.py in the pinned TopoLS checkout.',
+  },
+] as const;
 
 export default function TopoLSCompiler() {
-  const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
-  const [isCompiling, setIsCompiling] = useState(false);
-  const [compiled, setCompiled] = useState(true);
-
-  const preset = PRESETS[selectedPresetIndex];
-
-  const handleCompile = () => {
-    setIsCompiling(true);
-    setCompiled(false);
-    setTimeout(() => {
-      setIsCompiling(false);
-      setCompiled(true);
-    }, 600);
-  };
+  const [stageIndex, setStageIndex] = useState(0);
+  const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>(EXAMPLES[0].id);
+  const stage = STAGES[stageIndex];
+  const example = EXAMPLES.find((item) => item.id === exampleId) ?? EXAMPLES[0];
+  const Icon = stage.icon;
 
   return (
-    <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
-      {/* Header */}
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b border-ink-700 pb-4">
+    <section className="rounded-2xl border border-plaquette/40 bg-ink-900 p-5 shadow-glow-cyan md:p-6" aria-labelledby="topols-title">
+      <div className="flex flex-col gap-3 border-b border-ink-700 pb-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette">
-            <Box className="h-6 w-6" />
-          </div>
+          <div className="rounded-lg border border-plaquette/40 bg-plaquette/15 p-2 text-plaquette"><Box className="h-6 w-6" aria-hidden="true" /></div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// IN-BROWSER VERIFIED COMPILER</span>
-              <span className="rounded bg-stabilizer/20 px-2 py-0.5 font-mono text-[10px] text-stabilizer font-bold">PHYSICS VERIFIED</span>
-            </div>
-            <h3 className="font-display text-xl font-bold text-text-hi">TopoLS ZX-to-SpaceTime Compiler</h3>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// CONCEPTUAL PIPELINE WALKTHROUGH</span>
+            <h3 id="topols-title" className="font-display text-xl font-bold text-text-hi">How TopoLS compiles lattice surgery</h3>
           </div>
         </div>
-
-        {/* Preset selector */}
-        <div className="flex gap-2">
-          {PRESETS.map((p, idx) => (
-            <button
-              key={p.name}
-              type="button"
-              onClick={() => {
-                setSelectedPresetIndex(idx);
-                setCompiled(true);
-              }}
-              className={
-                selectedPresetIndex === idx
-                  ? 'rounded-lg border border-plaquette bg-plaquette/15 px-3 py-1.5 font-mono text-xs text-plaquette'
-                  : 'rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-mid hover:border-ink-500'
-              }
-            >
-              {p.name.split(' ')[0]} {p.name.split(' ')[1]}
-            </button>
-          ))}
-        </div>
+        <span className="rounded border border-magic/40 bg-magic/10 px-3 py-1 font-mono text-xs text-magic">COMPILER NOT RUN HERE</span>
       </div>
 
-      {/* Grid Compilation View */}
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        {/* Left: Input ZX-Calculus Diagram */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between border-b border-ink-800 pb-2">
-            <span className="font-mono text-xs uppercase tracking-wider text-star">
-              1. INPUT: ZX-Calculus Spider Graph
-            </span>
-            <span className="font-mono text-[10px] text-text-low">Abstract Logic</span>
-          </div>
+      <p className="mt-5 max-w-3xl text-sm leading-6 text-text-mid">
+        This interactive card explains the three stages documented by the TopoLS project. Changing a card only changes the explanation: this website does not import TopoLS, run MCTS, produce a pipe diagram, invoke TQEC, or verify an output with Stim.
+      </p>
 
-          <div className="relative mt-4 flex h-48 w-full items-center justify-center">
-            <svg viewBox="0 0 240 150" className="h-full w-full">
-              {/* Edges */}
-              {preset.edges.map((e) => {
-                const f = preset.nodes.find((n) => n.id === e.from)!;
-                const t = preset.nodes.find((n) => n.id === e.to)!;
-                return (
-                  <line
-                    key={`${e.from}-${e.to}`}
-                    x1={f.x}
-                    y1={f.y}
-                    x2={t.x}
-                    y2={t.y}
-                    stroke="#3D5178"
-                    strokeWidth="2"
-                  />
-                );
-              })}
-
-              {/* Nodes */}
-              {preset.nodes.map((n) => (
-                <g key={n.id}>
-                  <circle
-                    cx={n.x}
-                    cy={n.y}
-                    r="16"
-                    fill={n.type === 'Z' ? '#22D3EE' : '#FB7185'}
-                    fillOpacity="0.8"
-                    stroke={n.type === 'Z' ? '#22D3EE' : '#FB7185'}
-                    strokeWidth="2"
-                  />
-                  <text
-                    x={n.x}
-                    y={n.y + 4}
-                    textAnchor="middle"
-                    fill="#0A0F1C"
-                    className="font-mono text-xs font-bold"
-                  >
-                    {n.type}{n.phase !== '0' ? `(${n.phase})` : ''}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleCompile}
-            disabled={isCompiling}
-            className="mt-2 btn-primary w-full justify-center text-xs"
-          >
-            {isCompiling ? (
-              <>
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Compiling ZX rules...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-3.5 w-3.5" /> Compile to 3D Space-Time Diagram <ArrowRight className="h-3.5 w-3.5" />
-              </>
-            )}
-          </button>
+      <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[0.78fr_1.22fr]">
+        <div className="min-w-0 rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-text-low">Official pipeline</p>
+          <ol className="mt-3 space-y-2">
+            {STAGES.map((item, index) => (
+              <li key={item.title}>
+                <button type="button" onClick={() => setStageIndex(index)} aria-pressed={stageIndex === index} className={stageIndex === index ? 'flex w-full items-center gap-3 rounded-lg border border-plaquette bg-plaquette/10 p-3 text-left text-plaquette' : 'flex w-full items-center gap-3 rounded-lg border border-ink-700 bg-ink-900 p-3 text-left text-text-mid hover:border-ink-500 hover:text-text-hi'}>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current font-mono text-xs">{index + 1}</span>
+                  <span className="font-display text-sm font-semibold">{item.short}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
         </div>
 
-        {/* Right: Compiled 3D Space-Time Diagram & Stim Code */}
-        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
-          <div className="flex items-center justify-between border-b border-ink-800 pb-2">
-            <span className="font-mono text-xs uppercase tracking-wider text-plaquette">
-              2. OUTPUT: 3D Space-Time Pipe Layout
-            </span>
-            <span className="font-mono text-[10px] text-stabilizer font-bold">STIM VERIFIED</span>
+        <div className="min-w-0 rounded-xl border border-plaquette/30 bg-ink-950 p-5" role="region" aria-live="polite" aria-labelledby="topols-stage-title">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg border border-star/40 bg-star/10 p-2 text-star"><Icon className="h-6 w-6" aria-hidden="true" /></div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-star">Stage {stageIndex + 1} of {STAGES.length}</p>
+              <h4 id="topols-stage-title" className="font-display text-lg font-bold text-text-hi">{stage.title}</h4>
+            </div>
           </div>
-
-          {compiled ? (
-            <div className="mt-4 flex h-48 w-full flex-col justify-between rounded-lg border border-plaquette/30 bg-ink-900 p-4">
-              <div>
-                <span className="font-mono text-[10px] text-plaquette uppercase tracking-wider">COMPILED PIPE ROUTING</span>
-                <p className="mt-1 font-mono text-xs text-text-hi leading-relaxed">{preset.spacetimeDiagram}</p>
-              </div>
-
-              <div className="rounded border border-ink-700 bg-ink-950 p-2 font-mono text-[11px] text-star">
-                <span className="text-text-low">// Stim Code Excerpt:</span>
-                <pre className="mt-1 text-text-mid overflow-x-auto">{preset.stimCode}</pre>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-4 flex h-48 w-full items-center justify-center text-text-low font-mono text-xs">
-              Click &ldquo;Compile&rdquo; to execute TopoLS rules...
-            </div>
+          <p className="mt-4 text-sm leading-6 text-text-mid">{stage.body}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-3 rounded-lg border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
+            <span className="text-text-low">declared stage output</span>
+            <ArrowRight className="h-4 w-4 text-text-low" aria-hidden="true" />
+            <span className="text-stabilizer">{stage.output}</span>
+          </div>
+          {stageIndex < STAGES.length - 1 && (
+            <button type="button" onClick={() => setStageIndex(stageIndex + 1)} className="btn-secondary mt-5">Next documented stage <ArrowRight className="h-4 w-4" aria-hidden="true" /></button>
           )}
-
-          <div className="mt-4 flex items-center justify-between">
-            <span className="font-mono text-[10px] text-text-low">Target: Rotated Surface Code d=3</span>
-            <button
-              type="button"
-              onClick={() => {
-                const blob = new Blob([preset.stimCode], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${preset.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.stim`;
-                a.click();
-              }}
-              className="inline-flex items-center gap-1 font-mono text-xs text-plaquette hover:underline"
-            >
-              <Download className="h-3 w-3" /> Download .stim file
-            </button>
-          </div>
         </div>
       </div>
-    </div>
+
+      <div className="mt-6 rounded-xl border border-ink-700 bg-ink-950 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-text-low">Reproduce outside this website</p>
+            <p className="mt-1 text-sm text-text-hi">Choose an example described by the official repository.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {EXAMPLES.map((item) => (
+              <button key={item.id} type="button" onClick={() => setExampleId(item.id)} aria-pressed={exampleId === item.id} className={exampleId === item.id ? 'rounded-lg border border-star bg-star/15 px-3 py-2 font-mono text-xs text-star' : 'rounded-lg border border-ink-600 px-3 py-2 font-mono text-xs text-text-mid hover:text-text-hi'}>{item.label}</button>
+            ))}
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-text-low">{example.note}</p>
+        <pre className="mt-3 max-w-full overflow-x-auto rounded border border-ink-700 bg-ink-900 p-3 font-mono text-[11px] text-text-mid">{example.command}</pre>
+        <div className="mt-4 flex flex-wrap gap-4 font-mono text-xs">
+          <a href={TOPOLS_REPO} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-plaquette hover:underline">Official TopoLS repository <ExternalLink className="h-3 w-3" aria-hidden="true" /></a>
+          <a href={TOPOLS_PAPER} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-star hover:underline">Primary preprint <ExternalLink className="h-3 w-3" aria-hidden="true" /></a>
+        </div>
+      </div>
+    </section>
   );
 }

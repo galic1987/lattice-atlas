@@ -9,10 +9,13 @@
  *  3. logical operator algebra (commute with stabilizers, anticommute
  *     with each other)
  *  4. every single-qubit X/Z/Y error is corrected with no logical flip
- *  5. every two-qubit error is corrected back to the codespace
+ *  5. every two-qubit Pauli pattern returns to the codespace; all are
+ *     corrected logically for d≥5 (weight two is beyond d=3's guarantee)
  *  6. Monte-Carlo sanity: below threshold, logical failure decreases with d
  *  7. the Stim export is structurally sound (and semantically validated
- *     via `python3 -c "import stim"` when available)
+ *     when Python Stim is available; `--require-stim` fails if it is absent)
+ *  8. Decoder Duel generation is deterministic and exact hidden corrections
+ *     are accepted by the same model used in the game
  */
 import { build } from 'esbuild';
 import { execFileSync } from 'node:child_process';
@@ -25,6 +28,8 @@ import { pathToFileURL } from 'node:url';
 const appRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const workDir = mkdtempSync(join(tmpdir(), 'lattice-verify-'));
 const bundle = join(workDir, 'surfaceCode.mjs');
+const duelBundle = join(workDir, 'duel.mjs');
+const requireStim = process.argv.includes('--require-stim');
 
 await build({
   entryPoints: [join(appRoot, 'src/lib/surfaceCode.ts')],
@@ -34,6 +39,15 @@ await build({
   logLevel: 'silent',
 });
 const sc = await import(pathToFileURL(bundle).href);
+
+await build({
+  entryPoints: [join(appRoot, 'src/lib/duel.ts')],
+  bundle: true,
+  format: 'esm',
+  outfile: duelBundle,
+  logLevel: 'silent',
+});
+const duel = await import(pathToFileURL(duelBundle).href);
 
 let failures = 0;
 const check = (cond, msg) => {
@@ -81,21 +95,25 @@ for (const d of [3, 5, 7]) {
     }
   }
 
-  // 5. all two-qubit errors return to the codespace (logical flips allowed only at d=3...
+  // 5. all two-qubit Pauli patterns return to the codespace (logical flips allowed at d=3:
   //    weight-2 < ⌈d/2⌉ for d≥5 must always succeed; at d=3 weight ⌊(d-1)/2⌋=1 is guaranteed,
   //    so only check "syndrome cleared" universally and success for d≥5)
   let twoQubitFails = 0;
   for (let a = 0; a < lat.n; a++) {
     for (let b = a + 1; b < lat.n; b++) {
-      const errors = new Array(lat.n).fill(0);
-      errors[a] = 1;
-      errors[b] = 1;
-      const res = sc.decode(lat, errors); // decode() throws if syndrome not cleared
-      if (!res.success) twoQubitFails++;
+      for (const pauliA of [1, 2, 3]) {
+        for (const pauliB of [1, 2, 3]) {
+          const errors = new Array(lat.n).fill(0);
+          errors[a] = pauliA;
+          errors[b] = pauliB;
+          const res = sc.decode(lat, errors); // decode() throws if syndrome not cleared
+          if (!res.success) twoQubitFails++;
+        }
+      }
     }
   }
-  if (d >= 5) check(twoQubitFails === 0, `${twoQubitFails} two-qubit X errors mis-corrected at d=${d}`);
-  else console.log(`  two-qubit X errors beyond guarantee at d=3: ${twoQubitFails} logical flips (expected > 0)`);
+  if (d >= 5) check(twoQubitFails === 0, `${twoQubitFails} two-qubit Pauli patterns mis-corrected at d=${d}`);
+  else console.log(`  two-qubit Pauli patterns beyond guarantee at d=3: ${twoQubitFails} logical flips (expected > 0)`);
 }
 
 // 6. Monte-Carlo: logical failure rate should fall with distance below threshold
@@ -141,8 +159,20 @@ for (const d of [3, 5, 7]) {
   check((circuit.match(/^OBSERVABLE_INCLUDE/gm) ?? []).length === 1, 'stim observable missing');
   check(circuit.includes(`REPEAT ${lat.d - 1} {`), 'stim REPEAT block missing');
 
-  let stimChecked = false;
+  let stimAvailable = false;
   try {
+    execFileSync('python3', ['-c', 'import stim'], { encoding: 'utf8', timeout: 60000 });
+    stimAvailable = true;
+  } catch {
+    if (requireStim) {
+      failures++;
+      console.error('  ✗ python3 with stim is required but unavailable');
+    } else {
+      console.log('stim: python3+stim not available — optional semantic validation skipped (structure checks passed)');
+    }
+  }
+
+  if (stimAvailable) {
     const stimFile = join(workDir, 'circuit.stim');
     writeFileSync(stimFile, circuit);
     const py = `
@@ -153,30 +183,53 @@ assert c.num_detectors == ${zCount + S * (lat.d - 1) + zCount}, c.num_detectors
 assert c.num_observables == 1
 print("stim: circuit parses, detectors deterministic, DEM decomposes")
 `;
-    const out = execFileSync('python3', ['-c', py, stimFile], { encoding: 'utf8', timeout: 60000 });
-    process.stdout.write(out);
-    stimChecked = true;
-  } catch {
-    console.log('stim: python3+stim not available — semantic validation skipped (structure checks passed)');
-  }
-  if (stimChecked) {
-    // also validate d=5 and d=7 while we're here
-    for (const dd of [5, 7]) {
-      const cdd = sc.toStimCircuit(sc.buildLattice(dd), 0.001);
-      const stimFileDd = join(workDir, `circuit${dd}.stim`);
-      writeFileSync(stimFileDd, cdd);
-      const out = execFileSync(
-        'python3',
-        [
-          '-c',
-          `import stim, sys\nstim.Circuit(open(sys.argv[1]).read()).detector_error_model(decompose_errors=True)\nprint("stim: d=${dd} circuit valid")`,
-          stimFileDd,
-        ],
-        { encoding: 'utf8', timeout: 60000 },
-      );
+    try {
+      const out = execFileSync('python3', ['-c', py, stimFile], { encoding: 'utf8', timeout: 60000 });
       process.stdout.write(out);
+      for (const dd of [5, 7]) {
+        const cdd = sc.toStimCircuit(sc.buildLattice(dd), 0.001);
+        const stimFileDd = join(workDir, `circuit${dd}.stim`);
+        writeFileSync(stimFileDd, cdd);
+        const outDd = execFileSync(
+          'python3',
+          [
+            '-c',
+            `import stim, sys\nstim.Circuit(open(sys.argv[1]).read()).detector_error_model(decompose_errors=True)\nprint("stim: d=${dd} circuit valid")`,
+            stimFileDd,
+          ],
+          { encoding: 'utf8', timeout: 60000 },
+        );
+        process.stdout.write(outDd);
+      }
+    } catch (error) {
+      failures++;
+      const detail = error instanceof Error ? error.message : String(error);
+      console.error(`  ✗ Stim semantic validation failed: ${detail}`);
     }
   }
+}
+
+// 8. Decoder Duel integration: reproducible rounds and honest scoring/share output.
+{
+  for (const day of [20_000, 20_001, 20_002]) {
+    for (let roundIndex = 0; roundIndex < duel.DAILY_PLAN.length; roundIndex++) {
+      const plan = duel.DAILY_PLAN[roundIndex];
+      const seed = day * 7919 + roundIndex * 104729;
+      const a = duel.generateRound(plan, duel.mulberry32(seed));
+      const b = duel.generateRound(plan, duel.mulberry32(seed));
+      check(JSON.stringify(a.hidden) === JSON.stringify(b.hidden), `duel day ${day} round ${roundIndex} is not deterministic`);
+      check([...a.syndrome].sort().join('|') === [...b.syndrome].sort().join('|'), `duel day ${day} round ${roundIndex} syndrome changed for one seed`);
+      check(a.syndrome.size > 0, `duel day ${day} round ${roundIndex} has no playable syndrome`);
+
+      const exact = duel.judge(a, a.hidden);
+      check(exact.cleared, `duel day ${day} round ${roundIndex} rejects the exact hidden correction`);
+      check(!exact.logicalX && !exact.logicalZ, `duel day ${day} round ${roundIndex} exact correction creates a logical flip`);
+      check(exact.points > 0, `duel day ${day} round ${roundIndex} exact correction earns no points`);
+    }
+  }
+  const disclosure = duel.shareText(20_000, ['clean'], duel.POINTS.clean);
+  check(disclosure.includes('Local, unverified browser result'), 'duel share text omits its local/unverified boundary');
+  console.log('Decoder Duel: deterministic rounds, exact corrections, and share disclosure pass');
 }
 
 rmSync(workDir, { recursive: true, force: true });

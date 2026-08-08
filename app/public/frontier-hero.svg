@@ -47,14 +47,14 @@
   <!-- cyan & violet accent threads feeding into the cultivated region -->
   <g fill="none" stroke-linecap="round">
     <path d="M120 720 C 420 700, 620 560, 900 520 C 1010 505, 1080 480, 1130 460" stroke="#22D3EE" stroke-opacity="0.7" stroke-width="1.6"/>
-    <path d="M200 180 C 500 220, 700 300, 920 350 C 1020 372, 1090 400, 1140 415" stroke="#8B5CF6" stroke-opacity="0.7" stroke-width="1.6"/>
+    <path d="M200 180 C 500 220, 700 300, 920 350 C 1020 372, 1090 400, 1140 415" stroke="#9B7BFA" stroke-opacity="0.7" stroke-width="1.6"/>
     <path d="M1700 140 C 1560 200, 1440 280, 1340 360" stroke="#22D3EE" stroke-opacity="0.5" stroke-width="1.4"/>
-    <path d="M1780 720 C 1620 660, 1480 580, 1370 500" stroke="#8B5CF6" stroke-opacity="0.5" stroke-width="1.4"/>
+    <path d="M1780 720 C 1620 660, 1480 580, 1370 500" stroke="#9B7BFA" stroke-opacity="0.5" stroke-width="1.4"/>
   </g>
   <g>
     <circle cx="120" cy="720" r="4" fill="#22D3EE"/>
-    <circle cx="200" cy="180" r="4" fill="#8B5CF6"/>
+    <circle cx="200" cy="180" r="4" fill="#9B7BFA"/>
     <circle cx="1700" cy="140" r="3.5" fill="#22D3EE"/>
-    <circle cx="1780" cy="720" r="3.5" fill="#8B5CF6"/>
+    <circle cx="1780" cy="720" r="3.5" fill="#9B7BFA"/>
   </g>
 </svg>

@@ -15,7 +15,7 @@ The visual identity is built from the subject itself: **the surface code lattice
 - **Plaquette/star duality**: In the surface code, X-stabilizers (stars/vertices) and Z-stabilizers (plaquettes) form a checkerboard. We map this duality onto the two primary accent colors — **cyan (plaquette/Z)** and **violet (star/X)**. Whenever two complementary ideas appear (prereq ↔ paper, theory ↔ experiment), they are colored cyan/violet.
 - **Syndrome flashes**: A stabilizer measurement that detects an error "lights up". We use this as a micro-interaction language: hover states make lattice nodes glow; errors/highlights use rose.
 - **Braiding trails**: Anyon world-lines drawn as smooth curving paths — used as SVG decoration, timeline spine, and page-transition flourishes.
-- **Topology**: A torus (the toric code's home) appears as the hero 3D object — a wireframe torus with a lattice wrapped around it, slowly rotating.
+- **Topology**: Closed loops, boundaries, and homology appear in explanatory diagrams. The Home hero stays abstract and decorative so it is never mistaken for a code geometry.
 
 **Mood**: A dark observatory / chalkboard-of-the-future. Deep ink-navy background, luminous accents, generous negative space, monospace annotations like researcher marginalia. Feels like a beautifully crafted interactive textbook, not a startup landing page.
 
@@ -41,13 +41,13 @@ The visual identity is built from the subject itself: **the surface code lattice
 |---|---|---|
 | `--text-hi` | `#EAF0FB` | Headings, primary text |
 | `--text-mid` | `#A9B4CC` | Body text, descriptions |
-| `--text-low` | `#64708E` | Captions, metadata, placeholders |
+| `--text-low` | `#7B89A7` | Captions, metadata, placeholders (4.87:1 on `ink-800`) |
 
 ### Accents (semantic — tied to physics)
 | Token | Hex | Meaning / Usage |
 |---|---|---|
 | `--plaquette` (cyan) | `#22D3EE` | Primary accent. Z-plaquettes, links, primary CTAs, knowledge-map nodes, progress fill |
-| `--star` (violet) | `#8B5CF6` | Secondary accent. X-stars, papers, timeline markers, complementary highlights |
+| `--star` (violet) | `#9B7BFA` | Secondary accent. X-stars, papers, timeline markers, complementary highlights; readable as normal text on dark cards |
 | `--magic` (amber) | `#F5B83D` | Frontier content, magic states, "field today", warnings, difficulty peaks |
 | `--syndrome` (rose) | `#FB7185` | Errors, syndrome flashes, destructive states, "not yet understood" markers |
 | `--stabilizer` (green) | `#34D399` | Success, "understood" checkmarks, completed progress |
@@ -116,14 +116,14 @@ Physics notation (e.g. `X ⊗ Z ⊗ I`, `[[n, k, d]]`, `p_th ≈ 1%`) always in 
 - **Global easing**: `cubic-bezier(0.22, 1, 0.36, 1)` (ease-out-expo) for entrances; `cubic-bezier(0.4, 0, 0.2, 1)` for state changes.
 - **Durations**: micro-interactions 150–250ms; card entrances 400–600ms; page transitions 350ms; hero sequences 800–1200ms.
 - **Stagger language**: Lists/grids stagger at 0.05–0.08s per item, translating 24px up + opacity 0→1, triggered at 15–20% viewport entry (Framer Motion `whileInView`).
-- **Scroll**: Lenis smooth scrolling site-wide (`lerp: 0.1`). Scroll progress bar (2px cyan→violet gradient) fixed at top of viewport on all pages.
+- **Scroll**: Native browser scrolling. A 2px cyan→violet progress bar may appear at the top of long pages.
 - **Lattice ripple hover**: On card hover, a subtle radial glow (accent color, 8% opacity) follows the cursor within the card (CSS custom properties + radial-gradient).
 - **Page transitions**: Framer Motion `AnimatePresence` — outgoing fades + slides down 12px (200ms), incoming fades + slides up 16px (350ms, 80ms delay).
-- **Reduced motion**: Respect `prefers-reduced-motion` — disable Lenis, 3D rotation, stagger animations (render final states immediately).
+- **Reduced motion**: Respect `prefers-reduced-motion` — stop continuous image/canvas motion and render reveal sequences in their final state.
 
 ### Performance guardrails (per guide)
 - Max ~8–10 simultaneously animating elements per viewport.
-- One heavy effect per section: the Three.js torus lives ONLY in the home hero. All other pages use lightweight canvas/SVG lattice textures.
+- One heavy effect per section. Home uses one slow decorative raster-scale effect; the Lab alone owns the optional Three.js spacetime view. Other teaching visuals are lightweight SVG/DOM.
 - Character-split animation only for hero headline (≤20 chars per line); word-level for page subheads; block-level for body.
 
 ---
@@ -144,16 +144,16 @@ Physics notation (e.g. `X ⊗ Z ⊗ I`, `[[n, k, d]]`, `p_th ≈ 1%`) always in 
 ### 7.1 Navbar (fixed, all pages)
 - Height 64px, `ink-900` at 85% opacity + `backdrop-blur-md`, 1px bottom border `ink-600`.
 - Left: **Logo** — custom SVG mark (2×2 lattice of dots with one glowing plaquette, cyan) + wordmark "Lattice Atlas" in Space Grotesk 600, 18px. Hover: plaquette in logo pulses.
-- Center/right: nav links (Inter 500, 14px): `Home · Map · Path · Papers · Field Today · Glossary`. Active link: cyan text + 2px underline indicator (animated layout underline via Framer Motion `layoutId`). Inactive: `text-mid`, hover → `text-hi`.
+- Center/right: the core study routes (Start, Depths, Map, Path, Lab, Duel, Papers, Frontier, Glossary, Review). Active link: cyan text + 2px underline indicator. Compact viewports use the menu dialog.
 - Far right: **Global progress pill** — mono 12px, e.g. `▓▓▓░░ 19%` reading from localStorage (topics understood / 26). Click → Learning Path page. Shows a tiny animated fill on change.
-- Mobile (<768px): hamburger → full-screen overlay menu (`ink-950` 98% opacity), links stagger in from right (0.06s stagger, 24px x-offset), large 28px Space Grotesk links with mono index numbers (`01`–`06`).
+- Mobile/compact: hamburger → full-screen modal menu (`ink-950` 98% opacity), all routes plus the shareable activity/evidence score, with focus trapped and returned on close.
 - Navbar hides on scroll down, reveals on scroll up (translateY transition 300ms).
 
 ### 7.2 Footer (all pages)
 - `ink-950` background, top border `ink-600`, decorative lattice-dot SVG strip (low opacity) above content.
 - Three columns (desktop) / stacked (mobile):
   1. Logo + one-line mission: *"A self-study companion for topological quantum error correction — from linear algebra to the research frontier."*
-  2. Site links (all 6 pages).
+  2. Site links (all public study routes).
   3. Meta: mono-sm text — `23 papers · 26 topics · 6 tiers · 1998 → 2026`, plus note "Progress is stored locally in your browser. No account, no tracking."
 - Bottom line: `text-low` mono-sm: "Built for learners. Content curated from the seminal TQEC literature." + year.
 
@@ -213,7 +213,7 @@ All content ships as static JSON in the app bundle (no backend). Progress in `lo
 - `topics.resources` is an array of **plain strings** (e.g. `"Dennis, Kitaev, Landahl & Preskill, 'Topological quantum memory', arXiv:quant-ph/0110143"`) — parse the `arXiv:<id>` substring to build the link; render the string as the title and infer the type tag (`PAPER` when an arXiv id is present, else `REFERENCE`).
 - `papers.prerequisites` contains **informal topic names** (e.g. `"qubits & gates"`, `"surface code"`), not ids — build a normalized name→id lookup (lowercase, strip punctuation) with a small manual alias map for mismatches, so PrereqChips resolve to real topic ids.
 
-**`glossary.json`** — 28 terms: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[] }` (see glossary.md for the full term list and categories).
+**`src/data/glossary.ts`** — 61 canonical terms with explicit aliases: `{ term, slug, category, short, long, notation (optional), related_terms[], related_topics[], related_papers[], aliases (optional) }`. Matching uses normalized exact equality, not substring or automatic stemming (see glossary.md).
 
 **`localStorage` schema**: `lattice-atlas-progress = { understood: topicId[], papersRead: arxivId[] }`. Cross-page reactivity via a small context/store that syncs on `storage` events. (The path page derives "current step" from the first not-understood topic, so no separate `lastVisitedPath` field is stored.)
 
@@ -223,29 +223,34 @@ All content ships as static JSON in the app bundle (no backend). Progress in `lo
 
 | Page | File | Route | One-line description |
 |---|---|---|---|
-| Home | `home.md` | `/` | What TQEC is, the journey pitch, animated torus hero, stats, era overview, entry points |
+| Home | `home.md` | `/` | What TQEC is, the journey pitch, decorative quantum-lattice hero, stats, era overview, entry points |
 | Knowledge Map | `knowledge-map.md` | `/map` | Interactive tiered prerequisite tree of 26 topics with detail drawer + progress marking |
 | Learning Path | `learning-path.md` | `/path` | Guided ordered route through all topics with step-by-step progress tracking and unlocked papers |
 | Paper Explorer | `papers.md` | `/papers` | Chronological timeline of 23 papers grouped by era, plain-English summaries, filters |
 | Field Today | `field-today.md` | `/field-today` | The current research frontier: magic state cultivation, compilers, simulators, real-time decoding, experiments |
-| Glossary | `glossary.md` | `/glossary` | Searchable, cross-linked glossary of ~24 key TQEC terms |
+| Glossary | `glossary.md` | `/glossary` | Searchable, cross-linked glossary of 61 math, quantum, QEC, topology, decoding, and frontier terms |
+| Foundations Lab | — | `/foundations` | Five-step interference-first prerequisite game with local, shareable evidence |
+| Five Altitudes | — | `/altitudes` | Five concepts at Story, Cause, Model, Formal, and Evidence depth while preserving one invariant |
+| Surface Code Lab | — | `/lab` | Keyboard-accessible ideal-check toy, decoder challenges, threshold sampling, and scoped spacetime view |
+| Decoder Duel | — | `/duel` | Versioned daily decoding game with comparable puzzle IDs and local, unverified share score |
+| Review | — | `/review` | Retrieval-practice response/compare loop driven by the local study record |
 
 ---
 
 ## 10. Assets
 
-All assets are generative/SVG-friendly. No photography anywhere on the site.
+Teaching diagrams are code-native SVG/DOM whenever they carry scientific meaning. The Home raster is decorative mood art and stays empty-alt; raster assets remain compressed.
 
 | Filename | Description | Location | Dimensions | Type |
 |---|---|---|---|---|
 | `logo.svg` | Minimal mark: 3×3 grid of small dots (qubit lattice) with the center square plaquette filled as a glowing cyan diamond; crisp geometry, flat, works at 24px; single-color variant (cyan `#22D3EE`) plus white wordmark-friendly variant | Navbar, footer, favicon | 64×64 1:1 (vector) | SVG |
-| `hero-torus-fallback.png` | Dark ink-navy scene: a wireframe torus viewed at a slight tilt, its surface wrapped in a faint cyan/violet qubit lattice grid, a few nodes glowing rose like syndrome flashes, subtle depth-of-field and bloom, deep black-blue background `#0A0F1C`, elegant scientific-visualization aesthetic | Home hero (poster/fallback for the Three.js torus; also social/OG image) | 1920×1080 16:9 | Image |
+| `hero_quantum_lattice.jpg` | Abstract quantum-lattice mood art; decorative only, never a literal surface-code or toric-code diagram | Home hero backdrop (empty alt) | responsive cover | Compressed image |
 | `lattice-texture.svg` | Seamless tileable pattern: offset square lattice of tiny dim dots (`#2A3A5F` on transparent) with faint alternating plaquette squares at 6% opacity; tile size small so it repeats invisibly | Section backgrounds site-wide (CSS background) | 240×240 tile | SVG |
 | `braid-divider.svg` | Horizontal decorative divider: two smooth curving world-lines (one cyan, one violet) that cross over/under each other twice like anyon braids, thin 1.5px strokes on transparent, with small dots at endpoints | Section dividers on Home, Field Today | 1200×120 10:1 | SVG |
-| `era-strip.png` | Wide abstract timeline texture: five horizontal bands blending left-to-right (deep blue → cyan → violet → amber → rose) with faint lattice dots and thin connecting lines, very dark and subtle (≤15% brightness) so text stays readable on top | Papers page header background, home era overview backdrop | 1920×640 3:1 | Image |
-| `frontier-hero.png` | Abstract visualization of magic-state cultivation: a dark field of dim lattice dots with one small region intensely cultivated — glowing amber concentric geometric patterns (like a growing crystal/factory) emerging from the grid, cyan and violet accent threads feeding into it, scientific-elegant, deep navy background | Field Today page hero | 1920×900 ~2.1:1 | Image |
-| `surface-code-diagram.svg` | Clean didactic diagram: 5×5 rotated surface code lattice — data qubits as circles on vertices, cyan Z-plaquettes and violet X-plaquettes as checkerboard faces, one error chain highlighted in rose crossing two plaquettes; flat design, labeled minimally, dark-theme (`ink-900` background) | Home "what is TQEC" section + Glossary hero term | 960×720 4:3 | SVG |
-| `anyon-illustration.svg` | Stylized anyon pair creation + braiding diagram: a flat lattice plane with two particle/antiparticle pairs (e anyons violet, m anyons cyan) and dashed world-line paths showing one circling the other; minimal, diagrammatic, glowing strokes on transparent | Knowledge Map page header + glossary "anyon" term | 800×600 4:3 | SVG |
+| `era-strip.svg` | Low-contrast era timeline texture; decorative behind readable HTML | Papers header and Home canon | wide | SVG |
+| `frontier-hero.svg` | Abstract, unlabeled frontier motif; decorative only | Field Today hero | wide | SVG |
+| `surface-code-diagram.svg` | Exact distance-3 rotated patch from the shipped lattice model: 9 data qubits, 4 X checks, 4 Z checks, and a center X component flipping its two adjacent Z checks | Home “what is TQEC?” section | 960×720 4:3 | SVG |
+| `anyon-illustration.svg` | Decorative spatial loop motif; the exact mutual-statistics claim and caveat live in accessible HTML, not image text | Knowledge Map | 800×600 4:3 | SVG |
 | `og-image.png` | Social card: logo + "Lattice Atlas — Learn Topological Quantum Error Correction" in Space Grotesk on `ink-900` with faint lattice texture and cyan/violet braid line | Site `<meta og:image>` | 1200×630 | Image |
 
 ---
@@ -255,12 +260,10 @@ All assets are generative/SVG-friendly. No photography anywhere on the site.
 - `react`, `react-dom`, `react-router-dom` — SPA + routing
 - `tailwindcss@3.4.19` — styling
 - `framer-motion` — page transitions, stagger reveals, layout animations, drag
-- `gsap` + `ScrollTrigger` — scroll-pinned storytelling on Home + Field Today
-- `three`, `@react-three/fiber`, `@react-three/drei` — hero torus (home only)
-- `lenis` — smooth scroll
+- `three` — optional WebGL spacetime view in the Surface Code Lab
 - `lucide-react` — icons (BookOpen, Map, Route, ScrollText, Telescope, Library, Check, Lock, ArrowRight, ExternalLink, Search, X, ChevronDown, Zap, Cpu, FlaskConical, Waves, GitBranch, Sparkles)
+- `sonner` — visible copy/result feedback
 - Google Fonts: Space Grotesk, Inter, JetBrains Mono (via `<link>` or `@fontsource`)
-- shadcn/ui primitives as needed: `dialog` (drawer base), `tooltip`, `accordion`, `tabs`, `progress`
 
 **Explicitly NOT used**: MathJax/KaTeX (mono pills instead), chart libraries (custom SVG), backend/API, auth.
 
@@ -273,4 +276,4 @@ All assets are generative/SVG-friendly. No photography anywhere on the site.
 - Color is never the sole encoder: tier badges include text labels; difficulty meters include numeric labels; understood state has a check icon.
 - Contrast: `text-mid` (#A9B4CC) on `ink-900` ≈ 7.5:1 (AA/AAA pass); accent text cyan on ink-900 ≈ 8:1.
 - Knowledge map and timeline provide list-view alternatives (the map IS a DOM list under the hood — columns are real HTML, not canvas; only decorative backgrounds are canvas).
-- `prefers-reduced-motion`: disable torus rotation, canvas flashes, stagger/parallax, Lenis.
+- `prefers-reduced-motion`: stop continuous hero/canvas motion and bypass nonessential reveal transforms.

@@ -4,7 +4,7 @@
     "name": "Linear Algebra: Vectors, Matrices, Tensor Products, Eigenvalues",
     "tier": 1,
     "short": "The mathematical language of quantum mechanics: state vectors, linear operators, eigenvalues, and tensor products for combining systems.",
-    "detail": "Quantum states are vectors in a complex Hilbert space (a vector space with an inner product). Quantum operations are linear (unitary) maps on that space, so you cannot work in quantum mechanics without it. Eigenvalues and eigenvectors explain measurement outcomes. Hermitian and unitary matrices explain observables and evolution. The Kronecker (tensor) product explains how n qubits live in a 2^n-dimensional space. This is why quantum error correction can hide one logical qubit across many physical ones. For TQEC specifically, stabilizer codes are literally eigenspaces of commuting operators, and logical operators are vectors in a quotient space. You will use bases, inner products, projections, and spectral decompositions at every tier of this tree.",
+    "detail": "Quantum states are represented by vectors or rays in a complex Hilbert space, while observables and transformations are linear operators. Closed-system evolution is unitary; general physical processes can instead be quantum channels. Eigenvalues and projectors describe projective measurement, and tensor products combine systems into a 2^n-dimensional n-qubit space. Stabilizer codes are simultaneous eigenspaces of commuting Pauli operators. Logical Pauli operators are equivalence classes in the quotient group N(S)/S (up to phase), not state vectors in a quotient space. Bases, inner products, projections, and spectral decompositions recur throughout this tree.",
     "key_points": [
       "Complex vector spaces, inner products, orthonormal bases, and the projection operators built from them",
       "Hermitian operators have real eigenvalues and a spectral decomposition; unitary operators preserve the inner product",
@@ -24,9 +24,9 @@
     "name": "Complex Numbers & Dirac (Bra-Ket) Notation",
     "tier": 1,
     "short": "Complex amplitudes are what quantum states are made of; Dirac notation is the compact standard notation every quantum paper uses.",
-    "detail": "A quantum state is written as a ket |psi>, and its dual is written as a bra <psi|. The inner product <phi|psi> is a complex number whose squared magnitude gives a probability. Complex numbers matter because relative phases between amplitudes are physically observable through interference. Phases are exactly what Z-type errors in a quantum code corrupt. You must be able to convert between ket notation and column vectors. You must compute adjoints (dagger). You must read |0>+|1> superpositions. Expressions like <0|X|1> appear constantly in stabilizer and surface-code literature. Euler's formula and the Bloch-sphere picture of a qubit as a point on a sphere both rely on this mathematics.",
+    "detail": "A quantum state is written as a ket |psi>, and its dual as a bra <psi|. For normalized pure states, a rank-one projective outcome |phi><phi| has Born probability |<phi|psi>|^2. Complex relative phases affect interference; a common global phase does not affect isolated-system predictions. Kets, column vectors, adjoints, normalized superpositions, and matrix elements such as <0|X|1> are standard notation throughout stabilizer and surface-code literature.",
     "key_points": [
-      "A complex number z = a + bi has a modulus and a phase; |z|^2 = zz* gives probabilities",
+      "A complex number z = a + bi has a modulus and phase; |z|^2 is a probability only when z is the relevant normalized measurement amplitude",
       "Ket |psi> is a column vector, bra <psi| is its conjugate transpose, <phi|psi> is the inner product",
       "Outer products |psi><phi| are operators; projectors |0><0| extract components",
       "Global phase is unphysical, but relative phase between amplitudes drives interference",
@@ -45,11 +45,11 @@
     "id": "quantum-mechanics-basics",
     "name": "Quantum Mechanics Basics: Superposition, Measurement, Entanglement",
     "tier": 1,
-    "short": "The physical rules of the game: states exist in superposition, measurement disturbs them and yields probabilistic outcomes, and separated systems can be entangled.",
-    "detail": "Three ideas carry almost all of quantum information. Superposition means a qubit can be in alpha|0> + beta|1>, and quantum algorithms exploit interference between these amplitudes. Measurement is not passive observation. Measuring in a basis projects the state onto one outcome, with Born-rule probabilities, and destroys the amplitudes you did not observe. This is why quantum error correction diagnoses errors indirectly, through ancilla-assisted parity checks, instead of reading the data. Entanglement means a multi-qubit state cannot be factored into individual qubit states. It is both the resource quantum computers exploit and the error-hiding mechanism of stabilizer codes. These codes distribute one logical qubit across many physical qubits, so no single error reveals or destroys it.",
+    "short": "The physical rules of the game: superposition and interference, Born-rule measurement with conditional state update, open-system decoherence, and entanglement.",
+    "detail": "Superposition means a qubit can be written alpha|0> + beta|1>, with relative phases affecting interference. A projective measurement samples eigenspace i with probability <psi|P_i|psi> and conditionally updates the state to its normalized projection; it need not disturb a state already in that eigenspace. Individual data-basis measurements generally reveal logical information and dephase an encoded superposition, whereas ideal stabilizer measurements reveal commuting joint parities. Environmental decoherence is an open-system process, not the same operation as a deliberate projective readout. Entanglement means a multi-qubit pure state cannot be factored into independent subsystem states.",
     "key_points": [
       "Superposition: amplitudes add and interfere; probabilities are squared magnitudes (Born rule)",
-      "Measurement in a chosen basis collapses the state and generally disturbs it",
+      "Projective measurement samples a Born-rule outcome and conditionally updates the state; environmental decoherence is a distinct open-system process",
       "Unitary evolution is reversible and linear; the no-cloning theorem forbids copying unknown states",
       "Entangled states like the Bell pair (|00>+|11>)/sqrt(2) cannot be written as a tensor product of single-qubit states",
       "Complementary observables (X vs Z) cannot be simultaneously known — the root of quantum error correction's difficulty"
@@ -69,12 +69,12 @@
     "name": "Qubits & Pauli Operators",
     "tier": 2,
     "short": "The qubit is the unit of quantum information, and the Pauli matrices X, Y, Z — with their commutation rules — are the basic operators used to describe quantum errors and stabilizer codes.",
-    "detail": "A single qubit is a two-level system visualized on the Bloch sphere. The Pauli operators X (bit flip), Z (phase flip), and Y = iXZ, together with the identity, form a basis for all single-qubit operators. Any physical error process can therefore be decomposed into Pauli errors. Paulis either commute or anticommute (XZ = -ZX). This binary algebra drives the entire stabilizer formalism: error syndromes are precisely the patterns of anticommutation between an error and the code's check operators. In the toric and surface codes, the stabilizers themselves are products of Paulis on plaquettes and stars. Logical operators are strings of Paulis across the lattice, and decoding is inference over Pauli error chains. You must therefore learn Pauli multiplication and commutation.",
+    "detail": "A pure single-qubit state can be visualized on the Bloch sphere. The Pauli operators X, Y, Z, and I form an orthogonal basis for single-qubit operators, so each Kraus or error operator can be expanded in that basis. If a code corrects a spanning set of Pauli errors on a stated support, linearity and the Knill-Laflamme conditions imply it corrects their coherent linear combinations. This does not mean every physical noise channel is literally a classical random Pauli mixture: coherent, correlated, leakage, and non-Markovian effects can remain. Pauli commutation and anticommutation nevertheless provide the binary algebra of stabilizer syndromes and logical strings.",
     "key_points": [
       "Pauli matrices X, Z, Y = iXZ are Hermitian, unitary, and square to the identity",
       "XZ = -ZX: Paulis on the same qubit either commute or anticommute — syndromes detect anticommutation",
       "The n-qubit Pauli group (tensor products with phases +/-1, +/-i) closes under multiplication",
-      "The discretization theorem: any error is a superposition of Pauli errors, so correcting Pauli errors corrects everything",
+      "Paulis span operator errors; correcting a Pauli basis for a stated support corrects its linear span, without turning every physical channel into a stochastic Pauli mixture",
       "Bloch sphere: X and Z rotations, eigenstates |+>/|-> of X, and how Clifford gates permute Paulis"
     ],
     "depends_on": [
@@ -90,11 +90,11 @@
     "name": "Quantum Gates & Circuits",
     "tier": 2,
     "short": "Quantum computers run circuits of unitary gates; the Clifford group (H, S, CNOT) plus the T gate is the gate set whose fault-tolerant implementation is the main goal of TQEC.",
-    "detail": "Quantum circuits are built from one- and two-qubit unitary gates drawn on a timeline of wires. The Clifford gates — Hadamard, phase S, and CNOT — are special because they map Pauli operators to Pauli operators under conjugation. This makes them efficiently simulable classically (Gottesman-Knill) and transversally or topologically implementable in codes. Universality requires a non-Clifford gate such as T. The T gate cannot be done cheaply in error-corrected hardware and instead demands magic state distillation, the dominant cost of surface-code computation. You need to read circuits fluently. You need identities like the CNOT propagation rules. You need the conventions for state preparation and measurement. Syndrome extraction, lattice surgery, and the space-time diagrams of compilers are all just circuits in this language.",
+    "detail": "Quantum circuits arrange preparations, gates, measurements, and classical feed-forward along wires. Clifford gates map Paulis to Paulis under conjugation. The Gottesman-Knill theorem efficiently simulates stabilizer-state preparations, Clifford gates, and Pauli measurements; arbitrary non-stabilizer inputs are outside that guarantee. Which logical gates are transversal is code-dependent, and Eastin-Knill forbids a universal transversal set rather than every transversal non-Clifford gate. Surface-code schemes use a mixture of Pauli-frame tracking, code deformation, lattice surgery, and resource-state injection. A common logical T gadget consumes |A> = T|+>; its factory cost is algorithm-, target-, and architecture-dependent.",
     "key_points": [
       "Core gates: H, S (phase), T, CNOT, CZ, and Pauli X/Z; universality needs a non-Clifford gate",
       "Clifford gates conjugate Paulis to Paulis; the Clifford group is generated by H, S, CNOT",
-      "Gottesman-Knill: Clifford circuits with Pauli measurements are classically simulable",
+      "Gottesman-Knill: stabilizer preparations, Clifford gates, and Pauli measurements are classically simulable in polynomial time",
       "Circuit identities: Hadamard swaps X and Z; CNOT propagates X forward and Z backward",
       "Measurement-based gadgets (ancilla preparation, teleportation) turn gates into circuit primitives"
     ],
@@ -112,13 +112,13 @@
     "name": "Classical Error Correction & the Repetition Code",
     "tier": 3,
     "short": "How redundancy protects classical bits: parity checks, Hamming distance, and the repetition code — the conceptual skeleton that surface-code X- and Z-checks inherit directly.",
-    "detail": "Classical coding protects a bit by encoding it redundantly. The repetition code maps 0 -> 000 and 1 -> 111, and majority voting corrects a single flip. The key concepts transfer almost verbatim to quantum codes: code distance (minimum flips to confuse codewords), parity-check matrices, and syndrome-based (rather than state-based) correction. The crucial twist is that quantum codes need two independent classical-like codes, one for bit flips and one for phase flips. Indeed the surface code's X-stabilizers handle Z-errors exactly like a repetition code drawn on a graph. Minimum-weight matching decoders generalize majority voting. Understand linear codes over GF(2) (arithmetic with only 0 and 1), the [n,k,d] notation, and why decoding is inference on a noisy graph. These give you the mental model that everything topological refines.",
+    "detail": "Classical coding protects a bit by encoding it redundantly. The repetition code maps 0 -> 000 and 1 -> 111, and majority voting corrects a single flip. Several concepts transfer to quantum codes: distance, parity-check matrices, and syndrome-based inference rather than direct inspection of encoded data. A crucial twist is that qubit errors have X- and Z-type components. CSS codes—including the surface code—organize those components using two compatible classical-code structures; general quantum codes need not be CSS. In the repetition code, majority vote is the decoder; in a surface code, a graph decoder such as minimum-weight matching plays a related inference role under a declared noise model. Linear codes over GF(2), [n,k,d] notation, and noisy-graph inference provide useful foundations without making the two settings identical.",
     "key_points": [
       "Repetition code: encode 1 bit in n, decode by majority; corrects floor((n-1)/2) flips",
       "Hamming distance d determines error-correcting power; [n,k,d] notation for linear codes",
       "Parity checks and syndromes: detect errors from violated checks without reading the data",
       "Codes as graphs (Tanner graphs): checks and bits as nodes, decoding as inference",
-      "Failure probability scales as p^(d/2): below a threshold error rate, more redundancy always helps"
+      "For independent low-p noise and a suitable decoder, the leading repetition-code failure probability has order p^ceil(d/2); correlations or a mismatched decoder can erase that benefit"
     ],
     "depends_on": [
       "linear-algebra"
@@ -133,12 +133,12 @@
     "name": "Stabilizer Formalism",
     "tier": 3,
     "short": "The defining framework of quantum error correction: a code is the joint +1 eigenspace of commuting Pauli operators, and errors are diagnosed by which stabilizers they anticommute with.",
-    "detail": "A stabilizer code on n qubits is specified by an abelian subgroup S of the Pauli group (not containing -I) with n-k independent generators; the codespace is the simultaneous +1 eigenspace, encoding k logical qubits. Errors are Pauli operators. Measuring each stabilizer generator yields a binary syndrome bit equal to its commutation parity with the error. This gives 2^(n-k) syndromes without touching the encoded data. Logical operators are Paulis that commute with all stabilizers but are not themselves stabilizers. They come in anticommuting X/Z pairs per logical qubit. The code distance is the minimum weight of a nontrivial logical operator. This formalism makes QEC a linear-algebra-over-GF(2) problem. Toric and surface codes are stabilizer codes whose generators are local on a 2D lattice, and decoding is inverting the syndrome map.",
+    "detail": "A stabilizer code on n qubits is specified by an abelian subgroup S of the Pauli group (not containing -I) with r independent generators; the codespace is the simultaneous +1 eigenspace and encodes k = n-r logical qubits. Pauli operators form an error basis: a Pauli component anticommutes with a generator exactly when it flips that generator's outcome, producing a syndrome pattern. General physical noise need not itself be a stochastic Pauli operator. Logical Pauli operations are equivalence classes in the quotient N(S)/S, up to overall Pauli phase, where N(S) is the Pauli normalizer. They can be represented by Paulis that commute with every stabilizer but are not stabilizers. The code distance is the minimum weight of a nontrivial logical representative. For CSS stabilizer codes, much of syndrome processing becomes linear algebra over GF(2).",
     "key_points": [
       "Stabilizer group S: abelian subgroup of the n-qubit Pauli group; codespace = common +1 eigenspace",
-      "n independent generators on n qubits encode k = n - (#generators) logical qubits",
+      "r independent stabilizer generators on n qubits encode k = n-r logical qubits",
       "Syndrome of error E: the commutation pattern of E with each generator — no data is read directly",
-      "Normalizer N(S): Paulis commuting with S; logical operators = N(S) \\ S, with anticommuting X/Z pairs",
+      "Normalizer N(S): Paulis commuting with S; logical Pauli classes form N(S)/S up to phase, with nontrivial representatives in N(S) \\ S",
       "Distance d = minimum weight of a nontrivial logical operator; degenerate errors act identically on the code"
     ],
     "depends_on": [
@@ -156,10 +156,10 @@
     "name": "Quantum Error-Correcting Codes: Shor, Steane, CSS, Distance & Rate",
     "tier": 3,
     "short": "The first quantum codes show how one logical qubit survives noise: Shor's 9-qubit code, the 7-qubit Steane code, and the CSS construction built from paired classical codes.",
-    "detail": "Shor's code concatenates a 3-qubit bit-flip repetition code with a 3-qubit phase-flip code, proving that discrete Pauli correction handles continuous noise. Steane's [[7,1,3]] code and the broader CSS construction (Calderbank-Shor-Steane) build a quantum code from two classical linear codes C1, C2 with C2 contained in C1. One code fixes X-errors and the other fixes Z-errors. CSS codes are why ideas from classical coding theory transfer so easily to quantum codes. Key parameters are [[n,k,d]]: physical qubits, logical qubits, distance. The Knill-Laflamme conditions formalize when a set of errors is correctable, and the quantum Hamming/Gilbert-Varshamov-style bounds constrain rates. Surface codes are themselves CSS codes with geometrically local checks. Seeing Steane's code first makes the surface code's two interleaved check lattices feel inevitable rather than arbitrary.",
+    "detail": "Shor's code concatenates bit- and phase-flip repetition ideas to correct an arbitrary single-qubit error. This works because Pauli operators span single-qubit operators and the Knill-Laflamme conditions extend correctability from a basis of error operators to their linear span; it does not assert that hardware noise is literally a classical Pauli mixture. Steane's [[7,1,3]] code and the broader CSS construction (Calderbank-Shor-Steane) build X- and Z-type checks from compatible classical linear codes. Key parameters are [[n,k,d]]: physical qubits, logical qubits, and distance. The Knill-Laflamme conditions formalize when an error set is correctable, degeneracy allows distinct errors to act identically on the codespace, and coding bounds constrain achievable parameters. Surface codes are CSS codes with geometrically local checks.",
     "key_points": [
       "Shor's 9-qubit code: concatenated repetition codes correct arbitrary single-qubit errors",
-      "Discretization of errors: correcting the Pauli basis {I,X,Y,Z} corrects any error",
+      "Error-basis principle: if the Knill-Laflamme conditions hold for a Pauli error basis, they also hold for errors in its linear span",
       "CSS construction: two classical codes give X-type and Z-type stabilizers that commute",
       "[[n,k,d]] parameters; Steane [[7,1,3]] as the canonical small CSS code",
       "Knill-Laflamme conditions and degeneracy: distinct errors may share a syndrome yet both be correctable"
@@ -178,14 +178,14 @@
     "id": "fault-tolerance-thresholds",
     "name": "Fault Tolerance & Threshold Theorems",
     "tier": 3,
-    "short": "Fault tolerance means errors during the correction process itself cannot cascade; the threshold theorem guarantees that below a critical physical error rate, arbitrarily long computation is possible.",
-    "detail": "Every component of an error-correction circuit — gates, ancilla preparation, measurement — is itself noisy. Naive syndrome extraction can therefore spread one fault into many data errors. Fault-tolerant design (transversal gates, Shor/Steane/Knill syndrome extraction, flag qubits) ensures a single circuit fault causes at most a weight-1 effective error per code block. The threshold theorem (Aharonov-Ben-Or, Knill-Laflamme-Zurek, Aliferis-Gottesman-Preskill) applies here. If the physical fault rate is below a constant threshold p_th, concatenation or topological scaling suppresses the logical error rate arbitrarily. For surface codes, circuit-level noise simulations give p_th around 0.5-1%, the headline number behind Google's below-threshold experiment. Understanding logical-error scaling p_L ~ (p/p_th)^(d/2) is essential for reading every resource estimate in the field.",
+    "short": "Fault tolerance constrains how faults propagate; threshold theorems show scalable suppression below a critical rate under stated locality, noise, and fault-tolerant-protocol assumptions.",
+    "detail": "Every component of an error-correction circuit—gates, ancilla preparation, idling, and measurement—can be noisy. Naive syndrome extraction can therefore spread a fault into a damaging data error. A fault-tolerant gadget is designed so that the number and pattern of faults remain within the code-and-recovery guarantee; this is more general than requiring every single fault to become exactly one data-qubit error. Threshold theorems show that, under stated assumptions about locality, noise correlations, available operations, and the fault-tolerant construction, sufficiently low physical fault strength permits arbitrarily accurate computation with growing overhead. For particular surface-code circuits and stochastic circuit-level noise models, simulated thresholds are commonly around 0.5-1%; the number is not a universal hardware constant. A frequently used sub-threshold fit is p_L approximately A(p/p_th)^((d+1)/2), but its constants and even its useful range depend on the circuit, decoder, observable, and noise model.",
     "key_points": [
-      "Faults vs errors: one faulty gate must not propagate to many data errors",
+      "Fault-tolerant gadgets keep fault propagation within a declared code-and-recovery guarantee",
       "Fault-tolerant syndrome extraction: verified ancillas, repeated rounds, cat states, or flag qubits",
-      "Threshold theorem: below p_th, logical error rate falls exponentially with code size/concatenation",
-      "Surface-code circuit-level threshold ~0.5-1% under standard depolarizing noise",
-      "Logical error scaling p_L ~ A (p/p_th)^((d+1)/2) drives distance and resource estimates"
+      "Threshold theorem: below p_th, logical error can be suppressed with growing code size under the theorem's noise, locality, and gadget assumptions",
+      "Many specified circuit-level surface-code studies find thresholds around 0.5-1%; code-capacity and phenomenological models give different values",
+      "p_L ~ A(p/p_th)^((d+1)/2) is a common finite-size fit, not a universal law"
     ],
     "depends_on": [
       "quantum-codes-basics"
@@ -201,13 +201,13 @@
     "name": "Topological Order & Anyons",
     "tier": 4,
     "short": "Topological phases of matter store information nonlocally in degenerate ground states, and their quasiparticle excitations (anyons) have exotic braiding statistics — the physics that motivates topological quantum codes.",
-    "detail": "A topologically ordered phase (like Kitaev's toric code Hamiltonian or a fractional quantum Hall state) has a ground-state degeneracy. This degeneracy depends on the topology of the surface, not on local details. Quantum information encoded in that degeneracy is therefore immune to local perturbations. Excitations come in types — the toric code has e, m, and their composite fermion psi. String operators create them in pairs at their ends. Moving one anyon around another multiplies the state by a phase: e and m braid with a factor of -1. This is what makes them anyons rather than bosons or fermions. This gives the deep intuition for the surface code. Syndromes are anyon positions. Logical operators are strings transporting anyons around handles or between boundaries. Computation by braiding defects is literally manipulating anyonic worldlines.",
+    "detail": "In ideal models such as Kitaev's toric-code Hamiltonian, ground-state degeneracy depends on the topology of the closed surface and the ground states are locally indistinguishable. Under suitable conditions this structure is stable against sufficiently weak local perturbations, but a finite code is not immune to local noise and still requires active correction. The toric code has e and m excitations and their composite fermion ψ. Open string operators create excitations at their ends; taking e around m produces a -1 mutual-braiding phase. Contractible closed strings act as stabilizers in the ground space, while non-contractible cycles can act logically. This supplies intuition for surface-code syndromes, logical strings, and carefully scheduled code deformations that realize braiding operations.",
     "key_points": [
-      "Topological order: ground-state degeneracy set by manifold topology, robust to local noise",
+      "Ideal topological order: topology-dependent degeneracy and local indistinguishability, stable to sufficiently weak local perturbations under stated conditions",
       "Anyons: quasiparticles with statistics beyond bosons/fermions; e and m in the toric code braid to -1",
-      "String operators create anyon pairs at their endpoints; closed loops act trivially on the ground space",
+      "Open strings create anyon pairs; contractible closed strings are stabilizers, while non-contractible cycles can implement logical operations",
       "Fusion rules (e x e = 1, e x m = psi) govern how excitations combine and annihilate",
-      "Encoding in topology = encoding in nonlocal degrees of freedom: no local measurement reveals the logical state"
+      "In the ideal code space, sufficiently local observables cannot distinguish logical ground states; finite-distance protection is not immunity to noise"
     ],
     "depends_on": [
       "quantum-mechanics-basics",
@@ -224,13 +224,13 @@
     "name": "The Toric Code",
     "tier": 4,
     "short": "Kitaev's foundational topological code: qubits on the edges of a torus lattice, star and plaquette stabilizers, and logical operators that wind around the torus's non-contractible loops.",
-    "detail": "The toric code (Bravyi-Kitaev, Kitaev) places qubits on edges of an LxL lattice on a torus. It has X-type star stabilizers at each vertex and Z-type plaquette stabilizers on each face. All stabilizers are local, commuting, and weight 4. It encodes 2 logical qubits (one per non-contractible direction) with distance L. An X-error string anticommutes with the plaquettes at its endpoints, so syndromes reveal only endpoints of error chains; correcting means pairing up anyons along minimal chains, which succeeds as long as the error chain does not topologically span the torus. This is the birth of topological decoding as homology inference. The toric code also functions as a Hamiltonian quantum memory with an energy gap protecting the ground space. This links quantum error correction to condensed matter and justifies the 'surface code threshold' pictures used throughout the field.",
+    "detail": "The toric code places qubits on edges of an LxL periodic square lattice. It has X-type star stabilizers at vertices and Z-type plaquette stabilizers on faces; in the standard ideal layout they are local, commuting, and weight 4. The code encodes two logical qubits and has distance L. An X-error string flips the plaquette checks at its endpoints, so a syndrome reveals endpoints rather than a unique error chain. A decoder chooses a correction in the same boundary class; failure occurs when error plus correction contains a non-contractible logical cycle. As a commuting-projector Hamiltonian, the ideal 2D toric code has a constant gap to creating anyons, but it also has a constant energy barrier: at nonzero temperature it is not a self-correcting memory. Long-lived storage therefore requires active syndrome extraction and decoding.",
     "key_points": [
       "Qubits on lattice edges; star (X-type) and plaquette (Z-type) weight-4 commuting stabilizers",
       "Encodes 2 logical qubits on a torus; logical Z/X = non-contractible loops on lattice/dual lattice",
       "Syndromes are endpoints (anyons) of error strings — errors are seen only up to homology",
-      "Correction fails only when error plus correction forms a logical loop: distance L on an LxL torus",
-      "As a Hamiltonian (Kitaev model): topological memory with a constant energy gap"
+      "A decoding failure occurs when error plus correction contains a non-contractible logical cycle; distance is L on the standard LxL torus",
+      "The Hamiltonian has a constant anyon-creation gap but no growing energy barrier in 2D, so passive finite-temperature self-correction does not follow"
     ],
     "depends_on": [
       "stabilizer-formalism",
@@ -246,14 +246,14 @@
     "id": "surface-code",
     "name": "The Surface Code: Boundaries, Planar & Rotated Codes",
     "tier": 4,
-    "short": "The toric code flattened into the plane: rough and smooth boundaries let one patch encode one logical qubit, and the rotated surface code minimizes the qubit overhead — the standard tool of all practical TQEC.",
-    "detail": "Bravyi and Kitaev's planar code cuts the torus open. A finite lattice with two 'rough' (primal) and two 'smooth' (dual) boundaries encodes a single logical qubit. Its logical Z is a string connecting the rough boundaries, and its logical X is a string connecting the smooth ones. The rotated surface code (a 45-degree rotation) encodes one logical qubit in d^2 data qubits with weight-2 and weight-4 checks. This halves the overhead versus the original layout and makes it the standard for hardware experiments. Boundary types are the atomic concept behind all computation: holes, defects, and lattice-surgery merges are all operations that create, move, or fuse boundaries. Logical operators, code distance, and even the ZX/lattice-surgery space-time diagrams of compilers are most concretely understood as manipulations of these boundary-extending strings.",
+    "short": "The toric code adapted to a plane: complementary boundary types let a patch encode a logical qubit, and rotated layouts reduce the data-qubit footprint in a widely studied TQEC family.",
+    "detail": "A planar surface code replaces periodic topology with boundaries. In one common convention, a single-logical-qubit patch has two rough and two smooth boundaries; logical Z and X are string classes connecting the corresponding complementary boundary pairs. Exact rough/smooth naming and drawn orientation vary, so operator supports should be stated explicitly. The standard rotated distance-d patch uses d^2 data qubits, compared with d^2+(d-1)^2 for the corresponding unrotated planar layout, while check weights depend on the boundary and circuit convention. Boundaries, holes, twists, and lattice-surgery seams are central tools, but universal computation also needs preparations, measurements, Pauli-frame tracking, and non-Clifford resources. Under perfect syndrome information, distance d corrects up to floor((d-1)/2) adversarial Pauli errors; with noisy extraction, effective protection is a property of the full space-time circuit and decoder.",
     "key_points": [
       "Rough vs smooth boundaries terminate Z-type vs X-type logical strings respectively",
-      "Planar code: [[d^2 + (d-1)^2, 1, d]]; rotated code: [[d^2, 1, d]] — half the qubits",
-      "A distance-d patch protects against floor((d-1)/2) physical errors per round",
+      "Common unrotated and rotated planar layouts use d^2+(d-1)^2 and d^2 data qubits respectively; the latter is roughly half asymptotically",
+      "With perfect syndrome information, distance d corrects up to floor((d-1)/2) adversarial Pauli errors; circuit-level distance is a space-time property",
       "Syndromes live on the dual/primal lattices as defect (anyons) at string endpoints",
-      "All logical operations (braiding, lattice surgery) reduce to boundary manipulation"
+      "Code deformation and lattice surgery manipulate boundaries, while a universal stack also needs state preparation, measurement, tracking, and non-Clifford resources"
     ],
     "depends_on": [
       "toric-code"
@@ -268,13 +268,13 @@
     "id": "syndrome-extraction-circuits",
     "name": "Syndrome Extraction Circuits & Measurement Schedules",
     "tier": 4,
-    "short": "How the surface code is actually run: ancilla qubits measure each stabilizer with small CNOT circuits, repeated for d rounds so that measurement errors are corrected in 3D space-time.",
-    "detail": "To measure each surface-code stabilizer, the circuit prepares an ancilla in |+> and entangles it with the four (or two) neighboring data qubits via CNOTs. It then measures the ancilla. The CNOT ordering (e.g., an N- or Z-shaped schedule) matters. A bad order lets ancilla errors propagate into hook errors that align with logical strings and effectively halve the distance. A single round of noisy measurements is unreliable, so extraction is repeated d times. This turns decoding into a 3D problem: data errors make spatial edges in the syndrome graph, and measurement errors make temporal edges between rounds. Detectors (XORs of consecutive measurements) localize changes. This space-time picture — syndromes as events in a 2D+1 lattice — is the substrate for minimum-weight perfect matching (MWPM) decoding. It also underlies real-time decoding hardware and the 'space-time diagrams' used by modern compilers.",
+    "short": "How a surface code is operated: ancillas measure X- and Z-type checks with ordered entangling circuits, and repeated noisy measurements create a space-time decoding problem.",
+    "detail": "A standard Z-check circuit prepares an ancilla in |0>, applies CNOTs with neighboring data qubits as controls and the ancilla as target, then measures the ancilla in Z. A standard X-check circuit prepares |+>, uses the ancilla as CNOT control and data qubits as targets, then measures the ancilla in X. Equivalent circuits are possible, but control direction and basis must match the check. CNOT ordering matters because an ancilla fault can propagate into a hook error; a schedule is validated against the patch geometry so such hooks do not reduce the intended circuit distance. With noisy measurements, repeated rounds produce detection events defined as parity relations among measurement results and boundary references—not necessarily just adjacent-result XORs. A distance-d operation commonly uses order-d rounds around a boundary change, while a memory may run continuously. The resulting 2D+time detector graph is the input to space-time decoders such as MWPM.",
     "key_points": [
-      "Each check = ancilla prep, 4 (or 2) CNOTs, ancilla measurement; X and Z checks interleave on shared ancilla scheduling",
-      "CNOT ordering controls hook errors: bad schedules align propagated errors with the logical operator",
-      "Measurement noise requires ~d repeated rounds; decoding happens on a 3D space-time syndrome graph",
-      "Detectors: parity of consecutive measurement outcomes flags where syndromes changed",
+      "Z check: prepare |0>, data-to-ancilla CNOTs, measure Z; X check: prepare |+>, ancilla-to-data CNOTs, measure X",
+      "CNOT ordering controls hook errors; schedules must be checked against logical-string orientation and circuit distance",
+      "Noisy extraction uses repeated rounds and a 3D space-time detector graph; distance-d operations commonly allocate order-d rounds",
+      "Detectors are deterministic parity relations among measurement results in the no-error circuit, often but not always adjacent-round differences",
       "Circuit-level noise models include idle, gate, preparation, and measurement errors — this defines the real threshold"
     ],
     "depends_on": [
@@ -291,13 +291,13 @@
     "id": "decoding-mwpm",
     "name": "Decoding: Minimum-Weight Perfect Matching & the Threshold",
     "tier": 5,
-    "short": "Decoding turns a syndrome pattern into a most-likely error correction; for the surface code this maps to minimum-weight perfect matching on a graph, the algorithm behind the famous ~1% threshold.",
-    "detail": "A surface-code syndrome is a set of defect locations in a 2D (space) or 3D (space-time) graph. Decoding means finding an error chain consistent with those defects and topologically trivial relative to the true error. Because the code is CSS, X and Z syndromes decode independently as two matching problems. Minimum-weight perfect matching (MWPM, via Edmonds' blossom algorithm) pairs defects minimizing total chain length, approximating the most likely error. Dennis et al. showed a threshold near 10.3% for code-capacity noise (perfect measurements), around 3% for phenomenological noise (noisy measurements), and ~1% for circuit-level noise. Matching is not exact maximum-likelihood (which is #P-hard). Degeneracy, correlations, and finite-size effects all matter, motivating the frontier topics of correlated and fast decoders. Every experimental claim of 'below threshold' is ultimately a statement about logical error rates under a specified decoder.",
+    "short": "A decoder maps check data to a correction class. For graphlike surface-code noise, minimum-weight perfect matching minimizes a declared weighted pairing objective.",
+    "detail": "With perfect check measurements, nontrivial syndrome outcomes can be represented as defects on a 2D graph. With repeated noisy measurements, changes in appropriate parity relations become detection events on a 3D space-time graph. A decoder chooses a correction class consistent with those data; it cannot recover a unique physical fault history. For graphlike detector models, minimum-weight perfect matching (MWPM) pairs detection events or boundaries while minimizing the sum of specified edge weights, commonly derived from a noise model. That is an exact solution to the matching objective, but generally only a proxy for full maximum-likelihood decoding because degeneracy, correlations, leakage, and hypergraph faults matter. Threshold values must name their noise model: the standard toric/surface-code code-capacity value is about 10.3%, phenomenological models with faulty syndrome measurements are of order 3%, and common circuit-level depolarizing studies are around 0.5-1%. Experimental below-threshold claims are likewise scoped to a circuit, observable, decoder, and fitted distance range.",
     "key_points": [
-      "Decoding = finding a probable error chain with the observed syndrome endpoints",
-      "MWPM: pair defects with minimum total graph distance using Edmonds' blossom algorithm",
+      "Decoding selects a correction class consistent with syndrome results or detection events; it does not identify a unique fault history",
+      "MWPM exactly minimizes its weighted pairing objective, which may only approximate the full noise-model likelihood",
       "Space-time decoding: measurement errors become temporal edges in the 3D matching graph",
-      "Thresholds: ~10.3% (code capacity), ~3% (phenomenological), ~0.5-1% (circuit level)",
+      "Thresholds depend on model: ~10.3% code capacity, order 3% phenomenological, and commonly ~0.5-1% circuit level",
       "MWPM approximates, not equals, maximum likelihood; degeneracy and correlated noise are its blind spots"
     ],
     "depends_on": [
@@ -315,11 +315,11 @@
     "name": "Defects, Holes & Computation by Braiding",
     "tier": 5,
     "short": "The original route to surface-code computation: punch holes (defects) in the lattice to create extra logical qubits, then braid them by slowly moving boundaries to perform logical gates.",
-    "detail": "In the defect-based surface code (Fowler et al.), a logical qubit is encoded in a pair of holes punched through the lattice. Turning off stabilizers inside a region creates a smooth or rough boundary. Logical strings can loop around this boundary. Logical CNOT is performed by braiding: the holes are physically enlarged, shrunk, and moved so that the boundary of one defect encircles another. This is equivalent to anyon worldlines winding in space-time. This scheme has a beautiful topological interpretation: gates depend only on the braid topology, not the path details, giving inherent robustness. This scheme requires large holes (circumference ~d) and long move schedules, so it uses many qubits. This is why lattice surgery largely replaced it. But braiding remains essential for understanding the topological meaning of logical gates and twist defects. In the 3D cluster-state (Raussendorf-Harrington) viewpoint, braiding becomes plumbing of tubes in a foliated code.",
+    "detail": "In a defect-based surface-code construction, holes or punctures create additional boundaries and logical string classes. A logical operation can be realized by a sequence of stabilizer changes that enlarges, shrinks, and moves defects so one winds around another. In an idealized topological description, homotopic distance-preserving deformations implement the same logical map. A physical schedule is not path- or timing-independent: geometry, separation, hook orientation, measurement rounds, and decoder boundaries determine circuit distance and overhead. Large defects and long schedules can make these constructions expensive in analyzed layouts, which motivated lattice-surgery alternatives. In specific foliated cluster-state constructions, the same logical history is represented by defect tubes in three-dimensional space-time.",
     "key_points": [
       "A smooth/rough defect pair encodes one logical qubit; hole circumference sets the distance",
       "Logical operators = loops around a defect or strings connecting defect pairs",
-      "Braiding defects implements logical CNOT; gate outcome depends only on braid topology",
+      "A verified distance-preserving defect braid can implement logical CNOT; its ideal logical action is topological, while faults and overhead depend on the physical schedule",
       "Defect movement = sequential enlargement/shrinkage with re-measurement, over many syndrome rounds",
       "High space-time overhead of braiding motivated the shift to lattice surgery"
     ],
@@ -335,12 +335,12 @@
     "id": "lattice-surgery",
     "name": "Lattice Surgery: Merges, Splits & Logical Operations",
     "tier": 5,
-    "short": "The modern standard for surface-code computation: logical operations are performed by merging and splitting code patches along boundaries via joint Pauli measurements, at far lower overhead than braiding.",
-    "detail": "Lattice surgery (Horsman et al., Litinski's 'Game of Surface Codes') performs logical multi-qubit Pauli measurements by gluing surface-code patches along a boundary. Switch on a row of new stabilizers connecting two patches for d rounds (merge), read out the joint parity, then split. A logical CNOT is built from an ancilla patch and two such parity measurements. Arbitrary Clifford circuits become sequences of merge/split operations on a bus of patches. Because operations are planar and patch-shaped, the qubit footprint shrinks dramatically versus defect braiding. Algorithms compile into tilings of space-time 'pipes' and 'blocks', with volume counting logical qubits times code cycles. Lattice surgery is the common language of current research. Resource estimates, compilers like TopoLS, ZX-to-lattice-surgery translation, and magic-state factories are all expressed as lattice-surgery space-time diagrams.",
+    "short": "Lattice surgery measures joint logical Paulis by temporarily coupling patch boundaries. In many planar layouts it offers a lower-cost alternative to defect braiding.",
+    "detail": "Lattice surgery performs logical multi-qubit Pauli measurements by temporarily introducing boundary-spanning checks between surface-code patches. A merge changes the stabilizer group and repeated outcomes determine a joint logical parity; a later split restores separate patches but is not simply an information-free inverse. A standard logical CNOT uses an ancilla patch, two joint logical-parity measurements, a final ancilla measurement, and outcome-dependent Pauli-frame updates. Many Clifford operations can be compiled into Pauli-product measurements together with preparations, single-patch deformations or twists, measurements, and classical tracking; they are not all literally one merge/split pair. Planar patch layouts reduce footprint relative to particular defect-braiding layouts in many resource studies, but the advantage depends on connectivity, routing, distance, and workload. Space-time volume counts both occupied patches and code cycles.",
     "key_points": [
       "Merge: measure joint stabilizers across a boundary for d rounds = logical ZZ or XX parity measurement",
-      "Split: the inverse, with Pauli-frame corrections tracked by the merge outcome",
-      "CNOT = two multi-body Pauli measurements via an ancilla patch; all Clifford gates reduce to Pauli measurements",
+      "Split restores separate patch checks but does not undo the merge measurement; correlations and Pauli-frame information remain",
+      "A standard CNOT uses an ancilla, two joint logical-parity measurements, final ancilla readout, and Pauli-frame updates",
       "Space-time volume (patches x code cycles) replaces gate count as the cost metric",
       "Twists and boundary rotations enable Hadamard-like operations and patch reorientation"
     ],
@@ -357,12 +357,12 @@
     "id": "cluster-states-mbqc",
     "name": "Cluster States & Measurement-Based Quantum Computation",
     "tier": 5,
-    "short": "An alternative computational model: prepare a large entangled cluster state once, then compute entirely by single-qubit measurements — and its fault-tolerant 3D version is equivalent to the surface code.",
-    "detail": "In measurement-based quantum computation (Raussendorf & Briegel's one-way quantum computer), a cluster state serves as a universal resource. A cluster state is a graph state made by CZ-entangling |+> qubits on a lattice. Adaptive single-qubit measurements in rotated bases steer the computation, with measurement bases depending on prior outcomes. Raussendorf, Harrington, and Goyal studied a 3D cluster state with qubits measured in the X basis, leaving topological defects ('tubes') unmeasured. They showed this reproduces surface-code error correction and defect braiding, with a high threshold (~0.75% circuit-level in their model). This foliation picture — a 3D cluster state as the space-time history of a 2D surface code — unifies MBQC with TQEC. It underlies photonic and matter-based proposals, and explains why compilers draw computation as 3D space-time pipe diagrams. Those pipes are literally defect worldlines in a cluster state.",
+    "short": "Measurement-based computation consumes an entangled graph state through single-qubit measurements; specific 3D cluster constructions realize a foliated topological error-correction scheme.",
+    "detail": "In measurement-based quantum computation, a graph or cluster state is prepared by CZ-entangling |+> qubits, then consumed through single-qubit measurements. Universal computation generally needs adaptive measurement choices and non-Pauli measurement angles or equivalent injected magic resources; Pauli measurements alone remain in a stabilizer regime. Raussendorf, Harrington, and Goyal gave specific 3D cluster-state constructions whose correlation surfaces and defect tubes realize topological error correction closely related to a foliated 2D surface-code history. This is a construction-level correspondence, not a claim that every 3D cluster state is exactly a surface code. Their reported threshold is scoped to their circuit and stochastic noise model. The space-time picture motivates pipe diagrams used in some fault-tolerant compilation frameworks.",
     "key_points": [
       "Cluster/graph states: |+> qubits CZ-entangled on a graph; universal resource for MBQC",
       "Computation = adaptive single-qubit measurements; outcomes require feed-forward basis choices",
-      "3D cluster state with X-measurements = foliated surface code; tubes = braided defects (Raussendorf-Harrington-Goyal)",
+      "Specific RHG 3D cluster constructions realize a foliated topological code; defect tubes encode scheduled logical deformations",
       "Topological threshold in the RHG scheme ~0.6-0.75% under their noise model",
       "Space-time pipe diagrams used by compilers are defect worldlines in this 3D picture"
     ],
@@ -380,14 +380,14 @@
     "id": "magic-states-distillation",
     "name": "Magic States & Distillation",
     "tier": 5,
-    "short": "Clifford operations are topologically cheap but not universal; universality requires injecting noisy non-Clifford 'magic states' and distilling them into high-fidelity ones — historically the dominant cost of TQEC.",
-    "detail": "By the Eastin-Knill theorem no code admits a universal transversal gate set, and the surface code natively supports only Clifford gates. The T gate is instead executed by teleporting in a magic state |T> = (|0> + e^{i*pi/4}|1>)/sqrt(2) via a Clifford-plus-measurement gadget. Noisy magic states are purified by distillation. Bravyi-Kitaev 15-to-1 and related protocols consume many noisy |T> states to output fewer, quadratically less noisy ones, recursively reaching arbitrary fidelity. In early estimates, distillation factories occupied over 90% of a fault-tolerant machine. Litinski's 2019 re-analysis with lattice surgery and better protocols shrank this dramatically. Gidney-Ekerå's RSA resource estimate established factory design as a space-time optimization problem. Distillation is where QEC meets compilation: factory layouts, auto-corrected Toffoli tricks, and cultivation schemes all aim to minimize space-time volume per T.",
+    "short": "A surface-code Clifford toolkit is not universal; non-Clifford resource states can be injected and distilled, often at substantial architecture-dependent cost.",
+    "detail": "Eastin-Knill rules out a universal set of transversal logical gates for a finite-dimensional code family under its assumptions; it does not say every useful logical gate must be transversal. Surface-code architectures commonly realize Clifford operations through tracking, deformation, surgery, or related gadgets, but have no transversal T gate. Using the convention |A> = T|+> = (|0> + e^{i*pi/4}|1>)/sqrt(2), a Clifford-and-measurement injection gadget can enact T. Toffoli or CCZ operations require corresponding resource states or synthesis from T gates, not the same single-|A> gadget. For independent input error p in the ideal Bravyi-Kitaev 15-to-1 protocol, the accepted output's leading marginal error is 35p^3 + O(p^4), with acceptance and correlations treated separately. Distillation factories dominated some early resource estimates, while later layouts reduced their cost in particular architectures. Factory importance remains algorithm-, hardware-, target-error-, and scheduling-dependent.",
     "key_points": [
-      "Eastin-Knill: no transversal universal gate set; surface codes natively do Cliffords only",
-      "Magic-state injection + Clifford gate teleportation implements T (and Toffoli) gates",
-      "Distillation: 15-to-1 Bravyi-Kitaev protocol converts noisy |T> states to high-fidelity ones, recursively",
+      "Eastin-Knill forbids a universal transversal gate set under its assumptions; surface-code architectures commonly use non-transversal methods for logical Cliffords and T resources",
+      "With |A> = T|+>, a Clifford-and-measurement injection gadget implements T; Toffoli/CCZ needs an appropriate resource or T synthesis",
+      "Ideal 15-to-1 Bravyi-Kitaev distillation has accepted marginal output error 35p^3 + O(p^4) for independent small input error p",
       "Factories trade space x time for fidelity; space-time volume per T is the key cost metric",
-      "Litinski 2019 showed factory overheads are much smaller with lattice surgery and improved protocols"
+      "Later lattice-surgery studies found smaller factory overheads in analyzed architectures; no single fraction applies universally"
     ],
     "depends_on": [
       "fault-tolerance-thresholds",
@@ -395,7 +395,7 @@
     ],
     "resources": [
       "Bravyi & Kitaev, 'Universal quantum computation with ideal Clifford gates and noisy ancillas', arXiv:quant-ph/0403025",
-      "Daniel Litinski, arXiv:1905.06903",
+      "Daniel Litinski, 'Magic State Distillation: Not as Costly as You Think', arXiv:1905.06903",
       "Gidney & Ekerå, 'How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits', arXiv:1905.09749"
     ]
   },
@@ -403,13 +403,13 @@
     "id": "flag-fault-tolerance",
     "name": "Flag Fault-Tolerant Syndrome Extraction",
     "tier": 5,
-    "short": "A lean alternative to heavyweight verified-ancilla schemes: one extra 'flag' qubit catches dangerous ancilla faults, enabling fault-tolerant extraction with minimal overhead.",
-    "detail": "Standard fault-tolerant syndrome extraction (Shor's cat states, Steane/Knill ancillas) spends many extra qubits and gates. This ensures a single ancilla fault cannot spread to multiple data errors. Chao and Reichardt's flag scheme instead attaches one or two flag qubits to a bare ancilla. The flag's measurement signals precisely when an ancilla fault could have propagated. The subsequent adaptive measurement sequence then distinguishes the possible correlated errors. This yields fault tolerance at nearly the circuit cost of non-fault-tolerant extraction. This is vital for small-distance experiments, low-rate codes, and architectures with limited connectivity. Flag qubits are now common in practical fault-tolerant design. Magic-state cultivation circuits use flag-based checks to postselect fault-tolerantly at small distance. Experimental demonstrations (including Google's) rely on flag-like fault detection to certify ancilla states.",
+    "short": "Flag circuits add ancillas so dangerous fault propagation leaves extra information that a decoder or follow-up syndrome measurement can use under a stated fault model.",
+    "detail": "A bare syndrome ancilla can propagate one circuit fault into a correlated data error. In a flag fault-tolerant construction, one or more extra ancillas and a carefully chosen gate order ensure that faults capable of producing dangerous data errors cause either a flag outcome or a syndrome pattern that distinguishes the allowed error set under the construction's stated fault model. A flag does not precisely identify every physical fault, and the guarantee is circuit-, code-, and decoder-specific. Such schemes can reduce ancilla overhead relative to verified cat-state or encoded-ancilla methods for selected checks and distances. Related flag-like checks also appear in small-code preparation and postselection protocols, including magic-state work.",
     "key_points": [
       "Hook errors: a single ancilla fault can spread to a multi-qubit data error aligned with a logical operator",
-      "Flag qubits signal the occurrence of dangerous faults without full ancilla verification",
-      "Adaptive measurement conditioned on flag outcomes disambiguates correlated errors",
-      "Near-minimal overhead: fault tolerance at ~1-2 extra qubits per check",
+      "A validated flag circuit makes dangerous propagated errors produce a flag or a distinguishing syndrome under its stated fault model",
+      "Flag and syndrome outcomes narrow the allowed correlated-error set; they do not identify every microscopic fault",
+      "Ancilla savings and fault-tolerance guarantees depend on the code, check circuit, distance, and recovery procedure",
       "Used in small-distance experiments and magic-state cultivation circuits"
     ],
     "depends_on": [
@@ -426,11 +426,11 @@
     "name": "ZX-Calculus Basics",
     "tier": 5,
     "short": "A graphical language where quantum processes are diagrams of Z- and X-spiders connected by wires, manipulated by rewrite rules — increasingly the front-end notation for lattice-surgery compilers.",
-    "detail": "ZX-calculus (Coecke & Duncan) represents quantum states and maps as tensor networks of two generator types: green Z-spiders and red X-spiders, each with a phase. The rewrite rules — spider fusion, copy, bialgebra, Hadamard color-change — are sound and (for stabilizer and Clifford+T fragments) complete. This means any true equation between linear maps can be derived diagrammatically. Any ZX diagram denotes a tensor network. De Beaudrap & Horsman showed that lattice-surgery operations correspond directly to ZX fragments: Pauli measurements become spiders, merges become fusions. A compiled algorithm can then be drawn, simplified, and transformed entirely diagrammatically before being laid out as space-time pipes. This makes ZX the natural intermediate representation bridging quantum algorithms and TQEC layouts, used by modern compilers to reduce space-time volume by algebraic simplification.",
+    "detail": "ZX-calculus represents qubit linear maps with Z-spiders, X-spiders, phases, wires, and Hadamards. Standard rewrite rules such as spider fusion and bialgebra are sound. Completeness is a theorem only for a specified fragment together with an appropriate complete axiom set: the stabilizer fragment has a compact complete presentation, while Clifford+T and universal qubit ZX require additional rules beyond the small introductory core. De Beaudrap and Horsman related lattice-surgery primitives to ZX diagrams, making ZX useful as an intermediate representation. Rewrites preserve denotation, but an optimizer's ability to reduce a chosen hardware cost is heuristic and compilation-flow dependent.",
     "key_points": [
       "Two node types: Z-spiders (green) and X-spiders (red) with phases; Hadamard boxes swap colors",
       "Core rules: spider fusion, copy, bialgebra, pi-copy, color change",
-      "Universality and completeness: diagrams can represent and reason about all linear maps",
+      "Universality concerns representation; completeness requires a fragment-specific complete axiom set, not just the introductory rules",
       "Lattice surgery correspondence: merges/splits = spider fusion/fission of measurement spiders",
       "Serves as an intermediate representation for TQEC compilers and space-time volume reduction"
     ],
@@ -448,13 +448,13 @@
     "name": "Advanced Decoders: Correlated, Union-Find, Belief Propagation & Neural",
     "tier": 6,
     "short": "Beyond vanilla MWPM: decoders that exploit X-Z correlations, handle degeneracy, run in near-linear time, or learn from data — an active race to close the gap between matching and optimal decoding.",
-    "detail": "Standard MWPM decodes X and Z errors independently and assumes independent noise. Realistic hardware noise is correlated: Y errors correlate X and Z syndromes. Leakage and crosstalk break the graph model, and code degeneracy means many errors share a syndrome. Correlated decoders recover a large fraction of the lost performance. Examples include reweighting matching edges using correlations between the two syndrome lattices, and belief-propagation pre-processing as in BP+OSD. Union-find decoders (Delfosse-Nickerson) achieve almost-linear runtime with small accuracy cost, enabling megascale simulations. Neural-network and tensor-network decoders explore the accuracy/speed frontier from the learning side. Google's below-threshold experiment used ensemble decoders combining correlated matching with belief propagation. This showed that decoder choice measurably moves Lambda, the error-suppression factor. Decoding is therefore an important design choice, not a minor detail.",
+    "detail": "A basic CSS MWPM implementation often decodes X- and Z-type detector graphs separately, while real devices can exhibit Y correlations, leakage, crosstalk, and nonstationarity. Correlated matching can reweight or synthesize graph models that expose more of this structure; belief-propagation plus ordered-statistics decoding is another family, especially relevant to sparse parity-check codes. Union-find has almost-linear asymptotic complexity for specified topological-code decoding problems, but its threshold, accuracy, and wall-clock advantage depend on the noise model, graph construction, and implementation. Neural and tensor-network methods explore different accuracy/runtime tradeoffs. Google's Willow memory analysis used a matching-based decoder ensemble and synthesis, not belief propagation. Reported logical error and Lambda values therefore belong to the declared decoder pipeline as well as the device and circuit; there is no universally fastest or most accurate decoder.",
     "key_points": [
       "MWPM ignores X-Z correlations (Y errors) and degeneracy; correlated matching/BP recovers much of the gap",
-      "Union-find decoders run in almost-linear time (Delfosse & Nickerson) with modest accuracy loss",
+      "Union-find has almost-linear complexity in its analyzed setting; accuracy and practical runtime are model- and implementation-dependent",
       "Belief propagation + ordered statistics decoding (BP+OSD) handles degenerate and LDPC-style codes",
-      "Neural and tensor-network decoders trade training/simulation cost for near-optimal accuracy",
-      "Real experiments report Lambda (logical suppression per distance step) — decoder choice changes Lambda directly"
+      "Neural and tensor-network decoders occupy different accuracy/runtime regimes; neither is universally optimal",
+      "Willow used a matching-based decoder ensemble/synthesis; its reported Lambda is scoped to that circuit and decoding pipeline"
     ],
     "depends_on": [
       "decoding-mwpm"
@@ -470,13 +470,13 @@
     "name": "Real-Time Decoding & Classical Control",
     "tier": 6,
     "short": "Logical computation stalls if the classical decoder can't keep up: real-time decoding demands microsecond-scale throughput, parallelism, and tight hardware integration with the qubit control stack.",
-    "detail": "Every syndrome round (about 1 microsecond on superconducting hardware) produces defect data. This data must be decoded before measurement-dependent operations — Pauli frame updates, lattice-surgery branch choices, magic-state feed-forward — can proceed. Otherwise the backlog grows exponentially: the notorious backlog problem. Solutions include parallel/windowed decoding (partitioning the 3D syndrome volume into overlapping windows processed concurrently) and FPGA/ASIC implementations. Hierarchical decoders handle most errors locally and escalate hard cases. Google's 2024 experiment demonstrated real-time decoding operating alongside the quantum processor. The broader control problem — cryogenic wiring limits, latency budgets, decoder-quantum co-design — is now a central systems challenge on the road to millions of qubits. It sits at the intersection of computer architecture and quantum error correction.",
+    "detail": "Every syndrome round (on a microsecond-scale cadence in some superconducting experiments) produces detector data. A streaming decoder needs sustained throughput at least as high as that arrival rate; otherwise its queue grows without bound, approximately linearly in time when the rate deficit is steady. Latency is a separate constraint: Pauli-frame bookkeeping can often be deferred, while lattice-surgery branches and magic-state feed-forward need decisions before their control deadlines. Solutions include parallel/windowed decoding (partitioning the 3D syndrome volume into overlapping windows processed concurrently) and FPGA/ASIC implementations. Hierarchical decoders handle most errors locally and escalate hard cases. Google's 2024 experiment demonstrated real-time decoding operating alongside the quantum processor, reporting 63 microsecond average decoder latency while sustaining a 1.1 microsecond cycle stream. The broader control problem — cryogenic wiring limits, latency budgets, decoder-quantum co-design — is now a central systems challenge on the road to large-scale systems. It sits at the intersection of computer architecture and quantum error correction.",
     "key_points": [
-      "Backlog problem: undecoded syndromes accumulate and exponentially blow up required classical memory",
-      "Latency budget: ~1 microsecond per syndrome round on superconducting qubits",
-      "Parallel/windowed decoding partitions space-time volume with overlap to preserve accuracy",
-      "FPGA/ASIC and streaming architectures deliver the required throughput at scale",
-      "Pauli-frame tracking: most corrections are deferred in software, but non-Clifford feed-forward is latency-critical"
+      "Sustained aggregate throughput must meet the detector-round arrival rate; a steady deficit makes the queue grow approximately linearly",
+      "Throughput and latency are distinct: Google reported 63 microsecond average latency while sustaining a pipelined 1.1 microsecond cycle stream",
+      "Parallel/windowed decoding partitions space-time volume with overlap so multiple rounds can be processed concurrently",
+      "Pauli-frame tracking can often be deferred, but lattice-surgery and non-Clifford feed-forward decisions have control deadlines",
+      "Queue behavior, decision latency, and decoding accuracy are separate properties that must be measured for a declared architecture"
     ],
     "depends_on": [
       "advanced-decoding"
@@ -491,14 +491,14 @@
     "id": "magic-state-cultivation",
     "name": "Magic State Cultivation & Injection Advances",
     "tier": 6,
-    "short": "The 2024-era alternative to brute-force distillation: 'grow' high-quality magic states fault-tolerantly inside small codes and expand them, slashing the factory overhead that once dominated resource estimates.",
-    "detail": "Magic state cultivation (Gidney et al., 2024) replaces multi-level distillation factories with a graft-and-grow pipeline. A magic state is prepared fault-tolerantly inside a very small code (e.g., the color code or a distance-2 surface code). Flag-based postselection rejects faulty injections. The state's logical quality is then checked by fault-tolerant measurement of its stabilizers. Finally, the state is transplanted into a larger-distance surface code. Postselection at small distance is extraordinarily cheap per attempt, and the escape/growth step preserves fidelity. Cultivation therefore reaches logical error rates relevant for factoring-scale algorithms at a small fraction of the space-time cost of 15-to-1 factories. Together with hook injection (Gidney 2023), cultivation quickly changed resource estimates and shows how modern TQEC designs codes, circuits, and compilers together.",
+    "short": "A postselected magic-state preparation proposal that injects into a small code, increases fault distance through checked growth, then escapes into a larger matchable encoding.",
+    "detail": "In the original magic-state cultivation proposal, a rough T-type state is injected into a distance-3 triangular color code, initially with fault distance 1. Cross-checks, code growth, and stabilizer rounds increase the accepted state's fault distance while postselection discards detected faults. The final escape stage grafts or code-switches the state into a larger matchable surface-code-style encoding. Escape is not automatically fidelity-preserving: it adds circuit faults and can dominate rejection probability or cost, so the full pipeline must be simulated. Under the paper's uniform depolarizing circuit model and at selected intermediate target errors, simulations found roughly order-of-magnitude qubit-round savings relative to selected prior methods. That is evidence for the studied regimes, not a universal recurrence, fixed yield, or asymptotic advantage over distillation.",
     "key_points": [
-      "Cultivation: prepare + verify + grow a magic state within escalating code distances instead of distilling",
-      "Flag-based postselection at tiny distance rejects most injection faults very cheaply",
-      "Logical error rates competitive with multi-round 15-to-1 distillation at far lower space-time volume",
+      "Cultivation injects into a distance-3 triangular color code, cross-checks and grows with postselection, then escapes into a larger matchable encoding",
+      "The injected state initially has fault distance 1; accepted checks and growth raise protection while retries consume resources",
+      "The escape circuit can add errors and dominate rejection or cost, so it must be included in end-to-end estimates",
       "Hook injection (Gidney 2023): use hook errors as a feature to inject non-Pauli states",
-      "Reshapes factoring-scale resource estimates; key example of code/circuit/compiler co-design"
+      "Published simulations show about order-of-magnitude qubit-round savings only for specified noise models, baselines, and target-error regimes"
     ],
     "depends_on": [
       "magic-states-distillation",
@@ -514,12 +514,12 @@
     "name": "TQEC Design Automation & Compilers",
     "tier": 6,
     "short": "The emerging toolchain that turns abstract quantum algorithms into fault-tolerant surface-code layouts: logical compilation to lattice-surgery space-time diagrams, routing, volume optimization, and resource estimation.",
-    "detail": "A fault-tolerant quantum computer needs a compiler stack. The compiler: (1) translates an algorithm into Clifford+T, (2) synthesizes Pauli-product rotations, (3) commutes Clifford gates to the end (Litinski's framework), (4) lays the resulting measurement sequence out as 3D space-time pipes of surface-code patches, (5) schedules merges and splits and inserts magic-state factories, and (6) estimates physical qubit and time budgets. Tools and research lines in this space include ZX-calculus-based intermediate representations that simplify circuits diagrammatically before layout. Other lines include dedicated lattice-surgery compilers such as TopoLS and resource estimators descended from Gidney-Ekerå's factoring analysis. The design space — patch geometry, bus topology, factory count, distillation protocol, code distance per region — is enormous. It is strongly coupled to decoder and hardware choices. Design automation is therefore one of the most active and consequential areas of current TQEC research.",
+    "detail": "A fault-tolerant compiler stack can translate an algorithm into a logical gate set, synthesize Pauli rotations or product measurements, choose error-correction primitives, route patches, schedule measurements and feed-forward, provision non-Clifford resources, assign code distances, and estimate physical cost. One Litinski-style representation propagates many Clifford operations into a tracked frame and expresses the remaining work as Pauli-product measurements; the Cliffords are accounted for rather than physically erased in every architecture. ZX rewriting can simplify a diagram or reduce a declared cost for some inputs, but no generic rewrite sequence guarantees lower T-count or space-time volume. Research tools such as TopoLS explore particular lattice-surgery layout stages. Their output is a logical layout or schedule candidate—not a chip-ready pulse program—and still needs hardware mapping, timing, decoder integration, distance validation, and an error budget.",
     "key_points": [
       "Compilation pipeline: algorithm -> Clifford+T -> Pauli rotations -> lattice-surgery schedule -> physical layout",
-      "Litinski's framework: commute Cliffords out, leaving a sequence of multi-Pauli measurements",
-      "Space-time pipe diagrams are the assembly language of surface-code compilation",
-      "ZX-based simplification reduces T-count and volume before layout",
+      "One Litinski-style framework propagates many Cliffords into a tracked frame and represents remaining work with Pauli-product measurements",
+      "Space-time diagrams describe logical occupancy and measurement schedules; they are not automatically chip-executable controls",
+      "ZX rewrites preserve semantics and may reduce a chosen cost, but optimization gains are not guaranteed",
       "Resource estimation couples patch layout, factory design, code distances, and decoding — a co-optimization problem"
     ],
     "depends_on": [
@@ -538,13 +538,13 @@
     "name": "Classical Simulation of Quantum Error Correction: Clifford & Hybrid Methods",
     "tier": 6,
     "short": "Validating decoders and codes requires simulating noisy quantum circuits at scale: stabilizer (tableau) methods handle Clifford circuits, while hybrid Clifford+statevector factorization pushes simulation into the magic-state regime.",
-    "detail": "The Gottesman-Knill theorem lets Aaronson-Gottesman tableau methods simulate stabilizer circuits with millions of qubits. Modern tools like Stim add detector/error-model annotations that made surface-code threshold studies routine. But simulation beyond Clifford gates — essential for verifying magic-state injection, cultivation, and T-gadgets — is exponentially hard in general. The frontier exploits structure. Bravyi-Gosset showed circuits dominated by Clifford gates are simulable with cost exponential only in the number of T gates. Recent simulators (e.g., Clifft-style designs) combine a fast Clifford frame with statevector factorization. They treat the state as a stabilizer frame times a small non-stabilizer core, and factorize the wavefunction across qubit partitions. These hybrid methods are the only way to numerically certify fault-tolerant magic-state protocols before hardware can run them. This makes simulation methodology essential to current TQEC research.",
+    "detail": "Gottesman-Knill methods efficiently simulate stabilizer-state preparations, Clifford evolution, and Pauli measurements. Tools such as Stim add detector and error-model annotations for high-throughput Monte Carlo studies of declared stabilizer circuits. General non-Clifford simulation is hard, but hybrid methods exploit stabilizer rank, quasiprobability, tensor structure, low non-Clifford count, or problem-specific factorization. Bravyi-Gosset algorithms have cost exponential in a non-Clifford resource measure related to the number and structure of T resources, with accuracy and task also affecting cost; 'only T-count matters' is too strong. A simulator validates the represented circuit, noise model, observable, and sampling procedure. It does not certify omitted hardware physics, and finite Monte Carlo data cannot prove an exact failure probability. Hardware experiments and independent analytic checks remain necessary.",
     "key_points": [
       "Gottesman-Knill: stabilizer circuits simulate in polynomial time via tableau updates",
       "Stim-style tooling: detector/error-model annotations enable fast Monte Carlo threshold studies",
-      "Bravyi-Gosset: simulation cost exponential only in T-count (stabilizer rank extent)",
-      "Hybrid Clifford frame + statevector factorization simulates Clifford+T/magic-state circuits efficiently",
-      "Simulation certifies decoders, cultivation circuits, and fault-tolerant gadgets pre-hardware"
+      "Bravyi-Gosset-style cost depends on the non-Clifford resource representation, task, structure, and target accuracy—not solely a universal T-count law",
+      "Hybrid methods can extend tractable regimes by exploiting stabilizer frames, factorization, tensor structure, or low non-Clifford content",
+      "Simulation validates a declared model and implementation; it does not certify omitted hardware behavior or an exact physical failure rate"
     ],
     "depends_on": [
       "stabilizer-formalism",
@@ -560,14 +560,14 @@
     "id": "below-threshold-experiments",
     "name": "Below-Threshold Experiments & the Road to Factoring-Scale Machines",
     "tier": 6,
-    "short": "The experimental frontier: superconducting and neutral-atom processors now demonstrate logical qubits whose error rates fall as code distance grows — the first empirical confirmation of the threshold theorem on hardware.",
-    "detail": "Google Quantum AI's 2024 below-threshold result (Nature, arXiv:2408.13687) ran distance-3, 5, and 7 surface codes on a Willow-class superconducting processor. It observed logical error suppression by more than a factor of two per distance step (Lambda > 2) with real-time decoding. This was the first clear demonstration that scaling distance reduces logical error on actual hardware. Complementary milestones include logical magic-state demonstrations, multi-logical-qubit operations via transversal/lattice-surgery gates, and neutral-atom experiments moving logical qubits with high connectivity. Reading these papers requires fluency in every tier of this tree: noise characterization, syndrome circuits, decoder ensembles, and logical-error fitting. These experiments also set the research goals. The remaining gap runs from Lambda ~ 2 demonstrations to the billions of error-free logical operations needed for cryptanalysis. Closing it defines the engineering roadmap of the next decade.",
+    "short": "Hardware surface-code memories now show logical error decreasing across tested distances, with claims scoped to a circuit, decoder, observable, and fitted range.",
+    "detail": "Google's 2022 experiment made the first larger-code comparison, finding a modest average improvement for a distance-5 surface-code memory over distance 3; two distances did not establish a full exponential trend. The 2024 Willow experiment tested distance-3, 5, and 7 memories and reported clear below-threshold memory scaling. Using Lambda = epsilon(d)/epsilon(d+2), it found Lambda = 2.14 +/- 0.02, so Lambda > 1 means suppression as distance increases by two. The distance-7 logical error per cycle was 0.143 +/- 0.003%. A separate lifetime comparison found a factor 2.4 +/- 0.3 beyond the best constituent physical qubit; that ratio is not Lambda. The experiment also demonstrated real-time decoding for a distance-5 memory. These are major memory and decoding results, not end-to-end demonstrations of a universal logical gate set or an algorithm. Required logical-operation counts and error budgets remain algorithm- and architecture-dependent.",
     "key_points": [
       "Key metric Lambda: logical error suppression per +2 code-distance step; >1 means below threshold",
-      "Google 2024: d=3/5/7 surface codes, Lambda ~ 2.1-2.4, real-time decoding on Willow hardware",
-      "Experiments validate the full stack: calibration, syndrome circuits, decoders, leakage handling",
+      "Google 2024: d=3/5/7 memory scaling with Lambda = 2.14 +/- 0.02 and d=7 logical error 0.143 +/- 0.003% per cycle",
+      "The separate 2.4 +/- 0.3 result compares encoded lifetime with the best constituent qubit; it is not the suppression factor Lambda",
       "Complementary platforms: neutral atoms and trapped ions show logical qubit transport and high-connectivity gates",
-      "Remaining gap: ~10^10 error-free logical operations for cryptographically relevant algorithms"
+      "Memory scaling does not by itself demonstrate universal fault-tolerant gates or an algorithm; targets depend on the workload and full error budget"
     ],
     "depends_on": [
       "real-time-decoding-control",

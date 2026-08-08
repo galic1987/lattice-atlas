@@ -60,12 +60,13 @@ function Reveal({
   delay?: number;
   className?: string;
 }) {
+  const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 24 }}
+      initial={reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.55, delay, ease: EASE }}
+      transition={reduce ? { duration: 0 } : { duration: 0.55, delay, ease: EASE }}
       className={className}
     >
       {children}
@@ -76,7 +77,7 @@ function Reveal({
 function BraidDivider() {
   return (
     <div className="mx-auto max-w-6xl px-6 md:px-8" aria-hidden="true">
-      <img src={asset('braid-divider.svg')} alt="" className="h-16 w-full object-cover opacity-70" />
+      <img src={asset('braid-divider.svg')} alt="" loading="lazy" decoding="async" className="h-16 w-full object-cover opacity-70" />
     </div>
   );
 }
@@ -156,9 +157,9 @@ function Hero() {
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-24 md:px-8">
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
+          transition={reduce ? { duration: 0 } : { duration: 0.5, ease: EASE }}
           className="eyebrow text-magic"
         >
           {'// THE FIELD TODAY — 2024 → 2026'}
@@ -168,18 +169,18 @@ function Hero() {
           {words.map((w, i) => (
             <motion.span
               key={w}
-              initial={{ opacity: 0, y: 30 }}
+              initial={reduce ? false : { opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 + i * 0.03, ease: EASE }}
+              transition={reduce ? { duration: 0 } : { duration: 0.5, delay: 0.1 + i * 0.03, ease: EASE }}
               className="inline-block"
             >
               {w}&nbsp;
             </motion.span>
           ))}
           <motion.span
-            initial={{ opacity: 0, y: 30 }}
+            initial={reduce ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 + words.length * 0.03, ease: EASE }}
+            transition={reduce ? { duration: 0 } : { duration: 0.5, delay: 0.1 + words.length * 0.03, ease: EASE }}
             className="inline-block bg-gradient-to-r from-magic to-syndrome bg-clip-text text-transparent"
           >
             factory.
@@ -187,9 +188,9 @@ function Hero() {
         </h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduce ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35, ease: EASE }}
+          transition={reduce ? { duration: 0 } : { duration: 0.6, delay: 0.35, ease: EASE }}
           className="mt-6 max-w-2xl text-lg leading-relaxed text-text-mid max-sm:text-[17px]"
         >
           Topological error correction crossed from theory into engineering. The questions
@@ -200,9 +201,9 @@ function Hero() {
         </motion.p>
 
         <motion.nav
-          initial={{ opacity: 0, y: 16 }}
+          initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.55, ease: EASE }}
+          transition={reduce ? { duration: 0 } : { duration: 0.5, delay: 0.55, ease: EASE }}
           className="mt-10 flex flex-wrap gap-x-5 gap-y-2"
           aria-label="Section shortcuts"
         >
@@ -210,9 +211,9 @@ function Hero() {
             <motion.a
               key={a.href}
               href={a.href}
-              initial={{ opacity: 0, y: 12 }}
+              initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.6 + i * 0.06, ease: EASE }}
+              transition={reduce ? { duration: 0 } : { duration: 0.4, delay: 0.6 + i * 0.06, ease: EASE }}
               className="link-slide font-mono text-[13px] text-magic/90 decoration-magic hover:text-magic"
             >
               {a.label}
@@ -229,13 +230,13 @@ function Hero() {
 const SIGNALS = [
   {
     label: 'THRESHOLD',
-    value: 'p_th ≈ 1%',
+    value: 'model-dependent',
     color: '#F5B83D',
-    explainer: 'physical error rate the surface code tolerates',
+    explainer: 'often ≈0.5–1% in specified circuit-level studies',
   },
   {
     label: 'STATUS',
-    value: 'below threshold (2024)',
+    value: 'memory scaling (2024)',
     color: '#F5B83D',
     explainer: 'logical error ↓ as code distance ↑',
   },
@@ -266,27 +267,28 @@ function BigPicture() {
               >
                 G
               </span>
-              oogle&rsquo;s 2024 below-threshold result changed the conversation. For the
-              first time, a larger surface code outperformed a smaller one on real
-              hardware. Logical error rates fell as the code distance grew. Error
-              correction is now compounding like an engineering technology, not a physics
-              bet.
+              oogle&rsquo;s 2022 experiment reported a small average distance-5 improvement
+              over distance 3. Its 2024 Willow memory then showed a clear distance-3, 5,
+              and 7 scaling trend for the tested task and decoders. That is strong evidence
+              of below-threshold memory scaling—not yet an end-to-end fault-tolerant gate
+              set or algorithm.
             </p>
           </Reveal>
           <Reveal delay={0.1}>
             <p className="leading-[1.7] text-text-mid">
-              The bottleneck moved up the stack. Protecting a qubit is increasingly a
-              solved problem; the expensive part is computation: (1) prepare high-fidelity
-              non-Clifford resources, (2) route logical qubits through space-time, and (3)
-              decode syndromes fast enough to keep pace with hardware.
+              The bottleneck spans the whole stack. A useful machine must preserve logical
+              memory while it (1) prepares high-fidelity non-Clifford resources, (2) routes
+              and operates logical patches through space-time, and (3) decodes detector
+              data with adequate accuracy, sustained throughput, and control latency.
             </p>
           </Reveal>
           <Reveal delay={0.2}>
             <p className="leading-[1.7] text-text-mid">
-              A design-automation ecosystem grew around this result. Compilers turn
-              quantum algorithms into lattice-surgery instructions. Simulators verify
-              fault-tolerant circuits exactly, over billions of shots. Layout tools let
-              you draw, optimize, and debug space-time diagrams.
+              A design-automation ecosystem is growing around these requirements. Research
+              compilers can produce candidate logical layouts under declared constraints.
+              Simulators can reproduce a represented circuit and noise model, sometimes
+              exactly per sampled trajectory, but cannot certify omitted hardware effects.
+              Layout tools help draw, optimize, and inspect space-time constructions.
             </p>
           </Reveal>
         </div>
@@ -359,6 +361,7 @@ const DOTS_5X5 = Array.from({ length: 25 }, (_, i) => ({
 }));
 
 function MagicVignette() {
+  const reduce = useReducedMotion();
   return (
     <VignetteFrame caption="fig. 01 — a magic state grown in place, not shipped in from a factory">
       <svg viewBox="0 0 200 200" className="mx-auto w-full max-w-[280px]" role="img" aria-label="A glowing magic state growing inside a dim lattice cell">
@@ -378,11 +381,11 @@ function MagicVignette() {
             stroke="#F5B83D"
             strokeWidth={1}
             style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-            animate={{ scale: [0.4, 1.6], opacity: [0.6, 0] }}
-            transition={{ duration: 2.5, repeat: Infinity, delay: i * 1.25, ease: 'easeOut' }}
+            animate={reduce ? { scale: 1, opacity: 0.25 } : { scale: [0.4, 1.6], opacity: [0.6, 0] }}
+            transition={reduce ? { duration: 0 } : { duration: 2.5, repeat: Infinity, delay: i * 1.25, ease: 'easeOut' }}
           />
         ))}
-        {/* the cultivated |T⟩ diamond */}
+        {/* the cultivated |A⟩ diamond */}
         <motion.rect
           x={92}
           y={92}
@@ -439,7 +442,7 @@ function CompilerVignette() {
         <motion.path
           d="M150 100 L185 100"
           fill="none"
-          stroke="#64708E"
+          stroke="#7B89A7"
           strokeWidth={1.5}
           strokeDasharray="4 4"
           initial={{ pathLength: 0 }}
@@ -447,7 +450,7 @@ function CompilerVignette() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
         />
-        <path d="M185 96 L193 100 L185 104 Z" fill="#64708E" />
+        <path d="M185 96 L193 100 L185 104 Z" fill="#7B89A7" />
         {/* space-time tubes (right) */}
         {[
           { y: 50, c: '#22D3EE' },
@@ -579,7 +582,7 @@ function DecoderVignette() {
         <text x={248} y={106} fill="#FB7185" fontSize={10} fontFamily="'JetBrains Mono', monospace">
           latency
         </text>
-        <text x={20} y={30} fill="#64708E" fontSize={10} fontFamily="'JetBrains Mono', monospace">
+        <text x={20} y={30} fill="#7B89A7" fontSize={10} fontFamily="'JetBrains Mono', monospace">
           detector rounds →
         </text>
       </svg>
@@ -633,7 +636,7 @@ function ExperimentVignette() {
             </text>
           </g>
         ))}
-        <text x={12} y={24} fill="#64708E" fontSize={10} fontFamily="'JetBrains Mono', monospace" transform="rotate(-90 14 24)">
+        <text x={12} y={24} fill="#7B89A7" fontSize={10} fontFamily="'JetBrains Mono', monospace" transform="rotate(-90 14 24)">
           ε_L
         </text>
       </svg>
@@ -642,52 +645,64 @@ function ExperimentVignette() {
 }
 
 /* -------------------------------------------------------------------------- */
-/*             1. Magic State Distillation Factory Yield Calculator           */
+/*                1. Idealized magic-state protocol arithmetic                */
 /* -------------------------------------------------------------------------- */
 
-type ProtocolKey = '15-1' | '20-4' | '8-2' | 'cultivation';
+type ProtocolKey = '15-1' | '20-4' | '8-2';
 
 interface ProtocolMeta {
   name: string;
   shortName: string;
-  ratio: number;
-  formula: (p: number, round: number) => number;
+  inputs: number;
+  outputs: number;
+  formula: (p: number) => number;
+  formulaLabel: string;
   description: string;
+  caveat: string;
+  sourceLabel: string;
+  sourceHref: string;
   color: string;
 }
 
 const PROTOCOLS: Record<ProtocolKey, ProtocolMeta> = {
   '15-1': {
-    name: '15-to-1 (Bravyi-Kitaev)',
-    shortName: '15-to-1 BK',
-    ratio: 15,
+    name: '15-to-1 (Bravyi–Kitaev)',
+    shortName: '15→1 BK',
+    inputs: 15,
+    outputs: 1,
     formula: (p: number) => 35 * Math.pow(p, 3),
-    description: '15 noisy T-states yield 1 clean T-state. Cubic error suppression p_out ≈ 35·p_in³.',
+    formulaLabel: 'p_out = 35p³ + O(p⁴)',
+    description: 'One accepted output from 15 inputs, with cubic leading marginal error in the standard ideal input model.',
+    caveat: 'Acceptance probability and all logical Clifford-circuit faults are omitted.',
+    sourceLabel: 'Bravyi–Kitaev 15-to-1',
+    sourceHref: 'https://arxiv.org/abs/quant-ph/0403025',
     color: '#F5B83D',
   },
   '20-4': {
-    name: '20-to-4 (Fowler Block)',
-    shortName: '20-to-4 Fowler',
-    ratio: 5,
-    formula: (p: number) => 28 * Math.pow(p, 2),
-    description: '20 noisy T-states yield 4 clean T-states (5:1 ratio). Quadratic error suppression p_out ≈ 28·p_in².',
+    name: '20-to-4 (Bravyi–Haah)',
+    shortName: '20→4 BH',
+    inputs: 20,
+    outputs: 4,
+    formula: (p: number) => 13 * Math.pow(p, 2),
+    formulaLabel: 'p_out = 13p² + O(p³)',
+    description: 'The k=4 member of the Bravyi–Haah 3k+8-to-k family: five nominal inputs per accepted marginal output.',
+    caveat: 'The four outputs can be correlated; treating them as independent inputs to another level is an extra approximation.',
+    sourceLabel: 'Bravyi–Haah triorthogonal codes',
+    sourceHref: 'https://arxiv.org/abs/1209.2426',
     color: '#8B5CF6',
   },
   '8-2': {
-    name: '8-to-2 (Bravyi-Haah)',
-    shortName: '8-to-2 BH',
-    ratio: 4,
-    formula: (p: number) => 12 * Math.pow(p, 2),
-    description: '8 noisy T-states yield 2 clean T-states (4:1 ratio). Compact quadratic suppression.',
+    name: 'Catalyzed 8-to-2 (Gidney–Fowler)',
+    shortName: '8→2 catalyzed',
+    inputs: 8,
+    outputs: 2,
+    formula: (p: number) => 28 * Math.pow(p, 2),
+    formulaLabel: 'headline p_out ≈ 28p²',
+    description: 'Eight inputs feed a CCZ factory whose output is catalytically converted into two T-type outputs.',
+    caveat: 'This headline marginal model omits catalyst startup, catalyst poisoning, correlated outputs, and the conversion circuit’s own faults.',
+    sourceLabel: 'Gidney–Fowler catalyzed factory',
+    sourceHref: 'https://arxiv.org/abs/1812.01238',
     color: '#22D3EE',
-  },
-  cultivation: {
-    name: 'In-Place Cultivation (Gidney 2024)',
-    shortName: 'In-Place Cultivation',
-    ratio: 4,
-    formula: (p: number, round: number) => (round === 1 ? 2 * Math.pow(p, 2) : 35 * Math.pow(p, 3)),
-    description: 'Grows magic states inside code patches. Eliminates stage-1 factory footprint by ~75%.',
-    color: '#34D399',
   },
 };
 
@@ -695,8 +710,9 @@ interface FactoryStage {
   round: number;
   pIn: number;
   pOut: number;
-  rawMultiplier: number;
+  inputsPerOutput: number;
   cumulativeRaw: number;
+  improves: boolean;
 }
 
 function MagicStateCalculatorWidget() {
@@ -708,32 +724,39 @@ function MagicStateCalculatorWidget() {
   const pTarget = Math.pow(10, pTargetLog);
   const meta = PROTOCOLS[protocol];
 
-  // Calculate distillation stages
+  // Deliberately simple leading-order marginal cascade. It is not a factory simulation.
   const stages: FactoryStage[] = [];
   let currP = pIn;
   let cumRaw = 1;
   let roundCount = 0;
-  const maxRounds = 5;
+  let nonConvergent = false;
+  const maxRounds = 6;
+  const inputsPerOutput = meta.inputs / meta.outputs;
 
   while (currP > pTarget && roundCount < maxRounds) {
     roundCount++;
-    const stepRatio = meta.ratio;
-    cumRaw *= stepRatio;
-    const nextP = Math.min(0.5, meta.formula(currP, roundCount));
+    cumRaw *= inputsPerOutput;
+    const nextP = meta.formula(currP);
+    const improves = Number.isFinite(nextP) && nextP < currP;
     stages.push({
       round: roundCount,
       pIn: currP,
       pOut: nextP,
-      rawMultiplier: stepRatio,
+      inputsPerOutput,
       cumulativeRaw: cumRaw,
+      improves,
     });
     currP = nextP;
+    if (!improves) {
+      nonConvergent = true;
+      break;
+    }
   }
 
   const finalPOut = currP;
   const totalRawNeeded = cumRaw;
-  const purityPercentage = (Math.max(0, 1 - finalPOut) * 100).toFixed(8);
-  const estPhysicalQubits = totalRawNeeded * 450;
+  const targetMet = finalPOut <= pTarget;
+  const hitRoundLimit = !targetMet && !nonConvergent && roundCount === maxRounds;
 
   const applyPreset = (inLog: number, targetLog: number, prot: ProtocolKey) => {
     setPInLog(inLog);
@@ -749,14 +772,14 @@ function MagicStateCalculatorWidget() {
           <div className="flex items-center gap-2 text-magic">
             <Sparkles className="h-5 w-5" />
             <span className="eyebrow font-mono uppercase tracking-wider text-magic">
-              INTERACTIVE TOOL // DISTILLATION FACTORY CALCULATOR
+              INTERACTIVE TOOL // IDEALIZED PROTOCOL ARITHMETIC
             </span>
           </div>
           <h3 className="mt-1 font-display text-2xl font-semibold text-text-hi">
-            Magic State Distillation Factory Yield Calculator
+            Compare leading-order magic-state protocols
           </h3>
           <p className="mt-1 text-sm text-text-mid max-w-2xl">
-            Simulate how raw noisy T-states are purified through multi-round distillation factories to reach algorithm fault-tolerance thresholds.
+            Apply published small-p marginal formulas level by level. This checks arithmetic under explicit assumptions; it does not estimate a physical factory.
           </p>
         </div>
 
@@ -767,21 +790,21 @@ function MagicStateCalculatorWidget() {
             onClick={() => applyPreset(-3, -10, '15-1')}
             className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-magic/60 hover:text-magic"
           >
-            Superconducting (0.1%)
+            15→1 example
           </button>
           <button
             type="button"
-            onClick={() => applyPreset(-3.3, -12, 'cultivation')}
-            className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-stabilizer/60 hover:text-stabilizer"
+            onClick={() => applyPreset(-3, -10, '20-4')}
+            className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-star/60 hover:text-star"
           >
-            In-Place Cultivation
+            20→4 comparison
           </button>
           <button
             type="button"
-            onClick={() => applyPreset(-4, -15, '20-4')}
+            onClick={() => applyPreset(-1.3, -8, '8-2')}
             className="rounded-lg border border-ink-600 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-text-mid transition-all hover:border-plaquette/60 hover:text-plaquette"
           >
-            High-Fidelity Ion (0.01%)
+            Show non-convergence
           </button>
         </div>
       </div>
@@ -795,7 +818,7 @@ function MagicStateCalculatorWidget() {
             <div className="flex items-center justify-between font-mono text-xs">
               <label htmlFor="p-in-slider" className="text-text-mid flex items-center gap-1.5">
                 <Sliders className="h-3.5 w-3.5 text-magic" />
-                Physical Error Rate (p_in):
+                Input-state marginal error (p):
               </label>
               <span className="font-semibold text-magic">
                 {(pIn * 100).toFixed(2)}% ({formatSci(pIn)})
@@ -841,18 +864,22 @@ function MagicStateCalculatorWidget() {
               className="mt-3 w-full accent-syndrome cursor-pointer h-2 rounded-lg bg-ink-700"
             />
             <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-              <span>10⁻⁶ (Small)</span>
-              <span>10⁻¹⁰ (Shor's)</span>
-              <span>10⁻¹⁵ (Chemistry)</span>
+              <span>10⁻⁶</span>
+              <span>10⁻¹⁰</span>
+              <span>10⁻¹⁵</span>
             </div>
           </div>
 
           {/* Protocol Selection */}
           <div>
-            <span className="block font-mono text-xs text-text-mid mb-2.5">
-              Distillation Protocol Architecture:
+            <span id="magic-protocol-label" className="mb-2.5 block font-mono text-xs text-text-mid">
+              Published protocol model:
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div
+              className="grid gap-2 sm:grid-cols-3"
+              role="group"
+              aria-labelledby="magic-protocol-label"
+            >
               {(Object.keys(PROTOCOLS) as ProtocolKey[]).map((key) => {
                 const p = PROTOCOLS[key];
                 const active = protocol === key;
@@ -861,6 +888,7 @@ function MagicStateCalculatorWidget() {
                     key={key}
                     type="button"
                     onClick={() => setProtocol(key)}
+                    aria-pressed={active}
                     className={`rounded-lg border p-2.5 text-left transition-all ${
                       active
                         ? 'border-magic bg-magic/10 text-text-hi shadow-glow-amber'
@@ -870,14 +898,25 @@ function MagicStateCalculatorWidget() {
                     <p className="font-mono text-xs font-semibold" style={{ color: p.color }}>
                       {p.shortName}
                     </p>
-                    <p className="mt-1 text-[11px] text-text-low line-clamp-1">{p.name}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-text-low">{p.name}</p>
                   </button>
                 );
               })}
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-text-mid bg-ink-800/80 p-2.5 rounded-lg border border-ink-700">
-              {meta.description}
-            </p>
+            <div className="mt-3 rounded-lg border border-ink-700 bg-ink-800/80 p-3 text-xs leading-relaxed text-text-mid">
+              <p>{meta.description}</p>
+              <p className="mt-2 font-mono text-text-hi">{meta.formulaLabel}</p>
+              <p className="mt-2 text-text-low">Scope: {meta.caveat}</p>
+              <a
+                href={meta.sourceHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 font-mono text-[11px] text-plaquette hover:text-text-hi"
+              >
+                {meta.sourceLabel}
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -887,44 +926,44 @@ function MagicStateCalculatorWidget() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Raw States / Pure
+                Nominal raw / output
               </p>
               <p className="mt-2 font-display text-2xl font-bold text-magic">
                 {totalRawNeeded.toLocaleString()}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">noisy T-states</p>
+              <p className="mt-1 text-[11px] text-text-mid">ignores rejection and retries</p>
             </div>
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Factory Rounds
+                Modeled levels
               </p>
               <p className="mt-2 font-display text-2xl font-bold text-syndrome">
                 {roundCount} {roundCount === 1 ? 'Round' : 'Rounds'}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">distillation depth</p>
+              <p className="mt-1 text-[11px] text-text-mid">same marginal law reapplied</p>
             </div>
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Output Error (p_out)
+                Marginal output
               </p>
-              <p className="mt-2 font-mono text-lg font-bold text-stabilizer truncate">
+              <p className="mt-2 whitespace-nowrap font-mono text-[13px] font-bold text-stabilizer sm:text-lg">
                 {formatSci(finalPOut)}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">target ≤ {formatSci(pTarget)}</p>
+              <p className="mt-1 text-[11px] text-text-mid">requested ≤ {formatSci(pTarget)}</p>
             </div>
 
             <div className="rounded-xl border border-ink-700 bg-ink-900/60 p-4">
               <p className="font-mono text-[11px] uppercase tracking-wider text-text-low">
-                Est. Factory Qubits
+                Model status
               </p>
-              <p className="mt-2 font-display text-2xl font-bold text-plaquette">
-                {estPhysicalQubits > 1000000
-                  ? `${(estPhysicalQubits / 1000000).toFixed(2)}M`
-                  : `${(estPhysicalQubits / 1000).toFixed(0)}k`}
+              <p className={`mt-2 font-display text-xl font-bold ${targetMet ? 'text-stabilizer' : 'text-syndrome'}`}>
+                {targetMet ? 'TARGET MET' : nonConvergent ? 'NO IMPROVEMENT' : 'NOT REACHED'}
               </p>
-              <p className="mt-1 text-[11px] text-text-mid">qubit footprint</p>
+              <p className="mt-1 text-[11px] text-text-mid">
+                {targetMet ? 'inside this idealized model' : hitRoundLimit ? `${maxRounds}-level display limit` : 'leading law does not converge'}
+              </p>
             </div>
           </div>
 
@@ -933,10 +972,10 @@ function MagicStateCalculatorWidget() {
             <div className="flex items-center justify-between">
               <h4 className="font-mono text-xs font-semibold uppercase tracking-wider text-text-mid flex items-center gap-2">
                 <Layers className="h-4 w-4 text-magic" />
-                Distillation Pipeline Stage Breakdown
+                Leading-order cascade
               </h4>
               <span className="font-mono text-[11px] text-magic bg-magic/10 px-2 py-0.5 rounded border border-magic/30">
-                Purity: {purityPercentage}%
+                {meta.inputs} inputs → {meta.outputs} outputs per batch
               </span>
             </div>
 
@@ -949,7 +988,7 @@ function MagicStateCalculatorWidget() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between font-mono text-xs">
-                    <span className="font-semibold text-text-hi">Raw Input |T_noisy⟩</span>
+                    <span className="font-semibold text-text-hi">Input |A_noisy⟩, with |A⟩ = T|+⟩</span>
                     <span className="text-amber-400">p_in = {formatSci(pIn)}</span>
                   </div>
                   <div className="mt-1.5 h-1.5 w-full rounded-full bg-ink-700 overflow-hidden">
@@ -967,7 +1006,7 @@ function MagicStateCalculatorWidget() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between font-mono text-xs">
                       <span className="font-semibold text-text-hi">
-                        Stage {stg.round} ({stg.rawMultiplier}:1 factory filter)
+                        Level {stg.round} ({stg.inputsPerOutput}:1 nominal inputs/output)
                       </span>
                       <span className="text-syndrome">p_{stg.round} = {formatSci(stg.pOut)}</span>
                     </div>
@@ -978,24 +1017,30 @@ function MagicStateCalculatorWidget() {
                       />
                     </div>
                     <div className="mt-1 flex justify-between font-mono text-[10px] text-text-low">
-                      <span>Cum. Ratio: {stg.cumulativeRaw}:1</span>
-                      <span>Error reduction: {(stg.pIn / Math.max(1e-25, stg.pOut)).toExponential(1)}x</span>
+                      <span>Cum. nominal ratio: {stg.cumulativeRaw}:1</span>
+                      <span>{stg.improves ? `Modeled reduction: ${(stg.pIn / Math.max(1e-25, stg.pOut)).toExponential(1)}x` : 'No modeled improvement at this p'}</span>
                     </div>
                   </div>
                 </div>
               ))}
 
-              {/* Target Met Badge */}
-              <div className="flex items-center justify-between rounded-lg border border-stabilizer/40 bg-stabilizer/10 px-4 py-2.5 font-mono text-xs">
-                <span className="flex items-center gap-2 font-semibold text-stabilizer">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Target Purity Achieved!
+              <div className={`flex flex-col gap-1 rounded-lg border px-4 py-2.5 font-mono text-xs sm:flex-row sm:items-center sm:justify-between ${targetMet ? 'border-stabilizer/40 bg-stabilizer/10 text-stabilizer' : 'border-syndrome/40 bg-syndrome/10 text-syndrome'}`}>
+                <span className="flex items-center gap-2 font-semibold">
+                  {targetMet ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                  {targetMet ? 'Target reached in the leading-order model' : nonConvergent ? 'Selected recurrence does not improve this input' : `Target not reached within ${maxRounds} displayed levels`}
                 </span>
-                <span className="text-stabilizer">
-                  p_out = {formatSci(finalPOut)} ≤ {formatSci(pTarget)}
+                <span>
+                  modeled p_out = {formatSci(finalPOut)}
                 </span>
               </div>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-plaquette/30 bg-plaquette/5 p-4 text-xs leading-relaxed text-text-mid">
+            <p className="font-mono font-semibold uppercase tracking-wider text-plaquette">What this comparison omits</p>
+            <p className="mt-2">
+              It reapplies a published leading marginal term and divides batch inputs by outputs. It assumes small, independent, identically distributed twirled input errors and ideal checks. It omits acceptance probability, retries, output correlations, catalyst history, logical-circuit faults, routing, storage, code distance, physical qubits, wall-clock time, and spacetime volume. Multi-output batches are not generally independent streams, so later levels are illustrative arithmetic—not a factory design.
+            </p>
           </div>
         </div>
       </div>
@@ -1453,10 +1498,10 @@ function DecoderLatencySimulatorWidget() {
                   </linearGradient>
                 </defs>
 
-                <text x="160" y="156" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace">
+                <text x="160" y="156" textAnchor="middle" fill="#7B89A7" fontSize="10" fontFamily="monospace">
                   Arriving Detector Rounds →
                 </text>
-                <text x="12" y="85" textAnchor="middle" fill="#64708E" fontSize="9" fontFamily="monospace" transform="rotate(-90 12 85)">
+                <text x="12" y="85" textAnchor="middle" fill="#7B89A7" fontSize="10" fontFamily="monospace" transform="rotate(-90 12 85)">
                   Queue Backlog (Q)
                 </text>
               </svg>
@@ -1564,7 +1609,7 @@ const JARGON = [
   {
     term: 'magic state',
     color: '#F5B83D',
-    def: 'the distilled resource that powers non-Clifford T gates',
+    def: 'a prepared resource consumed to enact a non-Clifford gate such as T',
     slug: 'magic-state',
   },
   {
@@ -1790,6 +1835,7 @@ function FrontierShelf() {
 
 function ClosingCta() {
   const { understoodCount } = useProgress();
+  const reduce = useReducedMotion();
   const done = understoodCount >= topics.length;
   return (
     <section className="py-24">
@@ -1809,14 +1855,14 @@ function ClosingCta() {
         <Reveal delay={0.16}>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
             <motion.div
-              animate={{
+              animate={reduce ? undefined : {
                 boxShadow: [
                   '0 0 0 rgba(34,211,238,0)',
                   '0 0 24px rgba(34,211,238,0.25)',
                   '0 0 0 rgba(34,211,238,0)',
                 ],
               }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+              transition={reduce ? undefined : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               className="rounded-lg"
             >
               <Link to={done ? '/papers' : '/path'} className="btn-primary">
@@ -1845,11 +1891,11 @@ export default function FieldToday() {
       accent: '#F5B83D',
       eyebrow: 'THE BOTTLENECK',
       title: 'Growing T gates in a Clifford world.',
-      body: "Clifford operations are cheap on a surface code; the T gate is not. It requires distilled 'magic states' — and distillation factories consumed most of the qubits in a fault-tolerant algorithm. Magic state cultivation grows high-quality |T⟩ states directly inside the code with dramatically less overhead, turning the factory into a garden plot.",
+      body: "Surface-code schemes commonly enact T by consuming a prepared |A⟩ = T|+⟩ resource in a Clifford-and-measurement gadget. Distillation postselects cleaner outputs from noisy inputs; cultivation instead injects into a small color code, checks and grows it with postselection, then escapes into a larger matchable code. Published savings are model- and target-regime-specific, and escape errors, rejection, routing, and logical circuitry remain part of the cost.",
       keyPoints: [
-        'why non-Clifford gates need magic states',
-        'distillation → cultivation: the overhead collapse',
-        'cultivation as the current highest-leverage research problem',
+        'why this surface-code scheme injects a non-Clifford resource',
+        'distillation laws versus complete factory cost',
+        'cultivation: inject → check/grow/postselect → escape',
       ],
       links: (
         <>
@@ -1891,12 +1937,12 @@ export default function FieldToday() {
       num: '03',
       accent: '#22D3EE',
       eyebrow: 'TRUST BUT VERIFY',
-      title: 'Simulating the uncorrectable, exactly.',
-      body: 'How do you validate a fault-tolerant circuit before hardware exists? Clifford simulators are fast but blind to non-Clifford physics. Hybrid simulators like Clifft carry a Clifford frame and factorize the residual statevector. They give exact results over billions of shots, for circuits too large for brute-force statevector methods.',
+      title: 'Testing the model before hardware.',
+      body: 'Stabilizer simulators efficiently handle declared Clifford circuits, preparations, measurements, and noise. Hybrid methods can carry a Clifford frame while representing a smaller non-Clifford residue. Some implementations sample exact trajectories for the circuit and model they represent; runtime remains structure-dependent, finite sampling remains, and model agreement is not hardware certification.',
       keyPoints: [
         'stabilizer simulation vs statevector limits',
         'Clifford-frame + factorization trick',
-        'verification workflow for new code constructions',
+        'model validation versus hardware certification',
       ],
       links: <TopicChip id="clifford-simulation-hybrid" accent="#22D3EE" />,
       vignette: <SimVignette />,
@@ -1907,12 +1953,12 @@ export default function FieldToday() {
       accent: '#FB7185',
       eyebrow: 'THE CLOCK',
       title: 'Decoding at the speed of the stream.',
-      body: "A decoder that runs in post-processing can validate an experiment; a fault-tolerant computer needs a sustained streaming service. If detector rounds arrive faster than the decoder's aggregate throughput, the queue grows approximately linearly under a steady rate deficit. Latency is a separate systems constraint: Google's experiment reported about 63 µs average decoder latency while sustaining a 1.1 µs cycle stream through pipelining. Pauli-frame bookkeeping can often be deferred, but lattice-surgery and non-Clifford feed-forward decisions still have deadlines. Meanwhile, flag fault-tolerance uses a few extra flag qubits to catch dangerous faults in small-code extraction circuits.",
+      body: "A decoder that runs in post-processing can validate an experiment; a fault-tolerant computer needs a sustained streaming service. If detector rounds arrive faster than aggregate service, a fixed rate deficit makes the queue grow approximately linearly. Latency is separate: Google reported about 63 µs average decoder latency while sustaining a 1.1 µs cycle stream through pipelining. Pauli frames can often wait, while declared feed-forward branches have deadlines. In proved flag circuits, extra ancilla outcomes help distinguish a designed class of dangerous propagated faults; a flag is not a universal fault sensor.",
       keyPoints: [
         'aggregate throughput controls queue growth',
         'pipeline latency and feed-forward deadlines are separate',
         'streaming, windowed, and hierarchical decoder architectures',
-        'flag qubits: cheap fault-tolerance for small codes',
+        'flags: circuit-specific evidence for designed fault classes',
       ],
       links: (
         <>
@@ -1933,11 +1979,11 @@ export default function FieldToday() {
       accent: '#34D399',
       eyebrow: 'THE HARDWARE',
       title: 'Error correction that compounds.',
-      body: "The experimental era's defining plot: logical error rate vs code distance, bending downward. Google's 2024 below-threshold demonstration on superconducting hardware showed distance-7 beating distance-5, and distance-5 beating distance-3. This is the scaling signature the field chased since 1998. The roadmap question is now 'how many qubits to factoring-scale machines?'",
+      body: "Google's 2024 Willow memory experiment showed lower error per cycle at distance 7 than 5, and at 5 than 3, for its tested memories and decoders. It reported Λ = ε(d)/ε(d+2) = 2.14 ± 0.02, so Λ > 1 means suppression in this convention. A separate 2.4 ± 0.3 result compared logical-memory lifetime with the best constituent physical qubit. Neither metric alone demonstrates universal logical gates or fixes one machine-size roadmap.",
       keyPoints: [
-        'Λ (lambda): the error-suppression factor per distance step',
-        'logical qubit lifetime > physical lifetime',
-        'roadmap: millions of physical qubits',
+        'Λ: error suppression per +2 distance in the declared memory test',
+        'suppression factor and lifetime advantage are different metrics',
+        'resource needs depend on algorithm, architecture, and error budget',
       ],
       links: (
         <>

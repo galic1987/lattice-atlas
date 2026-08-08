@@ -2,7 +2,7 @@
   <defs>
     <linearGradient id="ogTitle" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#22D3EE"/>
-      <stop offset="100%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#9B7BFA"/>
     </linearGradient>
     <pattern id="ogLattice" width="60" height="60" patternUnits="userSpaceOnUse">
       <circle cx="0" cy="0" r="2" fill="#2A3A5F"/>
@@ -23,10 +23,10 @@
   <!-- braid line -->
   <g fill="none" stroke-width="2" stroke-linecap="round">
     <path d="M60 560 C 320 560, 420 500, 640 500 C 860 500, 940 560, 1140 520" stroke="#22D3EE" stroke-opacity="0.7"/>
-    <path d="M60 520 C 320 520, 420 560, 640 560 C 860 560, 940 500, 1140 545" stroke="#8B5CF6" stroke-opacity="0.7"/>
+    <path d="M60 520 C 320 520, 420 560, 640 560 C 860 560, 940 500, 1140 545" stroke="#9B7BFA" stroke-opacity="0.7"/>
   </g>
   <circle cx="60" cy="560" r="4" fill="#22D3EE"/>
-  <circle cx="60" cy="520" r="4" fill="#8B5CF6"/>
+  <circle cx="60" cy="520" r="4" fill="#9B7BFA"/>
 
   <!-- logo mark -->
   <g transform="translate(80 88) scale(1.5)">
@@ -43,5 +43,5 @@
   <text x="196" y="152" font-family="'Space Grotesk', sans-serif" font-size="44" font-weight="600" fill="#EAF0FB">Lattice Atlas</text>
   <text x="80" y="300" font-family="'Space Grotesk', sans-serif" font-size="64" font-weight="700" fill="#EAF0FB">Learn Topological</text>
   <text x="80" y="384" font-family="'Space Grotesk', sans-serif" font-size="64" font-weight="700" fill="url(#ogTitle)">Quantum Error Correction</text>
-  <text x="80" y="452" font-family="'JetBrains Mono', monospace" font-size="20" fill="#64708E">23 papers · 26 topics · 6 tiers · 1998 → 2026</text>
+  <text x="80" y="452" font-family="'JetBrains Mono', monospace" font-size="20" fill="#A9B4CC">23 papers · 26 topics · 6 tiers · 1998 → 2026</text>
 </svg>
