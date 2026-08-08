@@ -35,6 +35,7 @@ import {
 import { topicById, shortName } from '@/data';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
 import WasmQuantumSandbox from '@/components/WasmQuantumSandbox';
+import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -1625,6 +1626,23 @@ export default function SurfaceCodeLab() {
       </section>
 
       <ThresholdSection />
+
+      {/* Where the surface code comes from: the toric code on a torus */}
+      <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
+        <div className="mb-6">
+          <p className="eyebrow !text-star">{'// WHERE IT COMES FROM'}</p>
+          <h2 className="mt-2 max-w-2xl font-display text-[26px] font-semibold leading-[1.15] text-text-hi md:text-[32px]">
+            The surface code is a torus, cut open.
+          </h2>
+          <p className="mt-3 max-w-2xl leading-[1.7] text-text-mid">
+            The planar code you just decoded is the toric code flattened onto a
+            patch with boundaries. On the torus itself, the two logical operators
+            are loops that wind the donut two different ways — and no local error
+            can shrink them away. That is the topology doing the protecting.
+          </p>
+        </div>
+        <TorusTopologyViewer />
+      </section>
 
       {/* cross-links */}
       <section className="mx-auto max-w-7xl px-6 pb-20 md:px-8">
