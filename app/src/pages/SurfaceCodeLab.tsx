@@ -249,7 +249,32 @@ function LatticeView({
         const activeError = showErrors ? e : 0;
 
         return (
-          <g key={q} onClick={() => onQubitClick(q)} className="cursor-pointer">
+          <g
+            key={q}
+            role="button"
+            tabIndex={0}
+            aria-label={`Data qubit ${q}, ${
+              activeError === 0 ? 'no error' : `${PAULI_LABEL[activeError]} error`
+            } — press Enter to paint`}
+            onClick={() => onQubitClick(q)}
+            onKeyDown={(ev) => {
+              if (ev.key === 'Enter' || ev.key === ' ') {
+                ev.preventDefault();
+                onQubitClick(q);
+              }
+            }}
+            className="group/qb cursor-pointer outline-none"
+          >
+            {/* keyboard focus ring */}
+            <circle
+              cx={x}
+              cy={y}
+              r={14}
+              fill="none"
+              stroke="#EAF0FB"
+              strokeWidth={2}
+              className="opacity-0 transition-opacity group-focus-visible/qb:opacity-100"
+            />
             {corrected && (
               <circle cx={x} cy={y} r={16} fill="none" stroke={OK} strokeWidth={2} strokeDasharray="4 3" />
             )}
