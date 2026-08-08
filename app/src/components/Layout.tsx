@@ -15,6 +15,7 @@ import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
 import SoundToggle from '@/components/SoundToggle';
 import AITutorDrawer from '@/components/AITutorDrawer';
+import CommandPalette from '@/components/CommandPalette';
 import { FOUNDATION_STAGE_IDS } from '@/lib/learningRecord';
 
 const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }> = [
@@ -277,6 +278,7 @@ export default function Layout() {
       <UniversalExplainer />
       <ShareableScoreCard isOpen={shareOpen} onClose={() => setShareOpen(false)} />
       <AITutorDrawer isOpen={aiTutorOpen} onClose={() => setAiTutorOpen(false)} />
+      <CommandPalette />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
           <Logo />
