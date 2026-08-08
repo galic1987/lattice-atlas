@@ -39,7 +39,6 @@ import { useProgress } from '@/store/progress';
 import SelfCheck from '@/components/SelfCheck';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
-import { Intuition } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import TopicLensInsight from '@/components/TopicLensInsight';
 import Expandable3B1BCard from '@/components/Expandable3B1BCard';
@@ -986,7 +985,6 @@ function TopicDrawer({
               </button>
 
               <div className="mt-8 flex flex-col gap-8">
-                <Intuition topicId={topic.id} />
                 <TopicLensInsight topicId={topic.id} />
 
                 <DrawerSection>

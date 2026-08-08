@@ -21,6 +21,14 @@ export default function TopicLensInsight({ topicId }: { topicId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Vivid Mental Picture (if present) */}
+      {insight?.intuition && (
+        <div className="rounded-xl border border-plaquette/30 bg-plaquette/[0.06] p-4">
+          <p className="eyebrow mb-2 !text-plaquette">{'// THE MENTAL PICTURE'}</p>
+          <p className="leading-[1.7] text-text-hi text-xs">{insight.intuition}</p>
+        </div>
+      )}
+
       {/* Dynamic Cognitive Lens Card */}
       {data && (
         <motion.div
