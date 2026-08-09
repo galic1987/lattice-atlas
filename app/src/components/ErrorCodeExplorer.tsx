@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Binary, Zap, RotateCcw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Binary, Zap, RotateCcw, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import {
   hammingEncode,
   hammingDecode,
@@ -10,6 +10,15 @@ import {
   checkOverlapParity,
   CODE_ZOO,
 } from '@/lib/classicalCodes';
+import {
+  QUANTUM_CODES,
+  pauliOn,
+  pauliMultiply,
+  identityError,
+  syndromeOf,
+  type QuantumCode,
+  type PauliError,
+} from '@/lib/quantumCodes';
 
 const DATA = '#22D3EE'; // data bits (plaquette / cyan)
 const PARITY = '#8B5CF6'; // parity bits (star / violet)
@@ -341,6 +350,161 @@ function SteaneBuilder() {
   );
 }
 
+/* ---------------- quantum labs: inject Paulis, watch stabilizers ---------------- */
+
+const PAULI_CYCLE = ['I', 'X', 'Z', 'Y'] as const;
+type PauliLetter = (typeof PAULI_CYCLE)[number];
+
+const PAULI_COLOR: Record<PauliLetter, string> = {
+  I: '#3D5178',
+  X: ERR,
+  Z: PARITY,
+  Y: '#FBBF24', // magic / amber
+};
+
+function MixedStabRow({ stab, violated }: { stab: QuantumCode['stabilizers'][number]; violated: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-1.5 rounded px-1 py-0.5"
+      style={violated ? { background: ERR + '14' } : undefined}
+    >
+      <span className="w-12 shrink-0 font-mono text-[10px] text-text-low">{stab.label}</span>
+      {stab.x.map((xv, q) => {
+        const letter = xv && stab.z[q] ? 'Y' : xv ? 'X' : stab.z[q] ? 'Z' : '·';
+        const on = letter !== '·';
+        const color = letter === 'X' ? PARITY : letter === 'Z' ? DATA : '#FBBF24';
+        return (
+          <span
+            key={q}
+            className="flex h-6 w-6 items-center justify-center rounded font-mono text-[11px] font-bold"
+            style={{
+              color: on ? '#05080F' : '#3D5178',
+              background: on ? color : 'transparent',
+              border: `1px solid ${on ? color : '#22304d'}`,
+              outline: violated && on ? `1px solid ${ERR}` : undefined,
+            }}
+          >
+            {letter}
+          </span>
+        );
+      })}
+      <span className="ml-1 font-mono text-[10px]" style={{ color: violated ? ERR : OK }}>
+        {violated ? '−1' : '+1'}
+      </span>
+    </div>
+  );
+}
+
+function QuantumLab({ code }: { code: QuantumCode }) {
+  const [letters, setLetters] = useState<PauliLetter[]>(() => Array(code.n).fill('I'));
+
+  const error: PauliError = useMemo(
+    () =>
+      letters.reduce(
+        (acc, l, q) => (l === 'I' ? acc : pauliMultiply(acc, pauliOn(code.n, q, l))),
+        identityError(code.n),
+      ),
+    [letters, code.n],
+  );
+  const syn = useMemo(() => syndromeOf(code.stabilizers, error), [code, error]);
+  const correction = code.decode(syn);
+  const injected = letters.filter((l) => l !== 'I').length;
+  const cls = injected === 0 ? null : correction ? code.classify(error, correction) : 'uncorrected';
+
+  const cycle = (q: number) => {
+    const next = letters.slice();
+    next[q] = PAULI_CYCLE[(PAULI_CYCLE.indexOf(next[q]) + 1) % PAULI_CYCLE.length];
+    setLetters(next);
+  };
+  const reset = () => setLetters(Array(code.n).fill('I'));
+
+  const correctionText = (c: PauliError | null) => {
+    if (!c) return '';
+    const parts = c.x.map((xv, q) => {
+      const l = xv && c.z[q] ? 'Y' : xv ? 'X' : c.z[q] ? 'Z' : null;
+      return l ? `${l}${q + 1}` : null;
+    });
+    return parts.filter(Boolean).join(' ') || 'I';
+  };
+
+  const banner =
+    cls === null
+      ? { color: '#3D5178', text: 'No errors injected — the logical state is protected.' }
+      : cls === 'clean'
+        ? {
+            color: OK,
+            text: `Decoder applies ${correctionText(correction)} — error corrected, logical state intact.`,
+          }
+        : cls === 'logical'
+          ? {
+              color: '#FBBF24',
+              text: `Decoder applies ${correctionText(correction)}, but a logical operator slipped through — too many errors, the code was fooled.`,
+            }
+          : { color: ERR, text: 'Unknown syndrome — more errors than this code can decode.' };
+
+  return (
+    <div className="rounded-xl border border-ink-700 bg-ink-950 p-5">
+      <div className="flex items-center justify-between border-b border-ink-800 pb-3">
+        <span className="font-mono text-[11px] font-bold text-star">
+          {code.name} {code.notation} · corrects any 1 error
+        </span>
+        <button
+          type="button"
+          onClick={reset}
+          className="inline-flex items-center gap-1 rounded bg-ink-800 px-2 py-0.5 font-mono text-[10px] text-text-mid hover:text-text-hi"
+        >
+          <RotateCcw className="h-3 w-3" /> Reset
+        </button>
+      </div>
+
+      <p className="mt-3 font-mono text-[10px] text-text-low">
+        Click a qubit to inject an error (I → X → Z → Y):
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {letters.map((l, q) => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => cycle(q)}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border-2 font-mono text-sm font-bold transition-colors"
+            style={{
+              borderColor: l === 'I' ? '#22304d' : PAULI_COLOR[l],
+              color: l === 'I' ? '#3D5178' : '#05080F',
+              background: l === 'I' ? 'transparent' : PAULI_COLOR[l],
+            }}
+            aria-label={`Qubit ${q + 1}, error ${l} — click to change`}
+          >
+            {l === 'I' ? q + 1 : l}
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-4 font-mono text-[10px] uppercase text-text-low">Stabilizers (live eigenvalues):</p>
+      <div className="mt-1.5 space-y-1">
+        {code.stabilizers.map((s, i) => (
+          <MixedStabRow key={s.label} stab={s} violated={syn[i] === 1} />
+        ))}
+      </div>
+
+      <div
+        className="mt-4 rounded-lg border p-3 font-mono text-xs"
+        style={{ borderColor: banner.color, background: banner.color + '14' }}
+      >
+        <span className="flex items-center gap-1.5" style={{ color: banner.color }}>
+          {cls === 'clean' ? (
+            <ShieldCheck className="h-3.5 w-3.5" />
+          ) : cls === null ? (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          ) : (
+            <AlertTriangle className="h-3.5 w-3.5" />
+          )}
+          {banner.text}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- the explorer ---------------- */
 
 export default function ErrorCodeExplorer() {
@@ -360,7 +524,7 @@ export default function ErrorCodeExplorer() {
       </div>
 
       <div className="mt-5 flex items-center gap-2 font-mono text-[11px] text-text-low">
-        <Binary className="h-4 w-4 text-plaquette" /> Two real codes you can break by hand:
+        <Binary className="h-4 w-4 text-plaquette" /> Five real codes you can break by hand:
       </div>
 
       <div className="mt-3 grid gap-5 lg:grid-cols-2">
@@ -401,11 +565,29 @@ export default function ErrorCodeExplorer() {
         </div>
         <p className="mt-2 font-mono text-[10px] text-text-low">
           [n, k, d]: n physical bits/qubits, k logical, distance d (corrects ⌊(d−1)/2⌋ errors). Double brackets
-          [[…]] denote quantum codes. Classical rows are computed live above; quantum rows are reference values.
+          [[…]] denote quantum codes. Every row is computed live in the labs on this page.
         </p>
       </div>
 
       <SteaneBuilder />
+
+      {/* Quantum labs — exact stabilizer engines (scripts/check-codes.mjs proves them) */}
+      <div className="mt-6">
+        <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-star">
+          <Zap className="h-3.5 w-3.5" /> Quantum labs — inject Pauli errors, watch the stabilizers catch them
+        </div>
+        <p className="mt-2 text-xs leading-relaxed text-text-mid">
+          The three quantum codes from the zoo, live. Every syndrome and correction is exact symplectic
+          GF(2) algebra — the same math the surface code scales up — and an exhaustive proof script
+          (<span className="font-mono text-[11px] text-plaquette">npm run check-codes</span>) verifies that
+          every single-qubit error on every code decodes with zero logical damage.
+        </p>
+        <div className="mt-3 grid gap-5 lg:grid-cols-3">
+          {QUANTUM_CODES.map((c) => (
+            <QuantumLab key={c.id} code={c} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
