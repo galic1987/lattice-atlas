@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
+import SuperTLDR from '@/components/SuperTLDR';
 import { ALTITUDE_CONCEPTS } from '@/data/altitudes';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
@@ -44,6 +45,14 @@ export default function Altitudes() {
     <div className="bg-ink-900">
       <header className="lattice-bg">
         <div className="mx-auto max-w-4xl px-6 pb-10 pt-16 md:px-8">
+          <SuperTLDR
+            summary="Multi-age cognitive prism presenting quantum error correction across 5 distinct levels of detail (Story, Cause, Model, Formal, Verify)."
+            takeaways={[
+              'Story (~5 yrs): Tactile light-up tiles & physical metaphors.',
+              'Cause (~10 yrs) & Model (~15 yrs): Interactive dot-connecting & stabilizer matrix models.',
+              'Formal & Verify (20+ yrs): Rigorous math bounds (Λ), Stim circuit verification, and paper receipts.',
+            ]}
+          />
           <motion.p
             initial={reduce ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}

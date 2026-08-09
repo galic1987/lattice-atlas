@@ -6,6 +6,7 @@ import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { SURFACE_CODE_CAPSTONE_ID } from '@/lib/learningRecord';
 import { useProgress } from '@/store/progress';
+import SuperTLDR from '@/components/SuperTLDR';
 
 const MIN_TEACHBACK = 40;
 
@@ -99,6 +100,14 @@ export default function Capstone() {
     <div className="min-h-screen bg-ink-900 text-text-hi">
       <header className="lattice-bg border-b border-ink-600">
         <div className="mx-auto max-w-5xl px-6 pb-12 pt-20 md:px-8 md:pt-28">
+          <SuperTLDR
+            summary="Final synthesis capstone project testing model diagnosis, dual-depth teach-back explanations, and local learning record validation."
+            takeaways={[
+              'Diagnose syndrome pattern anticommutation rules on rotated surface code lattices.',
+              'Submit dual-depth teach-back explanations (5-yr physical metaphor + 20-yr formal math).',
+              'Generate verified local evidence records for full curriculum completion.',
+            ]}
+          />
           <motion.p
             initial={reduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}

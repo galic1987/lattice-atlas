@@ -13,6 +13,7 @@ import {
   Waves,
 } from 'lucide-react';
 import ConceptDepthLens from '@/components/ConceptDepthLens';
+import SuperTLDR from '@/components/SuperTLDR';
 import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
@@ -1234,6 +1235,14 @@ export default function FoundationsLab() {
 
       <section className="relative mx-auto grid max-w-6xl gap-12 px-6 pb-16 pt-20 md:px-8 md:pb-24 md:pt-28 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <motion.div initial={reduce ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduce ? 0 : 0.65, ease: EASE }}>
+          <SuperTLDR
+            summary="Master quantum fundamentals: from wave interference and superposition to Bloch sphere states and stabilizer measurement circuits."
+            takeaways={[
+              'Classical wave interference underpins quantum probability amplitudes.',
+              'Single-qubit states live on the 3D Bloch sphere, rotated via H, X, Z, S, and T gates.',
+              'Stabilizer check circuits measure multi-qubit Pauli parity without reading qubit states.',
+            ]}
+          />
           <p className="eyebrow">Foundation semester · module 01</p>
           <h1 className="mt-5 font-display text-5xl font-bold leading-[0.98] tracking-[-0.035em] text-text-hi md:text-7xl">
             Waves to <span className="text-gradient-cyan-violet">Qubits</span>

@@ -11,6 +11,7 @@ import {
   Sparkles,
   Terminal,
   Binary,
+  Shield,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -27,6 +28,7 @@ import CertificateGenerator from '@/components/CertificateGenerator';
 import ErrorCodeExplorer from '@/components/ErrorCodeExplorer';
 import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
 import StimDetectorGraphVisualizer from '@/components/StimDetectorGraphVisualizer';
+import StandardCodeZooStudio from '@/components/StandardCodeZooStudio';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
 
@@ -37,6 +39,7 @@ export type ToolTab =
   | 'circuit-composer'
   | 'executable-simulator'
   | 'stim-dem-graph'
+  | 'standard-code-zoo'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -95,6 +98,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Sparkles,
     description: 'Interactive Stim Detector Error Model (DEM) graph visualizer with live fault injection and MWPM matching.',
+  },
+  {
+    id: 'standard-code-zoo',
+    title: 'Standard Quantum Code Zoo Studio',
+    category: 'Simulation',
+    icon: Shield,
+    description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
   },
   {
     id: 'surgery-welder',
@@ -279,6 +289,12 @@ export default function LabWorkbenchHub() {
         {activeTab === 'stim-dem-graph' && (
           <div className="p-4">
             <StimDetectorGraphVisualizer />
+          </div>
+        )}
+
+        {activeTab === 'standard-code-zoo' && (
+          <div className="p-4">
+            <StandardCodeZooStudio />
           </div>
         )}
 

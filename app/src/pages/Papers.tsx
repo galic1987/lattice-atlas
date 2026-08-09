@@ -24,6 +24,7 @@ import {
 } from '@/data';
 import { useProgress } from '@/store/progress';
 import DifficultyMeter from '@/components/DifficultyMeter';
+import SuperTLDR from '@/components/SuperTLDR';
 import readingPromptsJson from '@/data/reading_prompts.json';
 
 const READING_PROMPTS = readingPromptsJson as Record<string, string[]>;
@@ -711,6 +712,14 @@ export default function Papers() {
         <div aria-hidden className="absolute inset-0 bg-ink-900/80" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-10 pt-32 md:px-8">
+          <SuperTLDR
+            summary="Annotated bibliography of 23 seminal quantum error correction papers with PDF-verified reading prompts."
+            takeaways={[
+              'Chronological timeline from Shor 1995 & Kitaev 1997 to Willow 2024 & TopoLS 2025.',
+              'Each paper includes key contributions, why it matters, and PDF-verified technical notes.',
+              'Direct arXiv links and prerequisite topic mappings for deep academic research.',
+            ]}
+          />
           <p className="eyebrow text-star">{'// THE CANON'}</p>
           <h1 className="mt-4 font-display text-display-lg text-text-hi max-md:text-[36px]">
             {headlineWords.map((word, i) => (
@@ -726,6 +735,9 @@ export default function Papers() {
               </motion.span>
             ))}
           </h1>
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
+            <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>The 23 key papers of the field, in order, with plain-English summaries.
+          </p>
           <motion.p
             initial={reduceMotion ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
