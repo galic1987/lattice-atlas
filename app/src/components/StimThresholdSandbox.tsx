@@ -1,171 +1,243 @@
-import { useState, useMemo } from 'react';
-import { Activity, Play, TrendingDown } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Activity, Play, Pause, RotateCcw, TrendingDown } from 'lucide-react';
 import { sound } from '@/lib/sound';
+import type { McCell, McCommand, McProgress } from '@/lib/threshold.worker';
 
-const DISTANCES = [3, 5, 7, 9, 11];
-const P_VALUES = [0.001, 0.002, 0.003, 0.005, 0.008, 0.01, 0.015, 0.02, 0.03];
-const P_TH = 0.01; // 1% threshold
+// Distances kept to 3/5/7: the exact TypeScript matching decoder stays
+// genuinely real-time here. Physical error rates bracket the crossing (the
+// threshold emerges from the data — it is not hard-coded).
+const DISTANCES = [3, 5, 7];
+const P_VALUES = [0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17];
+const MAX_TRIALS = 40000;
+const MIN_PLOT_TRIALS = 200; // don't plot a cell until it has enough samples
 
-const DIST_COLORS: { [key: number]: string } = {
-  3: '#F43F5E',
-  5: '#F5B83D',
-  7: '#22D3EE',
-  9: '#8B5CF6',
-  11: '#10B981',
+const DIST_COLORS: Record<number, string> = { 3: '#F43F5E', 5: '#F5B83D', 7: '#22D3EE' };
+
+const PX_MIN = Math.log10(0.05);
+const PX_MAX = Math.log10(0.17);
+const PY_MIN = Math.log10(1e-4);
+const PY_MAX = Math.log10(0.5);
+const xOf = (p: number) => 50 + ((Math.log10(p) - PX_MIN) / (PX_MAX - PX_MIN)) * 320;
+const yOf = (pL: number) => {
+  const c = Math.min(0.5, Math.max(1e-4, pL));
+  return 250 - ((Math.log10(c) - PY_MIN) / (PY_MAX - PY_MIN)) * 220;
 };
 
 export default function StimThresholdSandbox() {
-  const [selectedP, setSelectedP] = useState<number>(0.005);
-  const [isSampling, setIsSampling] = useState<boolean>(false);
+  const workerRef = useRef<Worker | null>(null);
+  const [cells, setCells] = useState<McCell[]>([]);
+  const [tps, setTps] = useState(0);
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Compute log-log threshold curve data points
-  const thresholdData = useMemo(() => {
-    return DISTANCES.map((d) => {
-      const points = P_VALUES.map((p) => {
-        // P_L ~ 0.1 * (p / p_th)^((d + 1)/2)
-        const exp = (d + 1) / 2;
-        let pL = 0.08 * Math.pow(p / P_TH, exp);
-        pL = Math.min(0.5, Math.max(1e-6, pL));
-        return { p, pL };
-      });
-      return { d, points };
-    });
+  useEffect(() => {
+    // Terminate the worker on unmount so no background sampling leaks.
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
   }, []);
 
-  const runSimulation = () => {
-    setIsSampling(true);
-    sound.playSyndromeTick();
-    setTimeout(() => {
-      setIsSampling(false);
-      sound.playDecoderLock();
-    }, 400);
+  const ensureWorker = (): Worker | null => {
+    if (workerRef.current) return workerRef.current;
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('../lib/threshold.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      setError('The Monte Carlo worker could not start in this browser.');
+      return null;
+    }
+    worker.onmessage = (e: MessageEvent<McProgress>) => {
+      setError(null);
+      setCells(e.data.cells);
+      setTps(e.data.trialsPerSec);
+      if (e.data.done) {
+        setDone(true);
+        setRunning(false);
+      }
+    };
+    worker.onerror = (event) => {
+      event.preventDefault();
+      setError(event.message || 'The Monte Carlo worker stopped unexpectedly.');
+      setRunning(false);
+    };
+    workerRef.current = worker;
+    return worker;
   };
 
+  const toggle = () => {
+    const worker = ensureWorker();
+    if (!worker) return;
+    if (running) {
+      worker.postMessage({ cmd: 'pause' } satisfies McCommand);
+      setRunning(false);
+      return;
+    }
+    sound.playDecoderLock();
+    if (cells.length > 0 && !done) {
+      worker.postMessage({ cmd: 'resume' } satisfies McCommand);
+    } else {
+      worker.postMessage({
+        cmd: 'start',
+        distances: DISTANCES,
+        pValues: P_VALUES,
+        maxTrials: MAX_TRIALS,
+      } satisfies McCommand);
+      setDone(false);
+    }
+    setError(null);
+    setRunning(true);
+  };
+
+  const reset = () => {
+    workerRef.current?.postMessage({ cmd: 'pause' } satisfies McCommand);
+    setCells([]);
+    setRunning(false);
+    setDone(false);
+    setTps(0);
+  };
+
+  const totalTrials = cells.reduce((a, c) => a + c.trials, 0);
+
+  const curves = useMemo(() => {
+    return DISTANCES.map((d) => {
+      const points = cells
+        .filter((c) => c.d === d && c.trials >= MIN_PLOT_TRIALS)
+        .sort((a, b) => a.p - b.p)
+        .map((c) => ({ p: c.p, pL: c.fails / c.trials, trials: c.trials }));
+      return { d, points };
+    });
+  }, [cells]);
+
   return (
-    <div className="rounded-2xl border border-ink-600 bg-ink-850 p-6 shadow-2xl">
+    <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink-700 pb-5">
         <div>
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-plaquette" />
-            <h3 className="font-display text-xl font-bold text-text-hi">
-              Real-Time Stim Threshold Sandbox (P_L vs p)
-            </h3>
+            <h3 className="font-display text-xl font-bold text-text-hi">Live Monte Carlo Threshold Sandbox (Pₗ vs p)</h3>
+            <span className="rounded bg-magic/20 px-2 py-0.5 font-mono text-[10px] font-bold text-magic">REAL · TS DECODER</span>
           </div>
-          <p className="mt-1 text-sm text-text-mid">
-            Simulates 100,000+ Monte Carlo trials/sec across code distances d = 3, 5, 7, 9, 11 to locate the p_th ≈ 1.0% threshold.
+          <p className="mt-1 max-w-2xl text-sm text-text-mid">
+            A genuine Monte Carlo sweep: each trial samples depolarizing noise and runs this atlas’s
+            TypeScript matching decoder in a Web Worker — <strong>not Stim, not WASM</strong>. The rate below
+            is your machine’s measured throughput; the d = 3, 5, 7 curves sharpen live and cross at the threshold.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={runSimulation}
-          disabled={isSampling}
-          className="btn-primary"
-        >
-          <Play className="h-4 w-4" /> {isSampling ? 'Sampling 100k Trials...' : 'Run 100k Stim Trials'}
-        </button>
+        <div className="flex gap-2">
+          <button type="button" onClick={toggle} className="btn-primary">
+            {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            {running ? 'Pause' : cells.length > 0 && !done ? 'Resume' : 'Run Monte Carlo'}
+          </button>
+          <button
+            type="button"
+            onClick={reset}
+            className="rounded-lg border border-ink-700 bg-ink-950 p-2 text-text-low hover:text-text-hi"
+            title="Reset"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        {/* Log-Log SVG Threshold Plot */}
-        <div className="relative flex flex-col items-center justify-center rounded-xl border border-ink-600 bg-ink-900/90 p-4 min-h-[380px]">
-          <div className="absolute top-4 left-4 font-mono text-xs text-text-low">
-            <span className="text-text-hi font-bold">Logical Error Rate P_L vs Physical Error p</span> (Log-Log Scale)
+      {/* Live measured stats */}
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono text-xs">
+        <Stat label="Measured rate" value={tps > 0 ? `${tps.toLocaleString()} trials/s` : '—'} />
+        <Stat label="Total trials" value={totalTrials.toLocaleString()} />
+        <Stat label="Per (d,p) cap" value={MAX_TRIALS.toLocaleString()} />
+        <Stat label="Status" value={done ? 'converged' : running ? 'sampling…' : cells.length ? 'paused' : 'idle'} />
+      </div>
+
+      {error && (
+        <div className="mt-3 rounded-lg border border-syndrome/40 bg-syndrome/10 p-2.5 font-mono text-xs text-syndrome">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-5 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        {/* Live log-log plot */}
+        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <div className="font-mono text-[11px] text-text-low">
+            <span className="font-bold text-text-hi">Logical error Pₗ vs physical error p</span> · log–log
           </div>
-
-          <div className="relative w-full max-w-[420px] aspect-[4/3] my-4">
-            <svg viewBox="0 0 400 300" className="w-full h-full">
-              {/* Axes */}
-              <line x1="50" y1="260" x2="380" y2="260" stroke="#3D5178" strokeWidth="1.5" />
-              <line x1="50" y1="20" x2="50" y2="260" stroke="#3D5178" strokeWidth="1.5" />
-
-              {/* Threshold Vertical Line at p_th = 0.01 */}
-              <line x1="215" y1="20" x2="215" y2="260" stroke="#F5B83D" strokeWidth="1.5" strokeDasharray="4 4" />
-              <text x="215" y="15" textAnchor="middle" fill="#F5B83D" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                p_th ≈ 1.0%
+          <svg viewBox="0 0 400 300" className="mt-2 w-full">
+            {/* axes */}
+            <line x1="50" y1="250" x2="380" y2="250" stroke="#3D5178" strokeWidth="1.5" />
+            <line x1="50" y1="30" x2="50" y2="250" stroke="#3D5178" strokeWidth="1.5" />
+            {/* p ticks */}
+            {P_VALUES.map((p) => (
+              <text key={p} x={xOf(p)} y={264} textAnchor="middle" fill="#5B6a8c" fontSize="8" fontFamily="monospace">
+                {(p * 100).toFixed(0)}%
               </text>
+            ))}
+            {/* Pl gridlines */}
+            {[0.1, 0.01, 0.001].map((g) => (
+              <g key={g}>
+                <line x1="50" y1={yOf(g)} x2="380" y2={yOf(g)} stroke="#1c2842" strokeWidth="1" />
+                <text x="46" y={yOf(g) + 3} textAnchor="end" fill="#5B6a8c" fontSize="8" fontFamily="monospace">
+                  {g}
+                </text>
+              </g>
+            ))}
 
-              {/* Plot Curves for d = 3, 5, 7, 9, 11 */}
-              {thresholdData.map(({ d, points }) => {
-                const pathD = points
-                  .map((pt, idx) => {
-                    const x = 50 + ((Math.log10(pt.p) - Math.log10(0.001)) / (Math.log10(0.03) - Math.log10(0.001))) * 320;
-                    const y = 250 - ((Math.log10(pt.pL) - Math.log10(1e-4)) / (Math.log10(0.5) - Math.log10(1e-4))) * 220;
-                    return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
-                  })
-                  .join(' ');
+            {curves.map(({ d, points }) => {
+              if (points.length === 0) return null;
+              const path = points.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${xOf(pt.p)} ${yOf(pt.pL)}`).join(' ');
+              return (
+                <g key={d}>
+                  <path d={path} fill="none" stroke={DIST_COLORS[d]} strokeWidth="2.5" strokeOpacity="0.9" />
+                  {points.map((pt) => (
+                    <circle key={pt.p} cx={xOf(pt.p)} cy={yOf(pt.pL)} r="2.5" fill={DIST_COLORS[d]} />
+                  ))}
+                </g>
+              );
+            })}
 
-                return (
-                  <path
-                    key={d}
-                    d={pathD}
-                    fill="none"
-                    stroke={DIST_COLORS[d]}
-                    strokeWidth="2.5"
-                    strokeOpacity="0.9"
-                  />
-                );
-              })}
-            </svg>
-          </div>
+            {cells.length === 0 && (
+              <text x="215" y="145" textAnchor="middle" fill="#5B6a8c" fontSize="11" fontFamily="monospace">
+                Press “Run Monte Carlo” to sample live
+              </text>
+            )}
+          </svg>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs">
+          <div className="mt-1 flex flex-wrap justify-center gap-4 font-mono text-xs">
             {DISTANCES.map((d) => (
               <span key={d} className="flex items-center gap-1.5" style={{ color: DIST_COLORS[d] }}>
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: DIST_COLORS[d] }} />
-                d={d}
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: DIST_COLORS[d] }} /> d={d}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Controls & Threshold Theorem Insights */}
+        {/* Reasoning */}
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
-            <h4 className="eyebrow mb-3 !text-plaquette">// PHYSICAL NOISE CONTROLLER</h4>
-
-            <div className="space-y-4 font-mono text-xs">
-              <div>
-                <div className="flex justify-between text-text-mid mb-1">
-                  <span>Physical Error Rate (p):</span>
-                  <span className="text-text-hi font-bold">{(selectedP * 100).toFixed(2)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.001"
-                  max="0.02"
-                  step="0.001"
-                  value={selectedP}
-                  onChange={(e) => setSelectedP(parseFloat(e.target.value))}
-                  className="w-full accent-plaquette"
-                />
-              </div>
-
-              <div className="rounded-lg bg-ink-900 p-3 border border-ink-700">
-                <div className="text-[11px] text-text-low">Threshold Regime Status:</div>
-                <div className="mt-1 font-bold text-sm">
-                  {selectedP < P_TH ? (
-                    <span className="text-stabilizer flex items-center gap-1.5">
-                      <TrendingDown className="h-4 w-4" /> Below Threshold (p &lt; p_th) — Scaling d Suppresses Errors!
-                    </span>
-                  ) : (
-                    <span className="text-rose-400">
-                      Above Threshold (p &gt; p_th) — Larger d Increases Errors!
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-ink-600 bg-ink-800 p-5 font-mono text-xs">
-            <h4 className="eyebrow mb-2 !text-stabilizer">// THRESHOLD THEOREM REASONING</h4>
-            <p className="text-text-mid leading-relaxed font-sans text-xs">
-              When physical gate noise p &lt; p_th ≈ 1%, increasing code distance d exponentially suppresses logical errors. Above threshold, error correction fails.
+          <div className="rounded-xl border border-ink-700 bg-ink-950 p-5">
+            <h4 className="eyebrow mb-2 !text-stabilizer">// READING THE CROSSING</h4>
+            <p className="text-xs leading-relaxed text-text-mid">
+              The point where the d = 3, 5, 7 curves meet is the <strong>threshold</strong> pₜₕ. To its left
+              (p &lt; pₜₕ) a larger code distance drives Pₗ <span className="text-stabilizer inline-flex items-center gap-1">down<TrendingDown className="h-3 w-3" /></span>
+              exponentially; to its right, larger d makes things worse. You’re reading it straight off live
+              sampled data — nothing here is a fitted or hard-coded curve.
             </p>
+          </div>
+          <div className="rounded-xl border border-ink-700 bg-ink-950 p-4 font-mono text-[11px] text-text-low leading-relaxed">
+            This is the code-capacity model (per-qubit depolarizing + one round of perfect syndrome extraction),
+            so the crossing sits higher than a circuit-level threshold. It is the same real decoder used across
+            the Lab, just swept live over (d, p).
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-ink-800 bg-ink-950 p-2.5">
+      <span className="block text-[10px] uppercase text-text-low">{label}</span>
+      <span className="mt-0.5 block font-bold text-text-hi">{value}</span>
     </div>
   );
 }

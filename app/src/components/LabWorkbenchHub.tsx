@@ -138,10 +138,10 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   },
   {
     id: 'stim-threshold',
-    title: 'Real-Time Stim Threshold Sandbox',
+    title: 'Live Monte Carlo Threshold Sandbox',
     category: 'Simulation',
     icon: Terminal,
-    description: 'Real-time 100k+ trials/sec Stim threshold curve plotter (P_L vs p) for d=3, 5, 7, 9, 11.',
+    description: 'A real Web-Worker Monte Carlo that samples depolarizing noise through the TS matching decoder and plots live Pₗ-vs-p threshold curves for d=3,5,7 (measured throughput shown — not Stim).',
   },
   {
     id: 'surgery-welder',
