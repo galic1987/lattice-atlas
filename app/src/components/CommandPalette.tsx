@@ -56,6 +56,7 @@ export default function CommandPalette() {
     { id: 'c13', title: 'Manim Mathematical Animation Gallery', category: 'Tool', url: '/lab?tab=manim-gallery' },
     { id: 'c14', title: 'Full-System FTQC Hardware Compiler (RSA-2048 & FeMoco)', category: 'Tool', url: '/lab?tab=ftqc-compiler' },
     { id: 'c15', title: 'Real-Time Stim Threshold Sandbox (P_L vs p Plot)', category: 'Tool', url: '/lab?tab=stim-threshold' },
+    { id: 'c16', title: 'Interactive Visual Experiments Studio (Anyons, Color Codes, Duality)', category: 'Tool', url: '/lab?tab=visual-experiments' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
