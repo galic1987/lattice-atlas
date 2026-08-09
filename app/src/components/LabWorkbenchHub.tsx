@@ -12,6 +12,7 @@ import {
   Terminal,
   Binary,
   Shield,
+  Video,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -37,6 +38,9 @@ const ManimExplainerGallery = lazy(() => import('@/components/ManimExplainerGall
 const FtqcHardwareCompilerStudio = lazy(() => import('@/components/FtqcHardwareCompilerStudio'));
 const StimThresholdSandbox = lazy(() => import('@/components/StimThresholdSandbox'));
 const VisualExperimentsStudio = lazy(() => import('@/components/VisualExperimentsStudio'));
+const QftQuantumStateVisualizer = lazy(() => import('@/components/QftQuantumStateVisualizer'));
+const HardwareChipBenchmarkMatrix = lazy(() => import('@/components/HardwareChipBenchmarkMatrix'));
+const MultiAgeCognitivePrism = lazy(() => import('@/components/MultiAgeCognitivePrism'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -48,6 +52,9 @@ export type ToolTab =
   | 'standard-code-zoo'
   | 'qldpc-tanner-graph'
   | 'visual-experiments'
+  | 'qft-visualizer'
+  | 'chip-benchmarks'
+  | 'cognitive-prism'
   | 'manim-gallery'
   | 'ftqc-compiler'
   | 'stim-threshold'
@@ -130,6 +137,27 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Foundations',
     icon: Sparkles,
     description: 'Fibonacci anyon braiding, 3D color code gates, e-m duality domain walls, & fault emitter machine.',
+  },
+  {
+    id: 'qft-visualizer',
+    title: 'Quantum Field Theory (QFT) & Veo 3 Studio',
+    category: 'Physics',
+    icon: Video,
+    description: 'QFT field excitations, vacuum fluctuations, wavepacket collapse, & Google Veo 3 AI prompts.',
+  },
+  {
+    id: 'chip-benchmarks',
+    title: 'TQEC Hardware Chip Benchmark Matrix',
+    category: 'Engineering',
+    icon: Cpu,
+    description: 'Google Willow, IBM Heron, Quantinuum H2, & QuEra Aquila interactive radar benchmark matrix.',
+  },
+  {
+    id: 'cognitive-prism',
+    title: 'Multi-Age & Multi-Perspective Cognitive Prism',
+    category: 'Foundations',
+    icon: Layers,
+    description: '5 audience levels (ELI5 to PhD) & 4 visual angles (everyday analogies, topology, math, & circuits).',
   },
   {
     id: 'manim-gallery',
@@ -362,6 +390,30 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Visual Experiments Studio...</div>}>
               <VisualExperimentsStudio />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'qft-visualizer' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading QFT & Veo 3 Studio...</div>}>
+              <QftQuantumStateVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'chip-benchmarks' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Hardware Chip Benchmark Matrix...</div>}>
+              <HardwareChipBenchmarkMatrix />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'cognitive-prism' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Multi-Age Cognitive Prism...</div>}>
+              <MultiAgeCognitivePrism />
             </Suspense>
           </div>
         )}

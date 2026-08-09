@@ -57,6 +57,9 @@ export default function CommandPalette() {
     { id: 'c14', title: 'Full-System FTQC Hardware Compiler (RSA-2048 & FeMoco)', category: 'Tool', url: '/lab?tab=ftqc-compiler' },
     { id: 'c15', title: 'Real-Time Stim Threshold Sandbox (P_L vs p Plot)', category: 'Tool', url: '/lab?tab=stim-threshold' },
     { id: 'c16', title: 'Interactive Visual Experiments Studio (Anyons, Color Codes, Duality)', category: 'Tool', url: '/lab?tab=visual-experiments' },
+    { id: 'c17', title: 'Quantum Field Theory (QFT) & Google Veo 3 AI Studio', category: 'Tool', url: '/lab?tab=qft-visualizer' },
+    { id: 'c18', title: 'TQEC Hardware Chip Benchmark Matrix (Willow, Heron, H2, Aquila)', category: 'Tool', url: '/lab?tab=chip-benchmarks' },
+    { id: 'c19', title: 'Multi-Age & Multi-Perspective Cognitive Prism (5 Levels, 4 Angles)', category: 'Tool', url: '/lab?tab=cognitive-prism' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
