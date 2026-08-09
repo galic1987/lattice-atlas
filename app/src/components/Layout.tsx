@@ -16,6 +16,7 @@ import ShareableScoreCard from '@/components/ShareableScoreCard';
 import SoundToggle from '@/components/SoundToggle';
 import AITutorDrawer from '@/components/AITutorDrawer';
 import CommandPalette from '@/components/CommandPalette';
+import SuperTLDR from '@/components/SuperTLDR';
 import { FOUNDATION_STAGE_IDS } from '@/lib/learningRecord';
 
 const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }> = [
@@ -315,6 +316,7 @@ export default function Layout() {
       />
 
       <main ref={mainRef} id="main-content" tabIndex={-1} className="flex-1 pt-16 outline-none">
+        <SuperTLDR />
         <Outlet />
       </main>
 
