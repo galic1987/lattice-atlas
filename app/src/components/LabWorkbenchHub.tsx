@@ -10,6 +10,7 @@ import {
   Zap,
   Sparkles,
   Terminal,
+  Binary,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -23,12 +24,14 @@ import QECOverheadCalculator from '@/components/QECOverheadCalculator';
 import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
 import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
 import CertificateGenerator from '@/components/CertificateGenerator';
+import ErrorCodeExplorer from '@/components/ErrorCodeExplorer';
 import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
 import StimDetectorGraphVisualizer from '@/components/StimDetectorGraphVisualizer';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
 
 export type ToolTab =
+  | 'code-zoo'
   | 'surface-3d'
   | 'braid-3d'
   | 'circuit-composer'
@@ -45,12 +48,19 @@ export type ToolTab =
 export interface ToolMeta {
   id: ToolTab;
   title: string;
-  category: 'Simulation' | 'Topology' | 'Physics' | 'Engineering' | 'Mastery';
+  category: 'Foundations' | 'Simulation' | 'Topology' | 'Physics' | 'Engineering' | 'Mastery';
   icon: LucideIcon;
   description: string;
 }
 
 const WORKBENCH_TOOLS: ToolMeta[] = [
+  {
+    id: 'code-zoo',
+    title: 'Error-Correcting Code Explorer',
+    category: 'Foundations',
+    icon: Binary,
+    description: 'The classical roots: break real Repetition & Hamming[7,4] codes by hand (exact GF(2)), and see how they lead to Shor, Steane, and the surface code.',
+  },
   {
     id: 'surface-3d',
     title: 'Rotated Surface Code 2D/3D',
@@ -141,7 +151,7 @@ export default function LabWorkbenchHub() {
   const [activeTab, setActiveTab] = useState<ToolTab>('surface-3d');
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  const categories = ['All', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery'];
+  const categories = ['All', 'Foundations', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery'];
 
   const defaultLattice = useMemo(() => buildLattice(3), []);
   const defaultErrors = useMemo<Pauli[]>(() => new Array(defaultLattice.n).fill(0), [defaultLattice]);
@@ -168,7 +178,7 @@ export default function LabWorkbenchHub() {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// NON-LINEAR LAB WORKBENCH</span>
-              <span className="rounded bg-plaquette/20 px-2 py-0.5 font-mono text-[10px] text-plaquette font-bold">10 INTERACTIVE TOOLS</span>
+              <span className="rounded bg-plaquette/20 px-2 py-0.5 font-mono text-[10px] text-plaquette font-bold">{WORKBENCH_TOOLS.length} INTERACTIVE TOOLS</span>
             </div>
             <h2 className="font-display text-2xl font-bold text-text-hi">TQEC Exploration Workbench</h2>
           </div>
@@ -230,6 +240,12 @@ export default function LabWorkbenchHub() {
 
       {/* Active Workspace Viewport */}
       <div className="rounded-2xl border border-ink-700 bg-ink-950 p-2 shadow-2xl">
+        {activeTab === 'code-zoo' && (
+          <div className="p-4">
+            <ErrorCodeExplorer />
+          </div>
+        )}
+
         {activeTab === 'surface-3d' && (
           <div className="p-4">
             <SpacetimeView3D
