@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import {
   Layers,
   Cpu,
@@ -26,11 +26,12 @@ import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
 import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
 import CertificateGenerator from '@/components/CertificateGenerator';
 import ErrorCodeExplorer from '@/components/ErrorCodeExplorer';
-import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
-import StimDetectorGraphVisualizer from '@/components/StimDetectorGraphVisualizer';
-import StandardCodeZooStudio from '@/components/StandardCodeZooStudio';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
+
+const ExecutableSimulatorStudio = lazy(() => import('@/components/ExecutableSimulatorStudio'));
+const StimDetectorGraphVisualizer = lazy(() => import('@/components/StimDetectorGraphVisualizer'));
+const StandardCodeZooStudio = lazy(() => import('@/components/StandardCodeZooStudio'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -282,19 +283,25 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'executable-simulator' && (
           <div className="p-4">
-            <ExecutableSimulatorStudio />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Executable Simulator Studio...</div>}>
+              <ExecutableSimulatorStudio />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'stim-dem-graph' && (
           <div className="p-4">
-            <StimDetectorGraphVisualizer />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
+              <StimDetectorGraphVisualizer />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'standard-code-zoo' && (
           <div className="p-4">
-            <StandardCodeZooStudio />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Standard Quantum Code Zoo Studio...</div>}>
+              <StandardCodeZooStudio />
+            </Suspense>
           </div>
         )}
 
