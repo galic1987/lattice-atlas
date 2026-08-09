@@ -39,46 +39,210 @@ const DEFAULT_FAULTS: FaultEdge[] = [
   { id: 'F6', from: 'D4', to: 'D5', weight: 1.2, errorType: 'Z', active: false },
 ];
 
+// Virtual node used for boundary (half) edges that touch only one real detector.
+const BOUNDARY = 'BOUNDARY';
+
+interface Graph {
+  nodes: string[];
+  idx: Map<string, number>;
+  dist: number[][];
+  next: number[][];
+  hasBoundary: boolean;
+}
+
+interface MatchPair {
+  a: string;
+  b: string;
+  weight: number;
+  path: string[];
+}
+
+type Decoding =
+  | { matched: true; pairs: MatchPair[]; totalWeight: number }
+  | { matched: false }
+  | null;
+
+// A Stim DEM edge weight is w = ln((1-p)/p); invert it to recover the physical
+// error probability of that edge so we can Monte-Carlo sample the real model.
+function edgeProbability(weight: number): number {
+  return 1 / (1 + Math.exp(weight));
+}
+
+// Toggling an edge flips the parity (XOR) of its two incident detectors.
+function computeFired(faults: FaultEdge[]): Set<string> {
+  const fired = new Set<string>();
+  faults.forEach((f) => {
+    if (!f.active) return;
+    [f.from, f.to].forEach((id) => {
+      if (fired.has(id)) fired.delete(id);
+      else fired.add(id);
+    });
+  });
+  return fired;
+}
+
+// Build a weighted graph from the DEM edges and compute all-pairs shortest-path
+// distances with Floyd-Warshall (edge weights are the DEM weights).
+function buildGraph(detectors: DetectorNode[], faults: FaultEdge[]): Graph {
+  const detectorIds = detectors.map((d) => d.id);
+  const idSet = new Set(detectorIds);
+
+  let hasBoundary = false;
+  const edges = faults.map((f) => {
+    const from = idSet.has(f.from) ? f.from : BOUNDARY;
+    const to = idSet.has(f.to) ? f.to : BOUNDARY;
+    if (from === BOUNDARY || to === BOUNDARY) hasBoundary = true;
+    return { from, to, weight: f.weight };
+  });
+
+  const nodes = hasBoundary ? [...detectorIds, BOUNDARY] : [...detectorIds];
+  const idx = new Map(nodes.map((n, i) => [n, i]));
+  const N = nodes.length;
+
+  const dist: number[][] = Array.from({ length: N }, () => Array(N).fill(Infinity));
+  const next: number[][] = Array.from({ length: N }, () => Array(N).fill(-1));
+  for (let i = 0; i < N; i++) {
+    dist[i][i] = 0;
+    next[i][i] = i;
+  }
+
+  edges.forEach((e) => {
+    const a = idx.get(e.from);
+    const b = idx.get(e.to);
+    if (a === undefined || b === undefined) return;
+    if (e.weight < dist[a][b]) {
+      dist[a][b] = e.weight;
+      dist[b][a] = e.weight;
+      next[a][b] = b;
+      next[b][a] = a;
+    }
+  });
+
+  for (let k = 0; k < N; k++) {
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        if (dist[i][k] + dist[k][j] < dist[i][j]) {
+          dist[i][j] = dist[i][k] + dist[k][j];
+          next[i][j] = next[i][k];
+        }
+      }
+    }
+  }
+
+  return { nodes, idx, dist, next, hasBoundary };
+}
+
+// Reconstruct the actual shortest-path node sequence between two nodes.
+function pathBetween(graph: Graph, a: string, b: string): string[] {
+  const { idx, next, nodes } = graph;
+  const ai = idx.get(a);
+  const bi = idx.get(b);
+  if (ai === undefined || bi === undefined || next[ai][bi] === -1) return [a, b];
+  const path = [a];
+  let cur = ai;
+  let guard = 0;
+  while (cur !== bi && guard++ <= nodes.length) {
+    cur = next[cur][bi];
+    if (cur === -1) break;
+    path.push(nodes[cur]);
+  }
+  return path;
+}
+
+// Exact minimum-weight perfect matching over the fired detectors. Pairs are
+// scored by shortest-path distance; when boundary edges exist a detector may
+// instead match the virtual boundary node (required when the count is odd).
+// This is an exact recursive search (memoized) — correct at this small size.
+function minWeightMatching(
+  fired: string[],
+  graph: Graph
+): { cost: number; pairs: { a: string; b: string; weight: number }[] } | null {
+  const { dist, idx, hasBoundary } = graph;
+  const memo = new Map<string, { cost: number; pairs: { a: string; b: string; weight: number }[] } | null>();
+
+  const solve = (
+    rem: string[]
+  ): { cost: number; pairs: { a: string; b: string; weight: number }[] } | null => {
+    if (rem.length === 0) return { cost: 0, pairs: [] };
+    const key = rem.join(',');
+    const cached = memo.get(key);
+    if (cached !== undefined) return cached;
+
+    const first = rem[0];
+    const rest = rem.slice(1);
+    let best: { cost: number; pairs: { a: string; b: string; weight: number }[] } | null = null;
+
+    for (let i = 0; i < rest.length; i++) {
+      const other = rest[i];
+      const d = dist[idx.get(first)!][idx.get(other)!];
+      if (!isFinite(d)) continue;
+      const sub = solve(rest.filter((_, j) => j !== i));
+      if (sub === null) continue;
+      const total = d + sub.cost;
+      if (best === null || total < best.cost) {
+        best = { cost: total, pairs: [{ a: first, b: other, weight: d }, ...sub.pairs] };
+      }
+    }
+
+    if (hasBoundary) {
+      const d = dist[idx.get(first)!][idx.get(BOUNDARY)!];
+      if (isFinite(d)) {
+        const sub = solve(rest);
+        if (sub !== null) {
+          const total = d + sub.cost;
+          if (best === null || total < best.cost) {
+            best = { cost: total, pairs: [{ a: first, b: BOUNDARY, weight: d }, ...sub.pairs] };
+          }
+        }
+      }
+    }
+
+    memo.set(key, best);
+    return best;
+  };
+
+  return solve(fired);
+}
+
 export default function StimDetectorGraphVisualizer() {
   const [detectors, setDetectors] = useState<DetectorNode[]>(DEFAULT_DETECTORS);
   const [faults, setFaults] = useState<FaultEdge[]>(DEFAULT_FAULTS);
   const [activeFaultId, setActiveFaultId] = useState<string | null>(null);
-  const [decodingPath, setDecodingPath] = useState<string[]>([]);
+  const [decoding, setDecoding] = useState<Decoding>(null);
+
+  const graph = useMemo(() => buildGraph(detectors, faults), [detectors, faults]);
+
+  const computeDecoding = (g: Graph, firedIds: Set<string>) => {
+    const fired = detectors.filter((d) => firedIds.has(d.id)).map((d) => d.id);
+    if (fired.length === 0) {
+      setDecoding(null);
+      return;
+    }
+    const result = minWeightMatching(fired, g);
+    if (result === null) {
+      setDecoding({ matched: false });
+      return;
+    }
+    const pairs: MatchPair[] = result.pairs.map((p) => ({
+      ...p,
+      path: pathBetween(g, p.a, p.b),
+    }));
+    setDecoding({ matched: true, pairs, totalWeight: result.cost });
+  };
 
   const injectRandomNoise = () => {
     sound.playSyndromeTick();
+    // Genuine Monte Carlo draw of the DEM: each edge fires with its own physical
+    // probability derived from the edge weight (p = 1 / (1 + e^w)).
     const newFaults = faults.map((f) => ({
       ...f,
-      active: Math.random() < 0.35,
+      active: Math.random() < edgeProbability(f.weight),
     }));
 
-    // Recompute detector fires (odd parity of incident active faults)
-    const firedIds = new Set<string>();
-    newFaults.forEach((f) => {
-      if (f.active) {
-        if (firedIds.has(f.from)) firedIds.delete(f.from);
-        else firedIds.add(f.from);
-
-        if (firedIds.has(f.to)) firedIds.delete(f.to);
-        else firedIds.add(f.to);
-      }
-    });
-
+    const firedIds = computeFired(newFaults);
     setFaults(newFaults);
-    setDetectors((prev) =>
-      prev.map((d) => ({
-        ...d,
-        fired: firedIds.has(d.id),
-      }))
-    );
-
-    // MWPM pairing
-    const firedArray = Array.from(firedIds);
-    if (firedArray.length >= 2) {
-      setDecodingPath([firedArray[0], firedArray[1]]);
-    } else {
-      setDecodingPath([]);
-    }
+    setDetectors((prev) => prev.map((d) => ({ ...d, fired: firedIds.has(d.id) })));
+    computeDecoding(graph, firedIds);
   };
 
   const resetGraph = () => {
@@ -86,38 +250,20 @@ export default function StimDetectorGraphVisualizer() {
     setDetectors(DEFAULT_DETECTORS);
     setFaults(DEFAULT_FAULTS);
     setActiveFaultId(null);
-    setDecodingPath([]);
+    setDecoding(null);
   };
 
   const handleFaultClick = (faultId: string) => {
     sound.playDecoderLock();
     setActiveFaultId((prev) => (prev === faultId ? null : faultId));
-    setFaults((prev) =>
-      prev.map((f) => (f.id === faultId ? { ...f, active: !f.active } : f))
+
+    const newFaults = faults.map((f) =>
+      f.id === faultId ? { ...f, active: !f.active } : f
     );
-
-    // Recalculate detector parity
-    setTimeout(() => {
-      setFaults((currFaults) => {
-        const firedIds = new Set<string>();
-        currFaults.forEach((f) => {
-          if (f.active) {
-            if (firedIds.has(f.from)) firedIds.delete(f.from);
-            else firedIds.add(f.from);
-
-            if (firedIds.has(f.to)) firedIds.delete(f.to);
-            else firedIds.add(f.to);
-          }
-        });
-        setDetectors((prevD) =>
-          prevD.map((d) => ({
-            ...d,
-            fired: firedIds.has(d.id),
-          }))
-        );
-        return currFaults;
-      });
-    }, 10);
+    const firedIds = computeFired(newFaults);
+    setFaults(newFaults);
+    setDetectors((prev) => prev.map((d) => ({ ...d, fired: firedIds.has(d.id) })));
+    computeDecoding(graph, firedIds);
   };
 
   const firedCount = useMemo(() => detectors.filter((d) => d.fired).length, [detectors]);
@@ -131,6 +277,7 @@ export default function StimDetectorGraphVisualizer() {
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// STIM DETECTOR ERROR MODEL (.DEM)</span>
             <span className="rounded bg-syndrome/20 px-2 py-0.5 font-mono text-[10px] text-syndrome font-bold">GRAPH VISUALIZER</span>
+            <span className="rounded bg-ink-800 px-2 py-0.5 font-mono text-[10px] text-text-low font-bold">ILLUSTRATIVE DEM</span>
           </div>
           <h3 className="font-display text-xl font-bold text-text-hi">Interactive Syndrome & Fault Graph Studio</h3>
         </div>
@@ -141,7 +288,7 @@ export default function StimDetectorGraphVisualizer() {
             onClick={injectRandomNoise}
             className="btn-primary text-xs !px-4 !py-2 flex items-center gap-1.5"
           >
-            <Zap className="h-3.5 w-3.5" /> Inject Noise Event
+            <Zap className="h-3.5 w-3.5" /> Sample DEM Noise
           </button>
           <button
             type="button"
@@ -154,7 +301,11 @@ export default function StimDetectorGraphVisualizer() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Explore Stim Detector Error Model (DEM) graph structures. Click on any error edge to simulate physical Pauli faults ($X, Z$) or measurement flips, and watch how detector nodes trigger odd-parity syndrome events for MWPM decoding.
+        Explore an illustrative Stim Detector Error Model (DEM) graph. Click any error edge to toggle a
+        physical Pauli fault (X or Z) or measurement flip and watch detector nodes trigger odd-parity
+        syndrome events. “Sample DEM Noise” performs a genuine Monte Carlo draw — each edge fires with its
+        own probability p = 1/(1+eᵂ) derived from its weight — and the syndrome is decoded by an exact
+        minimum-weight perfect matching over the graph’s shortest-path distances.
       </p>
 
       {/* Main Canvas Grid */}
@@ -176,19 +327,32 @@ export default function StimDetectorGraphVisualizer() {
             <text x="30" y="72" fill="#7B89A7" fontSize="10" fontFamily="monospace">Round t=1</text>
             <text x="30" y="212" fill="#7B89A7" fontSize="10" fontFamily="monospace">Round t=2</text>
 
-            {/* MWPM Match Pairing Path */}
-            {decodingPath.length === 2 && (
-              <line
-                x1={detectors.find((d) => d.id === decodingPath[0])?.x || 0}
-                y1={detectors.find((d) => d.id === decodingPath[0])?.y || 0}
-                x2={detectors.find((d) => d.id === decodingPath[1])?.x || 0}
-                y2={detectors.find((d) => d.id === decodingPath[1])?.y || 0}
-                stroke="#10B981"
-                strokeWidth="4"
-                strokeDasharray="6 4"
-                className="animate-pulse"
-              />
-            )}
+            {/* MWPM Match Pairing Paths — drawn along the real shortest paths */}
+            {decoding?.matched &&
+              decoding.pairs.map((pair, i) => {
+                const pts = pair.path
+                  .filter((id) => id !== BOUNDARY)
+                  .map((id) => detectors.find((d) => d.id === id))
+                  .filter((d): d is DetectorNode => !!d);
+                if (pts.length === 0) return null;
+                const coords = pts.map((d) => `${d.x},${d.y}`);
+                // If the pair terminates at the boundary, extend to the canvas edge.
+                if (pair.a === BOUNDARY || pair.b === BOUNDARY) {
+                  const last = pts[pts.length - 1];
+                  coords.push(`${last.x},292`);
+                }
+                return (
+                  <polyline
+                    key={`match-${i}`}
+                    points={coords.join(' ')}
+                    fill="none"
+                    stroke="#10B981"
+                    strokeWidth="4"
+                    strokeDasharray="6 4"
+                    className="animate-pulse"
+                  />
+                );
+              })}
 
             {/* Fault Edges */}
             {faults.map((fault) => {
@@ -304,10 +468,28 @@ export default function StimDetectorGraphVisualizer() {
                 </div>
               </div>
 
-              {decodingPath.length === 2 && (
+              {decoding?.matched && decoding.pairs.length > 0 && (
                 <div className="p-3 rounded-lg bg-stabilizer/10 border border-stabilizer/30 text-xs">
-                  <span className="text-stabilizer font-bold block mb-1">✓ MWPM Match Found:</span>
-                  <span className="text-text-mid block">Pairing {decodingPath[0]} ↔ {decodingPath[1]} via shortest graph path.</span>
+                  <span className="text-stabilizer font-bold block mb-1">
+                    ✓ MWPM Match Found (total weight {decoding.totalWeight.toFixed(2)}):
+                  </span>
+                  {decoding.pairs.map((pair, i) => (
+                    <span key={i} className="text-text-mid block">
+                      Pairing {pair.a} ↔ {pair.b} via shortest graph path (w={pair.weight.toFixed(2)}
+                      {pair.path.filter((n) => n !== BOUNDARY).length > 2
+                        ? `: ${pair.path.filter((n) => n !== BOUNDARY).join('→')}`
+                        : ''}
+                      ).
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {decoding && !decoding.matched && firedCount > 0 && (
+                <div className="p-3 rounded-lg bg-syndrome/10 border border-syndrome/30 text-xs">
+                  <span className="text-syndrome font-bold block">
+                    No perfect matching: odd syndrome with no boundary edge in this DEM.
+                  </span>
                 </div>
               )}
 
