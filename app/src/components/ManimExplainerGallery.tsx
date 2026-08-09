@@ -67,6 +67,17 @@ const VIDEOS: VideoExplainer[] = [
       '3D color codes extend transversality to non-Clifford T-gates.',
     ],
   },
+  {
+    id: 'quantum-ldpc-bipartite',
+    title: 'qLDPC Bipartite Tanner Graph & Belief Propagation',
+    filename: 'animations/quantum_ldpc_bipartite.mp4',
+    description: 'Manim vector animation demonstrating sparse Tanner graphs with degree-6 connectivity and Belief Propagation (BP) message-passing decoding.',
+    keyTakeaways: [
+      'Bipartite Tanner graphs link data qubits (V-nodes) to parity checks (C-nodes).',
+      'Log-likelihood ratio (LLR) messages flow along graph edges to converge on errors.',
+      'Enables high encoding rates (k/n > 0.1) with 10x fewer physical qubits than surface codes.',
+    ],
+  },
 ];
 
 export default function ManimExplainerGallery() {
