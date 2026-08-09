@@ -78,6 +78,17 @@ const VIDEOS: VideoExplainer[] = [
       'Enables high encoding rates (k/n > 0.1) with 10x fewer physical qubits than surface codes.',
     ],
   },
+  {
+    id: 'google-willow-veo31',
+    title: 'Google Willow Superconducting Chip (Google Veo 3.1 AI Generation)',
+    filename: 'animations/google_willow_veo31.mp4',
+    description: 'High-definition 8K 3D photorealistic video generated live via Google Veo 3.1 AI displaying the 105-qubit chip operating at 15mK.',
+    keyTakeaways: [
+      'Generated live via Google Veo 3.1 AI video generation API.',
+      'Renders the 105-transmon grid inside dilution refrigerator at 15mK.',
+      'Demonstrates real-time surface-code error suppression below threshold (Λ = 2.14).',
+    ],
+  },
 ];
 
 export default function ManimExplainerGallery() {
