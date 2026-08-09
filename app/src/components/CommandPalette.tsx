@@ -52,6 +52,7 @@ export default function CommandPalette() {
     { id: 'c9', title: 'Executable Stim Simulator Studio', category: 'Tool', url: '/lab?tab=executable-simulator' },
     { id: 'c10', title: 'Stim DEM Syndrome Graph Studio', category: 'Tool', url: '/lab?tab=stim-dem-graph' },
     { id: 'c11', title: 'Standard Quantum Code Zoo Studio (Steane, Shor, 5-Qubit)', category: 'Tool', url: '/lab?tab=standard-code-zoo' },
+    { id: 'c12', title: 'Quantum LDPC Bivariate Bicycle Studio (IBM Gross 72, 144)', category: 'Tool', url: '/lab?tab=qldpc-tanner-graph' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,

@@ -32,6 +32,7 @@ import { sound } from '@/lib/sound';
 const ExecutableSimulatorStudio = lazy(() => import('@/components/ExecutableSimulatorStudio'));
 const StimDetectorGraphVisualizer = lazy(() => import('@/components/StimDetectorGraphVisualizer'));
 const StandardCodeZooStudio = lazy(() => import('@/components/StandardCodeZooStudio'));
+const QldpcTannerGraphVisualizer = lazy(() => import('@/components/QldpcTannerGraphVisualizer'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -41,6 +42,7 @@ export type ToolTab =
   | 'executable-simulator'
   | 'stim-dem-graph'
   | 'standard-code-zoo'
+  | 'qldpc-tanner-graph'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -106,6 +108,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'qldpc-tanner-graph',
+    title: 'Quantum LDPC Bivariate Bicycle Studio',
+    category: 'Simulation',
+    icon: Layers,
+    description: 'Interactive bipartite Tanner graph visualizer for high-rate QLDPC codes & Belief-Propagation decoding.',
   },
   {
     id: 'surgery-welder',
@@ -301,6 +310,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Standard Quantum Code Zoo Studio...</div>}>
               <StandardCodeZooStudio />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'qldpc-tanner-graph' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading QLDPC Bivariate Bicycle Studio...</div>}>
+              <QldpcTannerGraphVisualizer />
             </Suspense>
           </div>
         )}
