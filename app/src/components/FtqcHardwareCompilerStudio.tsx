@@ -115,7 +115,10 @@ export default function FtqcHardwareCompilerStudio() {
     const dataQubitCount = algo.logicalQubits * qubitsPerLogical;
 
     // 15-to-1 T-factory Distillation Factories
-    const factoryCount = Math.ceil(algo.logicalQubits * 0.25);
+    // FACTORY_RATIO: assumed parallel T-factories per logical qubit — a rough
+    // planning figure, not a derived constant.
+    const FACTORY_RATIO = 0.25;
+    const factoryCount = Math.ceil(algo.logicalQubits * FACTORY_RATIO);
     const qubitsPerFactory = 15 * qubitsPerLogical;
     const factoryQubitCount = factoryCount * qubitsPerFactory;
 
