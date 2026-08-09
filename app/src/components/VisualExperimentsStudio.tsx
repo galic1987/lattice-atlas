@@ -186,7 +186,7 @@ export default function VisualExperimentsStudio() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
           <div className="relative flex flex-col items-center justify-center rounded-xl border border-ink-600 bg-ink-900 p-4 min-h-[380px]">
             <div className="absolute top-4 left-4 font-mono text-xs text-text-low">
-              <span className="text-text-hi font-bold">SU(2)_3 Fibonacci Anyons ($\tau$)</span> · Quantum Dimension $d_\tau = \phi \approx 1.618$
+              <span className="text-text-hi font-bold">SU(2)₃ Fibonacci Anyons (τ)</span> · Quantum Dimension d_τ = φ ≈ 1.618
             </div>
 
             <div className="relative w-full max-w-[420px] aspect-[4/3] my-4">
@@ -235,7 +235,7 @@ export default function VisualExperimentsStudio() {
             <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
               <h4 className="eyebrow mb-2 !text-magic">// FIBONACCI FUSION RULE</h4>
               <p className="text-text-mid font-sans text-xs leading-relaxed">
-                Fibonacci anyons obey $\tau \otimes \tau = I \oplus \tau$. Braiding anyons carries out non-Abelian quantum logic matrix multiplications $B_1 B_2 \neq B_2 B_1$ protected by topology!
+                Fibonacci anyons obey τ ⊗ τ = I ⊕ τ. Braiding them carries out non-Abelian quantum logic — the braid operators don't commute (B₁B₂ ≠ B₂B₁) — protected by topology.
               </p>
             </div>
           </div>
