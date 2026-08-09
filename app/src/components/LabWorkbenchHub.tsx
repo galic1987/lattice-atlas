@@ -160,10 +160,10 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   },
   {
     id: 'mastery-cert',
-    title: 'Mastery Certificate Exporter',
+    title: 'Study Keepsake Maker',
     category: 'Mastery',
     icon: Award,
-    description: 'Export an official, high-resolution TQEC completion credential.',
+    description: 'Make a personal, self-issued study keepsake card. Verifies nothing — not an accredited credential.',
   },
 ];
 
