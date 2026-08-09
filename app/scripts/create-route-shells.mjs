@@ -14,6 +14,7 @@ const routes = [
   'altitudes',
   'capstone',
   'duel',
+  'experiments',
   'field-today',
   'foundations',
   'glossary',
