@@ -9,6 +9,7 @@ import {
   Upload,
   Zap,
   Sparkles,
+  Terminal,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -22,6 +23,7 @@ import QECOverheadCalculator from '@/components/QECOverheadCalculator';
 import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
 import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
 import CertificateGenerator from '@/components/CertificateGenerator';
+import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
 
@@ -29,6 +31,7 @@ export type ToolTab =
   | 'surface-3d'
   | 'braid-3d'
   | 'circuit-composer'
+  | 'executable-simulator'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -66,6 +69,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Cpu,
     description: 'Build 3-qubit circuits with H, X, Z, S, T, and CX gates with real-time statevectors.',
+  },
+  {
+    id: 'executable-simulator',
+    title: 'Executable Stim Simulator Studio',
+    category: 'Simulation',
+    icon: Terminal,
+    description: 'Run executable Stim & QSim examples (Rotated Surface Code, Bell State, Lattice Surgery, Magic State, Color Code).',
   },
   {
     id: 'surgery-welder',
@@ -232,6 +242,12 @@ export default function LabWorkbenchHub() {
         {activeTab === 'circuit-composer' && (
           <div className="p-4">
             <QuantumCircuitComposer />
+          </div>
+        )}
+
+        {activeTab === 'executable-simulator' && (
+          <div className="p-4">
+            <ExecutableSimulatorStudio />
           </div>
         )}
 
