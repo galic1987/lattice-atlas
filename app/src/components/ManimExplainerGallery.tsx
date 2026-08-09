@@ -134,12 +134,13 @@ export default function ManimExplainerGallery() {
             </h3>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Mathematical 60fps vector animations generated with Manim Community v0.19.0.
+            Exact vector animations rendered from the real code with Manim Community v0.19.0 — plus a few
+            clearly-marked illustrative AI (Veo 3.1) atmospheric clips.
           </p>
         </div>
 
         <span className="rounded-full border border-plaquette/40 bg-plaquette/10 px-3 py-1 font-mono text-xs font-bold text-plaquette">
-          {VIDEOS.length} Vector Animations
+          {VIDEOS.length} Clips
         </span>
       </div>
 
@@ -168,6 +169,15 @@ export default function ManimExplainerGallery() {
       {/* Video Viewport Grid */}
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         <div className="overflow-hidden rounded-xl border border-ink-600 bg-ink-950 shadow-2xl">
+          {video.filename.includes('veo31') ? (
+            <div className="border-b border-syndrome/40 bg-syndrome/15 px-3 py-1.5 font-mono text-[10px] font-bold text-syndrome">
+              ⚠ ILLUSTRATIVE · AI-GENERATED (Veo 3.1) — atmospheric mood only, NOT an accurate depiction
+            </div>
+          ) : (
+            <div className="border-b border-stabilizer/30 bg-stabilizer/10 px-3 py-1.5 font-mono text-[10px] font-bold text-stabilizer">
+              ✓ MANIM · vector animation rendered from the real code
+            </div>
+          )}
           <video
             key={video.id}
             src={asset(video.filename)}
