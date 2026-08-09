@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown, Map as MapIcon, Repeat, ScrollText, Route } from 'lucide-react';
 import { topicById, shortName } from '@/data';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import SuperTLDR from '@/components/SuperTLDR';
 import {
   CATEGORIES,
   CATEGORY_COLORS,
@@ -162,9 +163,17 @@ export default function Glossary() {
 
   return (
     <div>
-      {/* Section 1 — page header */}
+      {/* Section 1 — header */}
       <section className="lattice-bg">
-        <div className="mx-auto max-w-6xl px-6 pb-8 pt-32 md:px-8">
+        <div className="mx-auto max-w-6xl px-6 pb-10 pt-16 md:px-8">
+          <SuperTLDR
+            summary="Comprehensive dictionary of 61 fundamental QEC terms, mathematical definitions, and physical concepts."
+            takeaways={[
+              'Search and filter terms across Stabilizers, Topology, Decoders, and Distillation.',
+              'Mathematical expressions formatted in clean JetBrains Mono notation.',
+              'Cross-linked to Knowledge Map topics and seminal research papers.',
+            ]}
+          />
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -181,6 +190,9 @@ export default function Glossary() {
           >
             Glossary
           </motion.h1>
+          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
+            <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>Every technical term on this site, defined in plain English.
+          </p>
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}

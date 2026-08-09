@@ -5,6 +5,7 @@ import { ArrowRight, BookOpen, Map as MapIcon } from 'lucide-react';
 import { CATEGORY_COLORS, TERMS, type GlossaryTerm } from '@/data/glossary';
 import { useProgress, type ReviewScheduleEntry } from '@/store/progress';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import SuperTLDR from '@/components/SuperTLDR';
 
 /**
  * Spaced review of glossary terms. Learners produce a response before seeing
@@ -140,6 +141,14 @@ export default function Review() {
     <div className="bg-ink-900">
       <header className="lattice-bg">
         <div className="mx-auto max-w-4xl px-6 pb-10 pt-16 md:px-8">
+          <SuperTLDR
+            summary="Spaced repetition active recall deck to permanently solidify key QEC physics, algorithms, and engineering concepts."
+            takeaways={[
+              'SM-2 algorithmic scheduling surfaces cards based on your self-reported confidence.',
+              'Covers threshold theorems, stabilizer generators, lattice surgery, and distillation factories.',
+              'Maintains long-term retention of core fault-tolerance physics principles.',
+            ]}
+          />
           <motion.p
             initial={reduce ? false : { opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -165,6 +174,15 @@ export default function Review() {
             Retrieval strengthens access. Produce a definition before revealing
             the reference, compare meaning rather than wording, then rate the match.
             Terms enter this deck as you explore their topics.
+          </motion.p>
+          <motion.p
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-4 max-w-xl text-[15px] leading-relaxed text-text-mid"
+          >
+            <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">// TL;DR</span>
+            A daily deck that asks you to recall terms and schedules the next review.
           </motion.p>
           <p className="mt-6 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[13px] text-text-low" role="status" aria-live="polite">
             <span>{unlocked.length} available</span>

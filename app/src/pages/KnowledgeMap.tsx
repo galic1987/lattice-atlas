@@ -42,6 +42,7 @@ import TopicNotes from '@/components/TopicNotes';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import TopicLensInsight from '@/components/TopicLensInsight';
 import Expandable3B1BCard from '@/components/Expandable3B1BCard';
+import SuperTLDR from '@/components/SuperTLDR';
 
 /* ------------------------------------------------------------------ */
 /* Data helpers                                                        */
@@ -173,8 +174,12 @@ function PageHeader({ understoodCount }: { understoodCount: number }) {
           after engaging with it; that self-mark is separate from check evidence.
           The map saves both locally.
         </motion.p>
+        <motion.p {...block(0.24)} className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
+          <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">// TL;DR</span>
+          Every prerequisite topic in six tiers — click any topic for its full explanation.
+        </motion.p>
         <motion.p
-          {...block(0.24)}
+          {...block(0.32)}
           className="mt-5 max-w-2xl rounded-lg border border-star/30 bg-star/10 px-3 py-2 text-sm leading-relaxed text-text-mid"
         >
           <span className="font-mono text-[12px] font-semibold uppercase tracking-wider text-star">Toric-code braid:</span>{' '}
@@ -1241,6 +1246,16 @@ export default function KnowledgeMap() {
   return (
     <div className="bg-ink-900">
       <PageHeader understoodCount={understoodCount} />
+      <div className="mx-auto max-w-6xl px-6 pt-6 md:px-8">
+        <SuperTLDR
+          summary="Non-linear interactive knowledge graph organizing 26 fundamental TQEC topics across 6 progressive structural tiers."
+          takeaways={[
+            'Explore prerequisite paths connecting classical error correction to fault-tolerant quantum algorithms.',
+            'Toggle between Physical Metaphor (Intuition) and Rigorous Math (Formalism) cognitive lenses.',
+            'Track your mastery progress across all 26 core topological concepts.',
+          ]}
+        />
+      </div>
       <ControlsBar
         view={view}
         setView={setView}

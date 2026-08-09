@@ -22,6 +22,7 @@ import {
   Telescope,
 } from 'lucide-react';
 import InteractiveTour from '@/components/InteractiveTour';
+import SuperTLDR from '@/components/SuperTLDR';
 import {
   papers,
   tierColors,
@@ -169,6 +170,16 @@ function Hero() {
           23 landmark papers, one map.
         </motion.p>
 
+        <motion.p
+          className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.35, duration: 0.5, ease: EASE_OUT_EXPO }}
+        >
+          <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>
+          This site teaches you topological quantum error correction, one clear step at a time.
+        </motion.p>
+
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -228,6 +239,17 @@ function Hero() {
 function WhatIsTqec() {
   return (
     <section className="relative">
+      <div className="mx-auto max-w-6xl px-6 pt-12 md:px-8">
+        <SuperTLDR
+          summary="Fault-tolerant quantum error correction (QEC) protects fragile quantum information by encoding 1 logical qubit across arrays of physical qubits."
+          takeaways={[
+            'Physical noise is continuously measured using non-destructive stabilizer check operators.',
+            'Minimum Weight Perfect Matching (MWPM) decodes syndromes into error corrections without collapsing superposition.',
+            'Lattice surgery enables universal fault-tolerant computation via boundary merges and state distillation.',
+          ]}
+        />
+      </div>
+
       <img
         src={asset('braid-divider.svg')}
         alt=""

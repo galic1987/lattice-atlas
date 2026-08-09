@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import {
   Layers,
   Cpu,
@@ -11,6 +11,7 @@ import {
   Sparkles,
   Terminal,
   Binary,
+  Shield,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -25,10 +26,12 @@ import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
 import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
 import CertificateGenerator from '@/components/CertificateGenerator';
 import ErrorCodeExplorer from '@/components/ErrorCodeExplorer';
-import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
-import StimDetectorGraphVisualizer from '@/components/StimDetectorGraphVisualizer';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
+
+const ExecutableSimulatorStudio = lazy(() => import('@/components/ExecutableSimulatorStudio'));
+const StimDetectorGraphVisualizer = lazy(() => import('@/components/StimDetectorGraphVisualizer'));
+const StandardCodeZooStudio = lazy(() => import('@/components/StandardCodeZooStudio'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -37,6 +40,7 @@ export type ToolTab =
   | 'circuit-composer'
   | 'executable-simulator'
   | 'stim-dem-graph'
+  | 'standard-code-zoo'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -95,6 +99,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Sparkles,
     description: 'Interactive Stim Detector Error Model (DEM) graph visualizer with live fault injection and MWPM matching.',
+  },
+  {
+    id: 'standard-code-zoo',
+    title: 'Standard Quantum Code Zoo Studio',
+    category: 'Simulation',
+    icon: Shield,
+    description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
   },
   {
     id: 'surgery-welder',
@@ -272,13 +283,25 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'executable-simulator' && (
           <div className="p-4">
-            <ExecutableSimulatorStudio />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Executable Simulator Studio...</div>}>
+              <ExecutableSimulatorStudio />
+            </Suspense>
           </div>
         )}
 
         {activeTab === 'stim-dem-graph' && (
           <div className="p-4">
-            <StimDetectorGraphVisualizer />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
+              <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'standard-code-zoo' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Standard Quantum Code Zoo Studio...</div>}>
+              <StandardCodeZooStudio />
+            </Suspense>
           </div>
         )}
 

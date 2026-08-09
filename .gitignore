@@ -15,3 +15,6 @@ tqec/extracted/
 
 # stale early scaffold superseded by app/ (delete the folder when ready)
 quantum-knowledge-map/
+
+# drop zone for generated decorative art (processed by app/scripts/prepare-images.mjs)
+asset-inbox/

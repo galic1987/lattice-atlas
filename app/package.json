@@ -13,6 +13,7 @@
     "check-trust": "node scripts/check-trust.mjs",
     "verify-lattice": "node scripts/verify-lattice.mjs",
     "lint": "eslint .",
+    "prepare-images": "node scripts/prepare-images.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test --config tests/release.playwright.config.ts"
   },
