@@ -149,7 +149,7 @@ class ThresholdSuppression(Scene):
             x_range=[0.02, 0.2, 0.04], y_range=[-4, 0, 1], x_length=8, y_length=4.3,
             axis_config={"color": DIM, "include_tip": False},
         ).shift(DOWN * 0.4)
-        x_label = axes.get_x_axis_label(Text("physical error p", font_size=22))
+        x_label = Text("physical error p", font_size=22).next_to(axes, DOWN, buff=0.2)
         y_label = axes.get_y_axis_label(Text("log10 Pl", font_size=22))
         self.play(Create(axes), FadeIn(x_label), FadeIn(y_label))
 
@@ -160,7 +160,7 @@ class ThresholdSuppression(Scene):
         colors = {3: "#F43F5E", 5: "#F5B83D", 7: "#22D3EE"}
         legend = VGroup()
         for d in [3, 5, 7]:
-            g = axes.plot(lambda p, d=d: logpl(p, d), x_range=[0.03, 0.19, 0.005], color=colors[d])
+            g = axes.plot(lambda p, d=d: logpl(p, d), x_range=[0.03, 0.125, 0.005], color=colors[d])
             lab = VGroup(
                 Line(ORIGIN, RIGHT * 0.4, color=colors[d], stroke_width=4),
                 Text(f"d={d}", font_size=22, color=colors[d]),
@@ -174,7 +174,10 @@ class ThresholdSuppression(Scene):
         thr = DashedLine([xthr, axes.c2p(p_th, -4)[1], 0], [xthr, axes.c2p(p_th, 0)[1], 0], color="#F5B83D")
         thr_lab = Text("p_th  (curves cross here)", font_size=22, color="#F5B83D").next_to(thr, UP, buff=0.1)
         self.play(Create(thr), FadeIn(thr_lab))
+        flip = Text("above p_th the order flips —\nlarger d becomes worse", font_size=18, color=MUTE,
+                    line_spacing=0.8).next_to(thr, RIGHT, buff=0.35).shift(UP * 0.4)
         self.play(FadeIn(stage_banner("left of the crossing, larger d drives Pl down exponentially", MUTE)))
+        self.play(FadeIn(flip))
         self.wait(1.4)
 
 
