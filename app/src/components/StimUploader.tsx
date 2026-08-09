@@ -37,8 +37,7 @@ export default function StimUploader({
       let hasNoise = false;
 
       lines.forEach((line) => {
-        const tokens = line.split(/\s+/);
-        const cmd = tokens[0].toUpperCase();
+        const cmd = line.split(/\s+/)[0].toUpperCase();
 
         if (['X_ERROR', 'Z_ERROR', 'Y_ERROR', 'DEPOLARIZING1', 'DEPOLARIZING2'].includes(cmd)) {
           hasNoise = true;
@@ -50,11 +49,14 @@ export default function StimUploader({
           observableCount++;
         }
 
-        // Parse integer qubit indices in tokens
-        tokens.slice(1).forEach((tok) => {
-          const num = parseInt(tok.replace(/[^\d]/g, ''), 10);
-          if (!isNaN(num) && num > maxQubit) {
-            maxQubit = num;
+        // Qubit targets only: drop the parenthesised coordinate/arg group first
+        // (e.g. QUBIT_COORDS(1, 1) 0, DETECTOR(1,1,0) …), then read the bare
+        // integer operands, skipping rec[...] measurement references.
+        const operands = line.replace(/\([^)]*\)/g, ' ').split(/\s+/).slice(1);
+        operands.forEach((tok) => {
+          if (/^\d+$/.test(tok)) {
+            const num = parseInt(tok, 10);
+            if (num > maxQubit) maxQubit = num;
           }
         });
       });
@@ -124,7 +126,9 @@ export default function StimUploader({
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Upload or paste custom <strong>Stim circuit files</strong> or <strong>Detector Error Models (.dem)</strong> to analyze detector counts, qubit layouts, and run real-time MWPM syndrome decoding.
+        Upload or paste a <strong>Stim circuit</strong> or <strong>Detector Error Model (.dem)</strong> to see a
+        structural summary — instruction, detector, and observable counts, the qubit index range, and whether
+        noise operations are present. This reads the file text only; it does not run a decoder or simulator.
       </p>
 
       {/* Drag & Drop Area */}
@@ -211,9 +215,9 @@ export default function StimUploader({
               <span className="text-plaquette font-bold text-base">{summary.observableCount}</span>
             </div>
             <div className="rounded-lg bg-ink-900 p-2.5 border border-ink-800">
-              <span className="text-text-low block text-[10px]">NOISE MODEL</span>
+              <span className="text-text-low block text-[10px]">NOISE OPS</span>
               <span className={`font-bold text-xs ${summary.hasNoise ? 'text-magic' : 'text-text-low'}`}>
-                {summary.hasNoise ? 'Phenomenological' : 'Ideal (No Noise)'}
+                {summary.hasNoise ? 'Present' : 'None (ideal)'}
               </span>
             </div>
           </div>

@@ -6,9 +6,15 @@ export default function MagicStateDistillationFactory() {
   const [inputErrorRate, setInputErrorRate] = useState<number>(0.01); // 1%
   const [factoryLevel, setFactoryLevel] = useState<number>(1); // Level 1 (15-to-1)
 
-  // 15-to-1 Bravyi-Kitaev magic state distillation equation:
-  // p_out = 35 * (p_in)^3
-  const outputErrorRate = Math.min(1.0, 35 * Math.pow(inputErrorRate, 3 * factoryLevel));
+  // 15-to-1 Bravyi–Kitaev distillation suppresses the T-state error as
+  // p_out = 35·p_in³ per round. Concatenating L rounds is the recurrence
+  // p_{k+1} = 35·p_k³ iterated L times (so the exponent grows as 3^L, NOT 3·L).
+  const distill = (p: number, levels: number): number => {
+    let cur = p;
+    for (let i = 0; i < levels; i += 1) cur = Math.min(1, 35 * cur ** 3);
+    return cur;
+  };
+  const outputErrorRate = distill(inputErrorRate, factoryLevel);
 
   const cycleFactory = () => {
     sound.playDecoderLock();
@@ -37,7 +43,10 @@ export default function MagicStateDistillationFactory() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Transversal Clifford gates ($H, S, CX$) are protected natively by the surface code, but non-Clifford T gates cannot be executed transversally (Eastin-Knill Theorem). High-fidelity magic states are <strong>distilled</strong> from 15 noisy raw states using Reed-Muller codes!
+        In the surface code, Clifford operations (H, S, CX) are comparatively cheap — realized by
+        transversal gates and lattice surgery — but the non-Clifford T gate cannot be done transversally
+        (a consequence of the Eastin–Knill theorem). High-fidelity magic states are instead
+        <strong> distilled</strong> from 15 noisy raw states via the Reed–Muller [[15,1,3]] code.
       </p>
 
       {/* Factory Pipeline Schematic */}
@@ -53,7 +62,7 @@ export default function MagicStateDistillationFactory() {
           <div className="rounded-xl border border-syndrome/40 bg-syndrome/10 p-4 text-center w-full md:w-1/3">
             <span className="font-mono text-[10px] text-syndrome font-bold uppercase block">15 Raw Noisy States</span>
             <span className="font-mono text-xl font-bold text-text-hi block mt-1">p_in = {(inputErrorRate * 100).toFixed(1)}%</span>
-            <span className="font-mono text-[10px] text-text-low block mt-1">Fault Rate ~ 10^-2</span>
+            <span className="font-mono text-[10px] text-text-low block mt-1">≈ 10^{Math.round(Math.log10(inputErrorRate))}</span>
           </div>
 
           <ArrowRight className="h-6 w-6 text-star shrink-0" />
@@ -62,7 +71,7 @@ export default function MagicStateDistillationFactory() {
           <div className="rounded-xl border border-star bg-star/15 p-5 text-center w-full md:w-1/3 animate-pulse">
             <Zap className="h-6 w-6 text-star mx-auto mb-1" />
             <span className="font-mono text-xs font-bold text-star block">LEVEL {factoryLevel} FACTORY</span>
-            <span className="font-mono text-[10px] text-text-mid block mt-1">p_out = 35 * (p_in)^3</span>
+            <span className="font-mono text-[10px] text-text-mid block mt-1">p → 35·p³, iterated ×{factoryLevel}</span>
           </div>
 
           <ArrowRight className="h-6 w-6 text-stabilizer shrink-0" />

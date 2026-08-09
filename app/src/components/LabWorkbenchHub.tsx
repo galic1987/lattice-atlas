@@ -16,7 +16,7 @@ import SpacetimeView3D from '@/components/SpacetimeView3D';
 import SpacetimeBraidWeaver from '@/components/SpacetimeBraidWeaver';
 import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 import StimUploader from '@/components/StimUploader';
-import MultiManifoldExplorer from '@/components/MultiManifoldExplorer';
+import GenusExplorer from '@/components/GenusExplorer';
 import LatticeSurgeryWelder from '@/components/LatticeSurgeryWelder';
 import AnyonBraidingSandbox from '@/components/AnyonBraidingSandbox';
 import QECOverheadCalculator from '@/components/QECOverheadCalculator';
@@ -98,7 +98,7 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     title: 'Multi-Manifold Topology',
     category: 'Topology',
     icon: Sparkles,
-    description: 'Explore torus (g=1), double torus (g=2), Klein bottle, and Möbius strip homologies.',
+    description: 'Why a genus-g surface code encodes k=2g logical qubits (sphere → triple torus), plus where that rule stops for non-orientable surfaces.',
   },
   {
     id: 'anyon-braid',
@@ -273,10 +273,10 @@ export default function LabWorkbenchHub() {
         )}
 
         {activeTab === 'multi-manifold' && (
-          <div className="p-4 font-mono">
+          <div className="p-4">
             <TorusTopologyViewer />
             <div className="mt-6">
-              <MultiManifoldExplorer />
+              <GenusExplorer />
             </div>
           </div>
         )}

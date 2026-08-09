@@ -10,18 +10,35 @@ export default function LatticeSurgeryWelder() {
   const [patch2State, setPatch2State] = useState<string>('|0⟩_L');
   const [jointMeasurement, setJointMeasurement] = useState<string | null>(null);
 
+  // Logical-state eigenvalues. A ZZ merge is deterministic only when both patches
+  // are Z-basis eigenstates (|0⟩_L,|1⟩_L); an XX merge only when both are X-basis
+  // eigenstates (|+⟩_L). Otherwise the joint parity is a genuine 50/50 outcome that
+  // collapses the superposition — so we say ±1, we do not invent a definite value.
+  const zEigen = (s: string): number => (s === '|0⟩_L' ? 1 : s === '|1⟩_L' ? -1 : 0);
+  const xEigen = (s: string): number => (s === '|+⟩_L' ? 1 : 0);
+
   const executeOperation = (op: OperationMode) => {
     sound.playDecoderLock();
     setMode(op);
 
     if (op === 'merge-z') {
-      const outcome = Math.random() > 0.5 ? '+1' : '-1';
-      setJointMeasurement(`Z_1 Z_2 = ${outcome}`);
+      const z1 = zEigen(patch1State);
+      const z2 = zEigen(patch2State);
+      if (z1 !== 0 && z2 !== 0) {
+        setJointMeasurement(`Z₁Z₂ = ${z1 * z2 === 1 ? '+1' : '−1'}  (deterministic)`);
+      } else {
+        setJointMeasurement('Z₁Z₂ = ±1  (50/50 — a |+⟩ patch is not a Z₁Z₂ eigenstate, so the outcome is random and collapses the state)');
+      }
     } else if (op === 'merge-x') {
-      const outcome = Math.random() > 0.5 ? '+1' : '-1';
-      setJointMeasurement(`X_1 X_2 = ${outcome}`);
+      const x1 = xEigen(patch1State);
+      const x2 = xEigen(patch2State);
+      if (x1 !== 0 && x2 !== 0) {
+        setJointMeasurement(`X₁X₂ = ${x1 * x2 === 1 ? '+1' : '−1'}  (deterministic)`);
+      } else {
+        setJointMeasurement('X₁X₂ = ±1  (50/50 — a |0⟩/|1⟩ patch is not an X₁X₂ eigenstate, so the outcome is random and collapses the state)');
+      }
     } else if (op === 'split') {
-      setJointMeasurement('Split Complete: 2 Independent Patches');
+      setJointMeasurement('Split complete: 2 independent patches');
     } else {
       setJointMeasurement(null);
     }
@@ -82,6 +99,10 @@ export default function LatticeSurgeryWelder() {
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
         Lattice Surgery performs logical gates between surface code patches without physically moving qubits. By turning on auxiliary boundary parity measurements, patches are <strong>merged</strong> into a single combined stabilizer code and then <strong>split</strong>.
+      </p>
+      <p className="mt-2 font-mono text-[10px] leading-relaxed text-text-low">
+        Illustrative schematic: the joint-parity readout is computed from the logical states you set on
+        each patch — it is not the output of a full distance-3 code simulation.
       </p>
 
       {/* Visual Canvas */}

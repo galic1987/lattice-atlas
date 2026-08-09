@@ -4,6 +4,23 @@ import { sound } from '@/lib/sound';
 
 export type AnyonType = 'e' | 'm' | 'epsilon' | 'vacuum';
 
+// Each toric-code anyon carries a charge bit and a flux bit: vacuum (0,0),
+// e (1,0), m (0,1), ε (1,1). The full mutual monodromy phase of x around y is
+// π·(qe_x·qm_y + qm_x·qe_y) mod 2π — i.e. exactly −1 when one carries charge and
+// the other the flux it sees, +1 otherwise. (These anyons are abelian, so the
+// phase is always ±1.)
+const ANYON_BITS: Record<AnyonType, [number, number]> = {
+  vacuum: [0, 0],
+  e: [1, 0],
+  m: [0, 1],
+  epsilon: [1, 1],
+};
+const monodromyUnits = (a: AnyonType, b: AnyonType): number => {
+  const [ae, am] = ANYON_BITS[a];
+  const [be, bm] = ANYON_BITS[b];
+  return (ae * bm + am * be) % 2; // 0 or 1, in units of π
+};
+
 export default function AnyonBraidingSandbox() {
   const [anyonA, setAnyonA] = useState<AnyonType>('e');
   const [anyonB, setAnyonB] = useState<AnyonType>('m');
@@ -40,7 +57,7 @@ export default function AnyonBraidingSandbox() {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// TOPOLOGICAL ANYON DYNAMICS</span>
-            <span className="rounded bg-star/20 px-2 py-0.5 font-mono text-[10px] text-star font-bold">NON-ABELIAN STATISTICS</span>
+            <span className="rounded bg-star/20 px-2 py-0.5 font-mono text-[10px] text-star font-bold">ABELIAN ANYON STATISTICS</span>
           </div>
           <h3 className="font-display text-xl font-bold text-text-hi">Anyon Braiding & Fusion Rules Sandbox</h3>
         </div>
@@ -67,7 +84,10 @@ export default function AnyonBraidingSandbox() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        In 2D space, quasiparticles are neither bosons nor fermions — they are <strong>anyons</strong>! Exchanging an electric charge ($e$) around a magnetic fluxon ($m$) accumulates a non-trivial Aharonov-Bohm phase $\theta = \pi$.
+        In 2D, quasiparticles need not be bosons or fermions — they are <strong>anyons</strong>. The toric
+        code’s e, m, and ε are <strong>abelian</strong>: taking an electric charge (e) fully around a
+        magnetic fluxon (m) multiplies the state by a mutual −1 (Aharonov–Bohm phase θ = π), while e and m
+        are each individually bosonic.
       </p>
 
       {/* 2D Interactive Braiding Arena */}
@@ -94,9 +114,21 @@ export default function AnyonBraidingSandbox() {
             </text>
           </svg>
 
-          <div className="mt-2 font-mono text-xs text-plaquette">
-            Current Braid Angle: <span className="font-bold text-text-hi">{braidAngle}°</span> (Aharonov-Bohm Phase: e^{`i${(braidAngle / 180).toFixed(1)}π`})
-          </div>
+          {(() => {
+            const loops = braidAngle / 360; // each braid is one full encirclement
+            const units = monodromyUnits(anyonA, anyonB); // 0 or 1 (× π)
+            const exponent = units * loops; // integer multiple of π
+            const sign = units === 0 || loops % 2 === 0 ? '+1' : '−1';
+            return (
+              <div className="mt-2 font-mono text-xs text-plaquette">
+                Encirclements: <span className="font-bold text-text-hi">{loops}</span> · mutual monodromy
+                phase e^(i·{exponent}π) = <span className="font-bold text-text-hi">{sign}</span>
+                {units === 1 && (
+                  <span className="text-text-low"> — {anyonA} around {anyonB} are mutual semions (−1 per loop)</span>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Fusion Rules Table */}
