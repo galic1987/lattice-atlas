@@ -45,6 +45,28 @@ const VIDEOS: VideoExplainer[] = [
       'Split & merge cycles form the foundation of topological quantum computation.',
     ],
   },
+  {
+    id: 'topological-braiding',
+    title: 'Fibonacci Anyon Non-Abelian Braiding',
+    filename: 'animations/topological_braiding.mp4',
+    description: 'Manim vector animation displaying Fibonacci anyon world-line trajectories in (2+1)D spacetime and non-Abelian braid matrix B1 B2 ≠ B2 B1 logic.',
+    keyTakeaways: [
+      'Braiding world-lines in 2+1D spacetime applies non-Abelian quantum logic.',
+      'Topological protection renders logic gates immune to local geometric perturbations.',
+      'Fibonacci anyons exhibit golden ratio quantum dimension d_τ = ϕ ≈ 1.618.',
+    ],
+  },
+  {
+    id: 'color-code-transversal',
+    title: 'Color Code Transversal Gate Execution',
+    filename: 'animations/color_code_transversal.mp4',
+    description: 'Manim vector animation demonstrating 3-colorable face lattices and parallel transversal Hadamard (H) gate execution without distillation.',
+    keyTakeaways: [
+      'Color codes allow transversal implementation of all Clifford gates (H, S, CNOT).',
+      '3-colorable red, green, and blue faces act as both X and Z parity checks.',
+      '3D color codes extend transversality to non-Clifford T-gates.',
+    ],
+  },
 ];
 
 export default function ManimExplainerGallery() {
