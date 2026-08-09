@@ -172,7 +172,7 @@ export default function QldpcTannerGraphVisualizer() {
             </h2>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Explore constant-rate QLDPC codes ($k/n &gt; 0.1$) with sparse bipartite Tanner graphs &amp; Belief-Propagation (BP-OSD) decoding.
+            Explore constant-rate QLDPC codes (k/n &gt; 0.1) with sparse bipartite Tanner graphs. The syndrome is computed live from the graph; the BP panel illustrates decoder rounds — it does not run a real BP-OSD decoder.
           </p>
         </div>
 
@@ -316,7 +316,7 @@ export default function QldpcTannerGraphVisualizer() {
         <div className="flex flex-col gap-4">
           {/* BP Decoder Controls */}
           <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
-            <h3 className="eyebrow mb-3 !text-magic">// BELIEF-PROPAGATION (BP-OSD) DECODER</h3>
+            <h3 className="eyebrow mb-3 !text-magic">// BELIEF PROPAGATION — SCHEMATIC ROUNDS (no decoder runs)</h3>
 
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between items-center rounded-lg bg-ink-900 p-2.5 border border-ink-700">
@@ -346,8 +346,12 @@ export default function QldpcTannerGraphVisualizer() {
               className="btn-primary mt-4 w-full justify-center disabled:opacity-50"
             >
               <Play className="h-4 w-4" />
-              {bpIteration >= 5 ? 'BP-OSD Converged' : 'Step Belief-Propagation'}
+              {bpIteration >= 5 ? '5 rounds shown' : 'Step a BP round (illustrative)'}
             </button>
+            <p className="mt-3 font-mono text-[10px] leading-relaxed text-text-low">
+              This animates BP’s round structure only — it does not pass real messages, run BP-OSD, or produce
+              a correction. The Active Errors and Syndrome Fires above are real (parity over the Tanner graph).
+            </p>
           </div>
 
           {/* QUBIT OVERHEAD SAVINGS MATRIX */}
