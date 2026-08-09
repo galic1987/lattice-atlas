@@ -41,8 +41,10 @@ const VisualExperimentsStudio = lazy(() => import('@/components/VisualExperiment
 const QftQuantumStateVisualizer = lazy(() => import('@/components/QftQuantumStateVisualizer'));
 const HardwareChipBenchmarkMatrix = lazy(() => import('@/components/HardwareChipBenchmarkMatrix'));
 const MultiAgeCognitivePrism = lazy(() => import('@/components/MultiAgeCognitivePrism'));
+const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineStageWalkthrough'));
 
 export type ToolTab =
+  | 'pipeline-walkthrough'
   | 'code-zoo'
   | 'surface-3d'
   | 'braid-3d'
@@ -123,6 +125,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'pipeline-walkthrough',
+    title: 'End-to-End QEC Stage Architecture',
+    category: 'Engineering',
+    icon: Layers,
+    description: 'Step-by-step physical breakdown from transmon qubit preparation to magic state distillation factories.',
   },
   {
     id: 'qldpc-tanner-graph',
@@ -366,6 +375,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'pipeline-walkthrough' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading End-to-End QEC Stage Walkthrough...</div>}>
+              <QecPipelineStageWalkthrough />
             </Suspense>
           </div>
         )}
