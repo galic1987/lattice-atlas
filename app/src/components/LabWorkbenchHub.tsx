@@ -36,6 +36,7 @@ const QldpcTannerGraphVisualizer = lazy(() => import('@/components/QldpcTannerGr
 const ManimExplainerGallery = lazy(() => import('@/components/ManimExplainerGallery'));
 const FtqcHardwareCompilerStudio = lazy(() => import('@/components/FtqcHardwareCompilerStudio'));
 const StimThresholdSandbox = lazy(() => import('@/components/StimThresholdSandbox'));
+const VisualExperimentsStudio = lazy(() => import('@/components/VisualExperimentsStudio'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -46,6 +47,7 @@ export type ToolTab =
   | 'stim-dem-graph'
   | 'standard-code-zoo'
   | 'qldpc-tanner-graph'
+  | 'visual-experiments'
   | 'manim-gallery'
   | 'ftqc-compiler'
   | 'stim-threshold'
@@ -121,6 +123,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Layers,
     description: 'Interactive bipartite Tanner graph visualizer for high-rate QLDPC codes & Belief-Propagation decoding.',
+  },
+  {
+    id: 'visual-experiments',
+    title: 'Interactive Visual Experiments Studio',
+    category: 'Foundations',
+    icon: Sparkles,
+    description: 'Fibonacci anyon braiding, 3D color code gates, e-m duality domain walls, & fault emitter machine.',
   },
   {
     id: 'manim-gallery',
@@ -345,6 +354,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading QLDPC Bivariate Bicycle Studio...</div>}>
               <QldpcTannerGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'visual-experiments' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Visual Experiments Studio...</div>}>
+              <VisualExperimentsStudio />
             </Suspense>
           </div>
         )}
