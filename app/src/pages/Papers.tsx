@@ -25,6 +25,7 @@ import {
 import { useProgress } from '@/store/progress';
 import DifficultyMeter from '@/components/DifficultyMeter';
 import SuperTLDR from '@/components/SuperTLDR';
+import PaperVeoVideoGallery from '@/components/PaperVeoVideoGallery';
 import readingPromptsJson from '@/data/reading_prompts.json';
 
 const READING_PROMPTS = readingPromptsJson as Record<string, string[]>;
@@ -764,6 +765,11 @@ export default function Papers() {
           </motion.div>
         </div>
       </header>
+
+      {/* ---------------- Google Veo 3 AI Video Generation Studio ---------------- */}
+      <section className="mx-auto max-w-7xl px-6 py-8 md:px-8">
+        <PaperVeoVideoGallery />
+      </section>
 
       {/* ---------------- Section 4: mini-map ---------------- */}
       <MiniMap onJump={jumpToPaper} />
