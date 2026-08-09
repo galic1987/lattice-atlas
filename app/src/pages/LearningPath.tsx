@@ -53,6 +53,7 @@ import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import ActChapterCard from '@/components/ActChapterCard';
 import TopicLensInsight from '@/components/TopicLensInsight';
 import Expandable3B1BCard from '@/components/Expandable3B1BCard';
+import SuperTLDR from '@/components/SuperTLDR';
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const;
 
@@ -921,6 +922,14 @@ export default function LearningPath() {
     <div className="lattice-bg">
       {/* Section 1 — header + progress hero */}
       <section className="mx-auto max-w-6xl px-6 pt-32 pb-12 md:px-8">
+        <SuperTLDR
+          summary="Structured 5-Act curriculum taking you from fundamental quantum mechanics to fault-tolerant quantum computing architectures."
+          takeaways={[
+            'Act 1 & 2: Quantum foundations, superposition paradoxes, and stabilizer algebra.',
+            'Act 3 & 4: Rotated surface codes, syndrome decoding, and anyon braiding topology.',
+            'Act 5: Fault-tolerant compilation, magic state distillation, and physical resource overheads.',
+          ]}
+        />
         <p className="eyebrow !text-stabilizer">// GUIDED ROUTE</p>
         <h1 className="mt-4 font-display text-display-lg text-text-hi max-md:text-4xl">
           The Learning Path
@@ -930,6 +939,10 @@ export default function LearningPath() {
           surface-code papers. The path respects dependencies — each step assumes only what
           came before it. The app saves your progress on this device. You can leave and come
           back any time. Topic marks mean “explored”; checks and applied challenges are shown separately.
+        </p>
+        <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
+          <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">// TL;DR</span>
+          Twenty-six ordered steps that take you from basic vectors to reading surface-code papers.
         </p>
 
         <div className="mt-8">

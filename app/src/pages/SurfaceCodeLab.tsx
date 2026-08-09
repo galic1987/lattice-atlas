@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import LabWorkbenchHub from '@/components/LabWorkbenchHub';
+import SuperTLDR from '@/components/SuperTLDR';
 import { sound } from '@/lib/sound';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -1099,6 +1100,15 @@ export default function SurfaceCodeLab() {
 
       {/* lab */}
       <section className="mx-auto max-w-7xl px-6 py-10 md:px-8">
+        <SuperTLDR
+          summary="Interactive FTQC Workbench Hub for 3D surface code patches, spacetime braid weaving, lattice surgery, and Stim execution."
+          takeaways={[
+            'Simulate d=3, 5, 7 rotated surface code lattices under depolarizing noise.',
+            'Visualize 3D spacetime defect braiding worldlines and lattice surgery boundary welds.',
+            'Run executable Stim circuit models and analyze Detector Error Model (.dem) graphs.',
+          ]}
+        />
+
         {/* View Mode Toggle Bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-ink-600 bg-ink-800 p-4">
           <div className="flex min-w-0 w-full flex-col items-start gap-2 sm:w-auto sm:flex-row sm:items-center">

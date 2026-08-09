@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
+import SuperTLDR from '@/components/SuperTLDR';
 import {
   DAILY_PLAN,
   DAILY_MAX_SCORE,
@@ -632,6 +633,14 @@ export default function DecoderDuel() {
     <div className="bg-ink-900">
       <header className="lattice-bg">
         <div className="mx-auto max-w-5xl px-6 pb-8 pt-16 md:px-8">
+          <SuperTLDR
+            summary="Daily 60-second speed challenge testing your visual intuition for Minimum Weight Perfect Matching (MWPM) decoding."
+            takeaways={[
+              'Identify rose-ringed syndrome detector fires on a d=3 surface code lattice.',
+              'Apply exact data qubit correction chains (X, Z) to prevent logical Pauli flips.',
+              'Earn verified Stim checksum badges and track your daily high score leaderboard.',
+            ]}
+          />
           <motion.p initial={reduce ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduce ? 0 : 0.5, ease: [...EASE] }} className="eyebrow !text-syndrome">
             {'// THE GAME'}
           </motion.p>

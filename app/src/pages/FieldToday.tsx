@@ -187,6 +187,10 @@ function Hero() {
           </motion.span>
         </h1>
 
+        <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
+          <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>This page shows what quantum error correction researchers are working on right now.
+        </p>
+
         <motion.p
           initial={reduce ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
