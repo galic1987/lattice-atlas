@@ -356,7 +356,7 @@ export default function VisualExperimentsStudio() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_1fr]">
           <div className="relative flex flex-col items-center justify-center rounded-xl border border-ink-600 bg-ink-900 p-4 min-h-[380px]">
             <div className="absolute top-4 left-4 font-mono text-xs text-text-low">
-              <span className="text-text-hi font-bold">Continuous Particle Stream Fault Emitter</span> · Real-Time MWPM Decoder Defense
+              <span className="text-text-hi font-bold">Continuous Particle Stream Fault Emitter</span> · random fault accumulation (no decoder)
             </div>
 
             <div className="relative w-full max-w-[360px] aspect-square my-4 grid grid-cols-4 gap-2 p-2 bg-ink-950 rounded-xl border border-ink-700">
@@ -393,7 +393,7 @@ export default function VisualExperimentsStudio() {
 
           <div className="flex flex-col gap-4 font-mono text-xs">
             <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
-              <h4 className="eyebrow mb-2 !text-syndrome">// REAL-TIME DECODER DEFENSE METRICS</h4>
+              <h4 className="eyebrow mb-2 !text-syndrome">// FAULT EMITTER — RANDOM ACCUMULATION (NO DECODER)</h4>
 
               <div className="space-y-3">
                 <div className="flex justify-between items-center bg-ink-900 p-2.5 rounded-lg border border-ink-700">
@@ -402,9 +402,15 @@ export default function VisualExperimentsStudio() {
                 </div>
 
                 <div className="flex justify-between items-center bg-ink-900 p-2.5 rounded-lg border border-ink-700">
-                  <span>Faults Neutralized:</span>
+                  <span>Faults emitted:</span>
                   <span className="font-bold text-syndrome">{faultCount} Pauli errors</span>
                 </div>
+
+                <p className="text-[11px] leading-relaxed text-text-low">
+                  This is a random fault emitter for intuition — no decoder runs here, and nothing is
+                  neutralized. The real MWPM decoder and Monte Carlo live in the Lab, the Experiment Bench,
+                  and the Threshold Sandbox.
+                </p>
 
                 <div>
                   <div className="flex justify-between text-text-mid mb-1">
