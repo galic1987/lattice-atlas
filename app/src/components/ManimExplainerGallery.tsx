@@ -89,6 +89,28 @@ const VIDEOS: VideoExplainer[] = [
       'Demonstrates real-time surface-code error suppression below threshold (Λ = 2.14).',
     ],
   },
+  {
+    id: 'kitaev-toric-code-veo31',
+    title: 'Kitaev Anyon Weaving & Toric Code (Google Veo 3.1 AI Generation)',
+    filename: 'animations/kitaev_toric_code_veo31.mp4',
+    description: 'Cinematic 8K 3D photorealistic video generated live via Google Veo 3.1 AI displaying non-Abelian electric & magnetic anyon ribbons in 2+1D spacetime.',
+    keyTakeaways: [
+      'Generated live via Google Veo 3.1 AI video generation API.',
+      'Renders electric (e) and magnetic (m) quasiparticle world-lines in (2+1)D spacetime.',
+      'Demonstrates topological memory protection immune to local noise perturbations.',
+    ],
+  },
+  {
+    id: 'magic-state-distillation-veo31',
+    title: '15-to-1 Magic State Distillation Factory (Google Veo 3.1 AI Generation)',
+    filename: 'animations/magic_state_distillation_veo31.mp4',
+    description: 'Cinematic 8K 3D photorealistic video generated live via Google Veo 3.1 AI displaying crystal pyramids purifying noisy ancillas into pristine T-gate states.',
+    keyTakeaways: [
+      'Generated live via Google Veo 3.1 AI video generation API.',
+      'Visualizes 15 noisy T-states purified through Reed-Muller [[15,1,3]] code block.',
+      'Achieves cubic error suppression O(ε³) to enable universal non-Clifford quantum logic.',
+    ],
+  },
 ];
 
 export default function ManimExplainerGallery() {
