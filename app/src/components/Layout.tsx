@@ -25,6 +25,7 @@ const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }
   { to: '/map', label: 'Map', ariaLabel: 'Knowledge map' },
   { to: '/path', label: 'Path', ariaLabel: 'Learning path' },
   { to: '/lab', label: 'Lab', ariaLabel: 'Surface code lab' },
+  { to: '/experiments', label: 'Bench', ariaLabel: 'Experiment bench — interactive visual experiments' },
   { to: '/duel', label: 'Duel', ariaLabel: 'Decoder Duel game' },
   { to: '/papers', label: 'Papers' },
   { to: '/field-today', label: 'Frontier', ariaLabel: 'Field today' },
