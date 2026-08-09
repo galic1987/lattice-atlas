@@ -24,6 +24,7 @@ import QuantumCircuitComposer from '@/components/QuantumCircuitComposer';
 import MagicStateDistillationFactory from '@/components/MagicStateDistillationFactory';
 import CertificateGenerator from '@/components/CertificateGenerator';
 import ExecutableSimulatorStudio from '@/components/ExecutableSimulatorStudio';
+import StimDetectorGraphVisualizer from '@/components/StimDetectorGraphVisualizer';
 import { buildLattice, decode, type Pauli } from '@/lib/surfaceCode';
 import { sound } from '@/lib/sound';
 
@@ -32,6 +33,7 @@ export type ToolTab =
   | 'braid-3d'
   | 'circuit-composer'
   | 'executable-simulator'
+  | 'stim-dem-graph'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -76,6 +78,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Terminal,
     description: 'Run executable Stim & QSim examples (Rotated Surface Code, Bell State, Lattice Surgery, Magic State, Color Code).',
+  },
+  {
+    id: 'stim-dem-graph',
+    title: 'Stim DEM Syndrome Graph Studio',
+    category: 'Simulation',
+    icon: Sparkles,
+    description: 'Interactive Stim Detector Error Model (DEM) graph visualizer with live fault injection and MWPM matching.',
   },
   {
     id: 'surgery-welder',
@@ -248,6 +257,12 @@ export default function LabWorkbenchHub() {
         {activeTab === 'executable-simulator' && (
           <div className="p-4">
             <ExecutableSimulatorStudio />
+          </div>
+        )}
+
+        {activeTab === 'stim-dem-graph' && (
+          <div className="p-4">
+            <StimDetectorGraphVisualizer />
           </div>
         )}
 
