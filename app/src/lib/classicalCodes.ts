@@ -82,6 +82,19 @@ export const HAMMING_CHECK_POSITIONS: [number[], number[], number[]] = [
   [2, 3, 6, 7],
   [4, 5, 6, 7],
 ];
+
+/**
+ * |a ∩ b| mod 2 for two check supports. In the Steane CSS construction an
+ * X-type stabilizer (from Hamming check a) and a Z-type stabilizer (from check
+ * b) commute iff their supports overlap in an EVEN number of qubits. For the
+ * Hamming(7,4) checks this is 0 for every pair — the code is dual-containing —
+ * which is precisely why every X- and Z-stabilizer of the [[7,1,3]] Steane code
+ * commutes, making it a valid CSS code.
+ */
+export function checkOverlapParity(a: number[], b: number[]): number {
+  const setB = new Set(b);
+  return a.reduce((acc, p) => acc + (setB.has(p) ? 1 : 0), 0) % 2;
+}
 export const HAMMING_PARITY_POSITIONS = [1, 2, 4];
 export const HAMMING_DATA_POSITIONS = [3, 5, 6, 7];
 

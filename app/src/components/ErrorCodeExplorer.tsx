@@ -7,6 +7,7 @@ import {
   repetitionDecode,
   HAMMING_CHECK_POSITIONS,
   HAMMING_PARITY_POSITIONS,
+  checkOverlapParity,
   CODE_ZOO,
 } from '@/lib/classicalCodes';
 
@@ -249,6 +250,97 @@ function RepetitionLab() {
   );
 }
 
+/* ---------------- Hamming → Steane CSS construction ---------------- */
+
+const STEANE_QUBITS = [1, 2, 3, 4, 5, 6, 7];
+
+function StabRow({ label, positions, kind }: { label: string; positions: number[]; kind: 'X' | 'Z' }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="w-12 shrink-0 font-mono text-[10px] text-text-low">{label}</span>
+      {STEANE_QUBITS.map((q) => {
+        const on = positions.includes(q);
+        const color = kind === 'X' ? PARITY : DATA;
+        return (
+          <span
+            key={q}
+            className="flex h-6 w-6 items-center justify-center rounded font-mono text-[11px] font-bold"
+            style={{
+              color: on ? '#05080F' : '#3D5178',
+              background: on ? color : 'transparent',
+              border: `1px solid ${on ? color : '#22304d'}`,
+            }}
+          >
+            {on ? kind : '·'}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function SteaneBuilder() {
+  // The 3 Hamming checks become 3 X-type and 3 Z-type stabilizers.
+  const overlap = HAMMING_CHECK_POSITIONS.map((cx) =>
+    HAMMING_CHECK_POSITIONS.map((cz) => checkOverlapParity(cx, cz)),
+  );
+  const allCommute = overlap.every((row) => row.every((v) => v === 0));
+
+  return (
+    <div className="mt-6 rounded-xl border border-ink-700 bg-ink-950 p-5">
+      <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-star">
+        <Zap className="h-3.5 w-3.5" /> From Hamming[7,4] to Steane [[7,1,3]] — the CSS construction
+      </div>
+      <p className="mt-2 text-xs leading-relaxed text-text-mid">
+        Steane’s quantum code is the Hamming code made quantum: the same three parity checks become three
+        <span style={{ color: PARITY }}> X-type</span> stabilizers and three <span style={{ color: DATA }}> Z-type</span> stabilizers
+        on 7 qubits. 7 qubits − 6 stabilizers = <strong>1 logical qubit</strong>, distance 3.
+      </p>
+
+      <div className="mt-4 space-y-1.5">
+        <span className="font-mono text-[10px] uppercase text-text-low">Stabilizers (qubits 1–7):</span>
+        <StabRow label="gˣ₁" positions={HAMMING_CHECK_POSITIONS[0]} kind="X" />
+        <StabRow label="gˣ₂" positions={HAMMING_CHECK_POSITIONS[1]} kind="X" />
+        <StabRow label="gˣ₃" positions={HAMMING_CHECK_POSITIONS[2]} kind="X" />
+        <StabRow label="gᶻ₁" positions={HAMMING_CHECK_POSITIONS[0]} kind="Z" />
+        <StabRow label="gᶻ₂" positions={HAMMING_CHECK_POSITIONS[1]} kind="Z" />
+        <StabRow label="gᶻ₃" positions={HAMMING_CHECK_POSITIONS[2]} kind="Z" />
+        <div className="mt-2 flex items-center gap-1.5">
+          <span className="w-12 shrink-0 font-mono text-[10px]" style={{ color: OK }}>X̄, Z̄</span>
+          <span className="font-mono text-[10px] text-text-mid">
+            logical operators are transversal: X̄ = X⊗⁷, Z̄ = Z⊗⁷
+          </span>
+        </div>
+      </div>
+
+      {/* Commutation proof */}
+      <div className="mt-5 grid gap-4 sm:grid-cols-[auto,1fr] sm:items-center">
+        <div>
+          <span className="font-mono text-[10px] uppercase text-text-low block mb-1">
+            overlap |gˣᵢ ∩ gᶻⱼ| mod 2
+          </span>
+          <div className="inline-grid grid-cols-3 gap-1">
+            {overlap.flat().map((v, i) => (
+              <span
+                key={i}
+                className="flex h-7 w-7 items-center justify-center rounded font-mono text-xs font-bold"
+                style={{ color: v === 0 ? OK : ERR, background: (v === 0 ? OK : ERR) + '18' }}
+              >
+                {v}
+              </span>
+            ))}
+          </div>
+        </div>
+        <p className="text-[11px] leading-relaxed" style={{ color: allCommute ? OK : ERR }}>
+          {allCommute
+            ? 'Every X-stabilizer overlaps every Z-stabilizer on an even number of qubits, so they all commute — that is exactly the condition (the Hamming code containing its dual) that makes this a valid CSS code. This same X/Z stabilizer idea, placed on a 2D lattice, is the surface code.'
+            : 'Non-commuting stabilizers — not a valid CSS code.'}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- the explorer ---------------- */
 
 export default function ErrorCodeExplorer() {
@@ -312,6 +404,8 @@ export default function ErrorCodeExplorer() {
           [[…]] denote quantum codes. Classical rows are computed live above; quantum rows are reference values.
         </p>
       </div>
+
+      <SteaneBuilder />
     </div>
   );
 }
