@@ -53,6 +53,9 @@ export default function CommandPalette() {
     { id: 'c10', title: 'Stim DEM Syndrome Graph Studio', category: 'Tool', url: '/lab?tab=stim-dem-graph' },
     { id: 'c11', title: 'Standard Quantum Code Zoo Studio (Steane, Shor, 5-Qubit)', category: 'Tool', url: '/lab?tab=standard-code-zoo' },
     { id: 'c12', title: 'Quantum LDPC Bivariate Bicycle Studio (IBM Gross 72, 144)', category: 'Tool', url: '/lab?tab=qldpc-tanner-graph' },
+    { id: 'c13', title: 'Manim Mathematical Animation Gallery', category: 'Tool', url: '/lab?tab=manim-gallery' },
+    { id: 'c14', title: 'Full-System FTQC Hardware Compiler (RSA-2048 & FeMoco)', category: 'Tool', url: '/lab?tab=ftqc-compiler' },
+    { id: 'c15', title: 'Real-Time Stim Threshold Sandbox (P_L vs p Plot)', category: 'Tool', url: '/lab?tab=stim-threshold' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,

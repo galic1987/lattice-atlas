@@ -33,6 +33,9 @@ const ExecutableSimulatorStudio = lazy(() => import('@/components/ExecutableSimu
 const StimDetectorGraphVisualizer = lazy(() => import('@/components/StimDetectorGraphVisualizer'));
 const StandardCodeZooStudio = lazy(() => import('@/components/StandardCodeZooStudio'));
 const QldpcTannerGraphVisualizer = lazy(() => import('@/components/QldpcTannerGraphVisualizer'));
+const ManimExplainerGallery = lazy(() => import('@/components/ManimExplainerGallery'));
+const FtqcHardwareCompilerStudio = lazy(() => import('@/components/FtqcHardwareCompilerStudio'));
+const StimThresholdSandbox = lazy(() => import('@/components/StimThresholdSandbox'));
 
 export type ToolTab =
   | 'code-zoo'
@@ -43,6 +46,9 @@ export type ToolTab =
   | 'stim-dem-graph'
   | 'standard-code-zoo'
   | 'qldpc-tanner-graph'
+  | 'manim-gallery'
+  | 'ftqc-compiler'
+  | 'stim-threshold'
   | 'surgery-welder'
   | 'multi-manifold'
   | 'anyon-braid'
@@ -115,6 +121,27 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Layers,
     description: 'Interactive bipartite Tanner graph visualizer for high-rate QLDPC codes & Belief-Propagation decoding.',
+  },
+  {
+    id: 'manim-gallery',
+    title: 'Manim Mathematical Animation Gallery',
+    category: 'Simulation',
+    icon: Sparkles,
+    description: '60fps Manim vector video explainers for stabilizer checks, MWPM graph matching, and lattice surgery.',
+  },
+  {
+    id: 'ftqc-compiler',
+    title: 'Full-System FTQC Hardware Compiler',
+    category: 'Engineering',
+    icon: Calculator,
+    description: 'Full-system compilation model for Shor RSA-2048 & FeMoco (physical qubits, runtime, and cryo power).',
+  },
+  {
+    id: 'stim-threshold',
+    title: 'Real-Time Stim Threshold Sandbox',
+    category: 'Simulation',
+    icon: Terminal,
+    description: 'Real-time 100k+ trials/sec Stim threshold curve plotter (P_L vs p) for d=3, 5, 7, 9, 11.',
   },
   {
     id: 'surgery-welder',
@@ -318,6 +345,30 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading QLDPC Bivariate Bicycle Studio...</div>}>
               <QldpcTannerGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'manim-gallery' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Manim Animation Gallery...</div>}>
+              <ManimExplainerGallery />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'ftqc-compiler' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading FTQC Hardware Compiler...</div>}>
+              <FtqcHardwareCompilerStudio />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'stim-threshold' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim Threshold Sandbox...</div>}>
+              <StimThresholdSandbox />
             </Suspense>
           </div>
         )}
