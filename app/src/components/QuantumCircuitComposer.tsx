@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Play, Trash2 } from 'lucide-react';
 import { sound } from '@/lib/sound';
+import { simulate, formatStatevector, formatProbabilities, type SimGate } from '@/lib/statevector';
 
 export type GateType = 'H' | 'X' | 'Z' | 'S' | 'T' | 'CX';
 
@@ -11,13 +12,26 @@ export interface CircuitGate {
   targetQubit?: number;
 }
 
+const N_QUBITS = 3;
+
+const INITIAL_GATES: CircuitGate[] = [
+  { id: 'g1', type: 'H', qubit: 0 },
+  { id: 'g2', type: 'CX', qubit: 0, targetQubit: 1 },
+];
+
+// Run the exact statevector simulator over the current gate list (in order).
+function describe(circuitGates: CircuitGate[]): { vec: string; probs: string } {
+  const state = simulate(circuitGates as SimGate[], N_QUBITS);
+  return {
+    vec: formatStatevector(state, N_QUBITS),
+    probs: formatProbabilities(state, N_QUBITS),
+  };
+}
+
 export default function QuantumCircuitComposer() {
-  const [gates, setGates] = useState<CircuitGate[]>([
-    { id: 'g1', type: 'H', qubit: 0 },
-    { id: 'g2', type: 'CX', qubit: 0, targetQubit: 1 },
-  ]);
-  const [qubitCount] = useState<number>(3);
-  const [simulationState, setSimulationState] = useState<string>('1/√2 (|000⟩ + |011⟩) — Bell State / Entangled Pair');
+  const [gates, setGates] = useState<CircuitGate[]>(INITIAL_GATES);
+  const [qubitCount] = useState<number>(N_QUBITS);
+  const [output, setOutput] = useState<{ vec: string; probs: string }>(() => describe(INITIAL_GATES));
   const gateCounter = useRef<number>(100);
 
   const addGate = (type: GateType, qubit: number) => {
@@ -29,36 +43,26 @@ export default function QuantumCircuitComposer() {
       qubit,
       targetQubit: type === 'CX' ? (qubit + 1) % qubitCount : undefined,
     };
-    setGates((prev) => [...prev, newGate]);
-    runSimulation([...gates, newGate]);
+    const updated = [...gates, newGate];
+    setGates(updated);
+    setOutput(describe(updated));
   };
 
   const removeGate = (id: string) => {
     sound.playErrorFlip();
     const updated = gates.filter((g) => g.id !== id);
     setGates(updated);
-    runSimulation(updated);
+    setOutput(describe(updated));
   };
 
   const clearCircuit = () => {
     sound.playErrorFlip();
     setGates([]);
-    setSimulationState('|000⟩ — Ground State');
+    setOutput(describe([]));
   };
 
   const runSimulation = (circuitGates: CircuitGate[]) => {
-    const hasH = circuitGates.some((g) => g.type === 'H' && g.qubit === 0);
-    const hasCX = circuitGates.some((g) => g.type === 'CX');
-
-    if (hasH && hasCX) {
-      setSimulationState('1/√2 (|000⟩ + |011⟩) — Bell State (Maximal Entanglement)');
-    } else if (hasH) {
-      setSimulationState('1/√2 (|000⟩ + |100⟩) — Superposition State');
-    } else if (circuitGates.some((g) => g.type === 'X')) {
-      setSimulationState('|100⟩ — Bit Flipped State');
-    } else {
-      setSimulationState('|000⟩ — Ground State');
-    }
+    setOutput(describe(circuitGates));
   };
 
   return (
@@ -68,7 +72,7 @@ export default function QuantumCircuitComposer() {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// INTERACTIVE QUANTUM CIRCUIT SIMULATOR</span>
-            <span className="rounded bg-plaquette/20 px-2 py-0.5 font-mono text-[10px] text-plaquette font-bold">5-QUBIT COMPOSER</span>
+            <span className="rounded bg-plaquette/20 px-2 py-0.5 font-mono text-[10px] text-plaquette font-bold">3-QUBIT · EXACT STATEVECTOR</span>
           </div>
           <h3 className="font-display text-xl font-bold text-text-hi">Visual Quantum Circuit Composer</h3>
         </div>
@@ -93,7 +97,9 @@ export default function QuantumCircuitComposer() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-mid">
-        Build quantum circuits by adding Hadamard ($H$), Pauli ($X, Z$), Phase ($S, T$), and CNOT ($CX$) gates onto 3 qubit wires. Calculates statevectors and entanglement in real-time.
+        Build circuits from Hadamard (H), Pauli (X, Z), Phase (S, T), and CNOT (CX) gates on 3 wires.
+        Each edit runs an exact 2³ = 8-amplitude statevector simulation — gate matrices applied in the
+        order you added them — so phases (S, T) and entanglement (CX) are computed, not canned.
       </p>
 
       {/* Circuit Grid Wires */}
@@ -142,8 +148,11 @@ export default function QuantumCircuitComposer() {
 
         {/* Statevector Simulation Output */}
         <div className="mt-4 rounded-lg border border-stabilizer/40 bg-stabilizer/10 p-4 font-mono text-xs">
-          <span className="text-[10px] uppercase text-text-low block">Simulated Quantum Statevector |Ψ⟩:</span>
-          <span className="font-bold text-sm text-stabilizer block mt-1">{simulationState}</span>
+          <span className="text-[10px] uppercase text-text-low block">Statevector |Ψ⟩ (exact):</span>
+          <span className="font-bold text-sm text-stabilizer block mt-1 break-words">{output.vec}</span>
+          {output.probs && (
+            <span className="mt-2 block text-[11px] text-text-mid break-words">{output.probs}</span>
+          )}
         </div>
       </div>
     </div>

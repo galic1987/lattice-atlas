@@ -23,8 +23,10 @@ export default function QECOverheadCalculator() {
   // Qubits per distance-d rotated patch = 2 * d^2
   const qubitsPerPatch = 2 * Math.pow(distance, 2);
 
-  // Magic state distillation factory overhead (~15-to-1 factory requires ~12 * d^2 qubits)
-  const factoryQubits = Math.ceil(logicalQubits * 0.4) * (12 * Math.pow(distance, 2));
+  // Magic-state distillation overhead. Assume ~1 parallel T-factory per ~2.5 logical
+  // qubits (FACTORY_RATIO = 0.4), each 15-to-1 factory footprint ≈ 12·d² qubits.
+  const FACTORY_RATIO = 0.4; // assumed factories per logical qubit — a rough planning figure
+  const factoryQubits = Math.ceil(logicalQubits * FACTORY_RATIO) * (12 * Math.pow(distance, 2));
 
   const totalPhysicalQubits = logicalQubits * qubitsPerPatch + factoryQubits;
 
