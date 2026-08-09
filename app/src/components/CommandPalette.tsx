@@ -49,6 +49,8 @@ export default function CommandPalette() {
     { id: 'c6', title: 'Daily Spaced Review Deck', category: 'Route', url: '/review' },
     { id: 'c7', title: 'Seminal TQEC Research Papers', category: 'Route', url: '/papers' },
     { id: 'c8', title: 'TQEC Glossary & Terminology', category: 'Route', url: '/glossary' },
+    { id: 'c9', title: 'Executable Stim Simulator Studio', category: 'Tool', url: '/lab?tab=executable-simulator' },
+    { id: 'c10', title: 'Stim DEM Syndrome Graph Studio', category: 'Tool', url: '/lab?tab=stim-dem-graph' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
