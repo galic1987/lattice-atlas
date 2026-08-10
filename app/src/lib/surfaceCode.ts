@@ -105,7 +105,18 @@ export function sampleDepolarizing(n: number, p: number, rng: () => number = Mat
 /* Decoder                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Above this many detection events per type, fall back to greedy matching. */
+/**
+ * Above this many detection events per type, fall back to greedy matching.
+ *
+ * IMPORTANT — this is a fixed count against a defect population that scales as
+ * ~p·d². It is calibrated for the SHIPPED distances (d ≤ 7) and Monte-Carlo grid
+ * (p ≤ 0.20): across that grid the greedy fallback fires in ≤ 0.1% of shots, so
+ * the threshold plot is genuinely exact-decoded. It does NOT hold for larger
+ * codes — by d = 9 a non-trivial fraction of shots fall back and by d = 11 the
+ * decode is visibly sub-optimal (measured worse than d = 9). If you ever add a
+ * d ≥ 9 option, this constant must scale with d (or the decoder swapped for a
+ * blossom implementation) before the results can be trusted.
+ */
 export const MAX_EXACT_DEFECTS = 16;
 
 interface TypeGraph {
@@ -284,6 +295,13 @@ function matchDefects(g: TypeGraph, defects: number[]): { pairs: [number, number
           bestJ = j;
         }
       }
+    }
+    if (bestI === -1) {
+      // Unreachable on a connected lattice (every defect has a finite boundary
+      // distance), but guard the while-loop: match any stranded defects to the
+      // boundary rather than spin forever on a no-op alive.delete(-1).
+      for (const i of alive) pairs.push([defects[i], -1]);
+      break;
     }
     alive.delete(bestI);
     pairs.push([defects[bestI], bestJ === -1 ? -1 : defects[bestJ]]);

@@ -17,11 +17,8 @@ import {
   Move,
   type LucideIcon,
 } from 'lucide-react';
-import SpacetimeView3D from '@/components/SpacetimeView3D';
 import SpacetimeBraidWeaver from '@/components/SpacetimeBraidWeaver';
-import TorusTopologyViewer from '@/components/TorusTopologyViewer';
 import StimUploader from '@/components/StimUploader';
-import GenusExplorer from '@/components/GenusExplorer';
 import LatticeSurgeryWelder from '@/components/LatticeSurgeryWelder';
 import AnyonBraidingSandbox from '@/components/AnyonBraidingSandbox';
 import QECOverheadCalculator from '@/components/QECOverheadCalculator';
@@ -49,6 +46,11 @@ const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTran
 const VideoPromptRefinerStudio = lazy(() => import('@/components/VideoPromptRefinerStudio'));
 const LatticeSurgeryComposerStudio = lazy(() => import('@/components/LatticeSurgeryComposerStudio'));
 const FtqcResourceEstimatorStudio = lazy(() => import('@/components/FtqcResourceEstimatorStudio'));
+// three.js-backed views: lazy so the heavy 3D runtime is a separate chunk loaded
+// only when a 3D tab mounts, keeping it out of the Lab's initial bundle.
+const SpacetimeView3D = lazy(() => import('@/components/SpacetimeView3D'));
+const TorusTopologyViewer = lazy(() => import('@/components/TorusTopologyViewer'));
+const GenusExplorer = lazy(() => import('@/components/GenusExplorer'));
 
 export type ToolTab =
   | 'ftqc-resource-estimator'
@@ -408,13 +410,15 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'surface-3d' && (
           <div className="p-4">
-            <SpacetimeView3D
-              lat={defaultLattice}
-              errors={defaultErrors}
-              result={defaultResult}
-              currentStep={5}
-              p={0.01}
-            />
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading 3D spacetime view…</div>}>
+              <SpacetimeView3D
+                lat={defaultLattice}
+                errors={defaultErrors}
+                result={defaultResult}
+                currentStep={5}
+                p={0.01}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -574,10 +578,12 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'multi-manifold' && (
           <div className="p-4">
-            <TorusTopologyViewer />
-            <div className="mt-6">
-              <GenusExplorer />
-            </div>
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading manifold viewers…</div>}>
+              <TorusTopologyViewer />
+              <div className="mt-6">
+                <GenusExplorer />
+              </div>
+            </Suspense>
           </div>
         )}
 

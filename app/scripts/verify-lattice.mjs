@@ -181,7 +181,15 @@ c = stim.Circuit(open(sys.argv[1]).read())
 dem = c.detector_error_model(decompose_errors=True)  # throws on non-deterministic detectors
 assert c.num_detectors == ${zCount + S * (lat.d - 1) + zCount}, c.num_detectors
 assert c.num_observables == 1
-print("stim: circuit parses, detectors deterministic, DEM decomposes")
+# Circuit-level distance must equal d. The DEM decomposing is NOT enough — a wrong
+# CNOT schedule can decompose fine yet halve the distance. This is the real guard.
+err = c.search_for_undetectable_logical_errors(
+    dont_explore_detection_event_sets_with_size_above=${lat.d},
+    dont_explore_edges_with_degree_above=2,
+    dont_explore_edges_increasing_symptom_degree=True,
+)
+assert len(err) == ${lat.d}, f"circuit-level distance {len(err)} != {${lat.d}}"
+print("stim: circuit parses, detectors deterministic, DEM decomposes, distance == ${lat.d}")
 `;
     try {
       const out = execFileSync('python3', ['-c', py, stimFile], { encoding: 'utf8', timeout: 60000 });
@@ -194,7 +202,7 @@ print("stim: circuit parses, detectors deterministic, DEM decomposes")
           'python3',
           [
             '-c',
-            `import stim, sys\nstim.Circuit(open(sys.argv[1]).read()).detector_error_model(decompose_errors=True)\nprint("stim: d=${dd} circuit valid")`,
+            `import stim, sys\nc = stim.Circuit(open(sys.argv[1]).read())\nc.detector_error_model(decompose_errors=True)\ne = c.search_for_undetectable_logical_errors(dont_explore_detection_event_sets_with_size_above=${dd}, dont_explore_edges_with_degree_above=2, dont_explore_edges_increasing_symptom_degree=True)\nassert len(e) == ${dd}, f"d=${dd} circuit-level distance {len(e)} != ${dd}"\nprint("stim: d=${dd} circuit valid, distance == ${dd}")`,
             stimFileDd,
           ],
           { encoding: 'utf8', timeout: 60000 },
