@@ -88,27 +88,38 @@ export default function FtqcResourceEstimatorStudio() {
     // 4. Cryogenic Cooling Power (approx 15mW per physical transmon qubit at 15mK)
     const cryoPowerkW = (totalPhysicalQubits * 0.015).toFixed(1);
 
+    // Suppression per +2 code distance under the standard below-threshold model
+    // eps_L ~ (p/p_th)^(d/2), so Lambda = eps_L(d)/eps_L(d+2) = p_th/p. This is a
+    // simple model (p_th taken ~1% for a circuit-level surface code), not a fit —
+    // and it correctly drops below 1 above threshold rather than being a magic number.
+    const P_TH = 0.01;
+    const lambda = P_TH / physicalErrorRate;
+
     return {
       totalPhysicalQubits: totalPhysicalQubits.toLocaleString(),
       dataPhysicalQubits: totalDataPhysical.toLocaleString(),
       factoryPhysicalQubits: totalFactoryPhysical.toLocaleString(),
       timeFormatted,
       cryoPowerkW,
-      lambdaEstimate: (physicalErrorRate < 0.001 ? 2.8 : 2.14).toFixed(2),
+      lambdaEstimate: lambda.toFixed(2),
+      belowThreshold: physicalErrorRate < P_TH,
     };
   }, [currentAlgo, codeDistance, physicalErrorRate, distillationScheme]);
 
   // Generated Stim Code snippet
   const stimSnippet = useMemo(() => {
-    return `# Fault-Tolerant Resource Estimation Circuit
+    // An ILLUSTRATIVE Stim-style sketch of the layout — NOT a compiled or runnable
+    // circuit. Real Stim has no QUBIT_COUNT/range syntax and would list every one
+    // of the millions of qubits, so the footprint is shown as comments, not fake ops.
+    return `# ILLUSTRATIVE Stim-style sketch — NOT compiled, NOT executed, NOT runnable as-is.
 # Target: ${currentAlgo.name}
 # Code Distance d=${codeDistance}, Physical Error p=${physicalErrorRate * 100}%
 # Factory Scheme: ${distillationScheme} Reed-Muller
-
-QUBIT_COUNT ${estimates.totalPhysicalQubits.replace(/,/g, '')}
-# Logical Memory Patches
-R 0..${currentAlgo.logicalQubits - 1}
-# T-State Distillation Factory Cycles
+#
+# Physical qubits (this model): ${estimates.totalPhysicalQubits}
+# Logical patches: ${currentAlgo.logicalQubits} (real Stim resets each physical qubit explicitly)
+#
+# Distillation factory cycle (schematic):
 REPEAT ${Math.min(1000, currentAlgo.tGatesRequired)} {
   TICK
   MXX 0 1 2 3
@@ -267,22 +278,31 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
 
         <div className="rounded-xl border border-star/40 bg-star/10 p-4">
           <div className="flex items-center gap-1.5 text-star font-bold text-[10px] uppercase">
-            <ShieldCheck className="h-4 w-4" /> Threshold Gain (Λ)
+            <ShieldCheck className="h-4 w-4" /> Λ ≈ p_th / p
           </div>
           <div className="font-display text-2xl font-bold text-text-hi mt-1">
             {estimates.lambdaEstimate}
           </div>
           <div className="text-[10px] text-text-low mt-1">
-            Exponential error suppression
+            {estimates.belowThreshold
+              ? 'Suppression per +2 distance (simple model, p_th≈1%)'
+              : 'Above threshold — no suppression (Λ ≤ 1)'}
           </div>
         </div>
       </div>
+
+      <p className="mt-3 rounded-lg border border-star/30 bg-ink-900/60 px-3 py-2 text-[11px] leading-relaxed text-text-low">
+        <strong className="text-star">Rough order-of-magnitude model</strong> — not a validated resource
+        estimate. Footprint uses 2·d² data qubits/logical + a 0.4× distillation factory; latency assumes
+        ~1&nbsp;µs/round and 2d rounds/T-gate; Λ is the simple p_th/p below-threshold ratio. Real estimates
+        (e.g. Azure/pyLIQTR) account for routing, layout, and connectivity this omits.
+      </p>
 
       {/* Auto-Generated Stim Circuit */}
       <div className="mt-5 rounded-xl border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-plaquette font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-            <Code className="h-3.5 w-3.5" /> Compiled Stim Circuit Header Snippet
+            <Code className="h-3.5 w-3.5" /> Illustrative Stim-style sketch — not compiled or executed
           </span>
           <button
             type="button"
