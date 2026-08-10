@@ -10,7 +10,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     takeaways: [
       'Physical qubits under depolarizing noise generate syndrome detector fires.',
       'Minimum Weight Perfect Matching (MWPM) decodes syndromes without collapsing superpositions.',
-      'Scaling code distance d exponential suppresses logical error rates (p < p_th).',
+      'Scaling code distance d exponentially suppresses logical error rates (p < p_th).',
     ],
   },
   '/foundations': {
@@ -64,8 +64,8 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
   '/papers': {
     summary: 'Annotated bibliography of 23 seminal quantum error correction papers with PDF-verified reading prompts.',
     takeaways: [
-      'Chronological timeline from Shor 1995 & Kitaev 1997 to Willow 2024 & TopoLS 2025.',
-      'Each paper includes key contributions, why it matters, and PDF-verified technical notes.',
+      'Chronological timeline from Bravyi–Kitaev 1998 to Willow 2024 and 2026 scheduling research.',
+      'Each paper includes key contributions and why it matters; selected papers carry PDF-verified technical notes.',
       'Direct arXiv links and prerequisite topic mappings for deep academic research.',
     ],
   },
@@ -88,7 +88,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
   '/review': {
     summary: 'Spaced repetition active recall deck to permanently solidify key QEC physics, algorithms, and concepts.',
     takeaways: [
-      'SM-2 algorithmic scheduling surfaces cards based on your self-reported confidence.',
+      'An SM-2-inspired interval schedule surfaces cards based on your self-reported confidence.',
       'Covers threshold theorems, stabilizer generators, lattice surgery, and distillation factories.',
       'Maintains long-term retention of core fault-tolerance physics principles.',
     ],

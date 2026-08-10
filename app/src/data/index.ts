@@ -39,6 +39,8 @@ export interface Paper {
   difficulty: number;
   /** One of the five era keys in {@link eraNames}. */
   era: string;
+  /** Present on selected papers: a fact checked against the paper's PDF. */
+  verified_note?: string;
 }
 
 /** All 26 prerequisite-tree topics. */
