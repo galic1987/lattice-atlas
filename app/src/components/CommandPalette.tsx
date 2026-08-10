@@ -62,6 +62,7 @@ export default function CommandPalette() {
     { id: 'c19', title: 'Multi-Age & Multi-Perspective Cognitive Prism (5 Levels, 4 Angles)', category: 'Tool', url: '/lab?tab=cognitive-prism' },
     { id: 'c20', title: 'End-to-End Fault-Tolerant QEC Stage Architecture Walkthrough', category: 'Tool', url: '/lab?tab=pipeline-walkthrough' },
     { id: 'c21', title: '3D Spacetime Syndrome Decoder Sandbox (MWPM & Noise Injection)', category: 'Tool', url: '/lab?tab=spacetime-3d-decoder' },
+    { id: 'c22', title: 'Quantum Color Code Transversal Gate Simulator (6.6.6 & 4.8.8)', category: 'Tool', url: '/lab?tab=color-code-transversal' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
