@@ -63,8 +63,15 @@ export default function LatticeSurgeryComposerStudio() {
     }
   };
 
-  // 2. Execute Lattice Surgery
-  const handleExecuteSurgery = () => {
+  // A composition is previewable only when there is an actual weld joining at
+  // least two patches — otherwise there is no operation to describe.
+  const hasValidWeld = welds.length > 0 && patches.length >= 2;
+
+  // 2. Preview the illustrative operation. This does NOT execute or sample
+  //    anything — it describes what the toggled weld represents. It deliberately
+  //    reports no measured value, because none is computed.
+  const handlePreview = () => {
+    if (!hasValidWeld) return;
     sound.playDecoderLock();
     setExecutingSurgery(true);
     setSurgeryResult(null);
@@ -73,10 +80,10 @@ export default function LatticeSurgeryComposerStudio() {
       setExecutingSurgery(false);
       setSurgeryResult(
         activeWeldType === 'Z-Weld'
-          ? 'Joint Z_L1 · Z_L2 parity measured (+1). Target state flipped under logical CNOT control.'
-          : 'Joint X_L1 · X_L2 parity measured (+1). Control phase shift applied under logical CNOT target.'
+          ? 'A Z-weld merges the two smooth Z-boundaries, measures the joint Z_L1·Z_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
+          : 'An X-weld merges the two rough X-boundaries, measures the joint X_L1·X_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
       );
-    }, 800);
+    }, 400);
   };
 
   // 3. Auto-Generated Stim Code Circuit Definition
@@ -121,12 +128,20 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink-700 pb-5">
         <div>
-          <span className="eyebrow text-plaquette mb-1">// LATTICE SURGERY COMPOSER</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="eyebrow text-plaquette">// LATTICE SURGERY ILLUSTRATION</span>
+            <span className="rounded-full border border-star/50 bg-star/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-star">
+              Illustrative
+            </span>
+          </div>
           <h3 className="font-display text-xl font-bold text-text-hi">
-            Multi-Qubit Surface Code Lattice Surgery Composer Studio
+            Lattice Surgery Illustration &amp; Stim Snippet
           </h3>
           <p className="mt-1 text-sm text-text-mid">
-            Position planar surface code patches, draw Z-weld and X-weld surgery boundaries, and auto-compile fault-tolerant Stim quantum circuits.
+            Lay out up to four planar surface-code patches, toggle a Z-weld or X-weld
+            boundary, and see a representative Stim snippet for that operation. This
+            panel <strong>sketches the geometry</strong> — it does not simulate
+            stabilizers, sample an outcome, or execute a circuit.
           </p>
         </div>
 
@@ -184,20 +199,28 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
         </div>
 
         <div className="rounded-xl border border-ink-700 bg-ink-900 p-3 flex flex-col justify-between">
-          <span className="text-text-low text-[10px] uppercase block mb-1">Execute Surgery Protocol:</span>
+          <span className="text-text-low text-[10px] uppercase block mb-1">Preview Operation:</span>
           <button
             type="button"
-            onClick={handleExecuteSurgery}
-            className="flex items-center justify-center gap-1.5 rounded py-1 bg-plaquette text-ink-950 font-bold hover:bg-plaquette/90 transition-colors"
+            onClick={handlePreview}
+            disabled={!hasValidWeld}
+            title={hasValidWeld ? undefined : 'Toggle a boundary weld between two patches first'}
+            className={`flex items-center justify-center gap-1.5 rounded py-1 font-bold transition-colors ${
+              hasValidWeld
+                ? 'bg-plaquette text-ink-950 hover:bg-plaquette/90'
+                : 'cursor-not-allowed bg-ink-800 text-text-low'
+            }`}
           >
-            <Play className="h-3.5 w-3.5" /> Run Joint Parity Check
+            <Play className="h-3.5 w-3.5" /> Preview illustrative operation
           </button>
         </div>
       </div>
 
       {/* 2D Canvas Workspace */}
       <div className="mt-5 relative rounded-xl border border-ink-700 bg-ink-950 p-6 flex flex-col justify-center items-center overflow-hidden min-h-[380px]">
-        <svg width="480" height="300" viewBox="0 0 480 300" className="max-w-full">
+        {/* viewBox fits two rows of patches (4th patch sits at y≈240 + 140 tall),
+            so adding all four no longer clips off the bottom of the canvas. */}
+        <svg width="480" height="400" viewBox="0 0 420 400" className="max-w-full">
           {/* Surface Patches */}
           {patches.map((p) => (
             <g key={p.id} transform={`translate(${p.x}, ${p.y})`}>
@@ -257,13 +280,16 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
         {/* Execution Feedback */}
         {executingSurgery && (
           <div className="absolute inset-0 bg-ink-950/80 backdrop-blur flex items-center justify-center font-mono text-sm font-bold text-plaquette animate-fade-in">
-            <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Executing {activeWeldType} Joint Parity Measurement...
+            <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Sketching {activeWeldType} sequence…
           </div>
         )}
 
         {surgeryResult && (
-          <div className="mt-2 rounded-lg border border-stabilizer/40 bg-stabilizer/10 p-3 font-mono text-xs text-stabilizer text-center">
-            ✓ {surgeryResult}
+          <div className="mt-2 rounded-lg border border-star/40 bg-star/10 p-3 font-mono text-xs text-text-mid">
+            <span className="mb-1 block font-bold uppercase tracking-wide text-star text-[10px]">
+              Illustrative sequence — no stabilizer simulation or circuit execution
+            </span>
+            {surgeryResult}
           </div>
         )}
       </div>
@@ -272,7 +298,7 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
       <div className="mt-5 rounded-xl border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-plaquette font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-            <Code className="h-3.5 w-3.5" /> Auto-Generated Stim Fault-Tolerant Circuit Definition
+            <Code className="h-3.5 w-3.5" /> Representative Stim snippet — illustrative, not executed or validated
           </span>
           <button
             type="button"
@@ -286,6 +312,11 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
         <pre className="rounded-lg bg-ink-950 p-3.5 border border-ink-700 text-text-hi leading-relaxed overflow-x-auto text-[11px]">
           {stimCircuitCode}
         </pre>
+        <p className="mt-2 text-[10px] leading-relaxed text-text-low">
+          A canonical d=3 {activeWeldType} snippet for reference — it is not compiled
+          from the patch layout above and has not been parsed or validated. Take it to
+          Stim/Crumble to run it.
+        </p>
       </div>
 
       {/* Physics Explanation */}
