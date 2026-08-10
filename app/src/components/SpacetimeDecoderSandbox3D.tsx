@@ -27,6 +27,10 @@ export default function SpacetimeDecoderSandbox3D() {
   const [errorProbability, setErrorProbability] = useState<number>(0.05);
   const [injectedErrors, setInjectedErrors] = useState<Map<string, 'X' | 'Z' | 'Y'>>(new Map());
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
   const [copied, setCopied] = useState<boolean>(false);
 
   // 1. Generate 3D Spacetime Grid Nodes
@@ -252,7 +256,7 @@ export default function SpacetimeDecoderSandbox3D() {
     let rotationAngle = 0;
 
     const animate = () => {
-      if (isPlaying) {
+      if (isPlayingRef.current) {
         rotationAngle += 0.008;
         camera.position.x = Math.cos(rotationAngle) * (distance * 2.2);
         camera.position.z = Math.sin(rotationAngle) * (distance * 2.2);
@@ -291,19 +295,24 @@ export default function SpacetimeDecoderSandbox3D() {
       renderer.forceContextLoss();
       renderer.dispose();
     };
-  }, [distance, rounds, nodes, matchings, isPlaying]);
+  }, [distance, rounds, nodes, matchings]);
 
   return (
     <div className="rounded-2xl border border-ink-600 bg-ink-850 p-6 shadow-glow-cyan">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink-700 pb-5">
         <div>
-          <span className="eyebrow text-plaquette mb-1">// INTERACTIVE 3D DECODER SANDBOX</span>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="eyebrow text-plaquette">// INTERACTIVE 3D MATCHING VISUALIZER</span>
+            <span className="rounded bg-syndrome/20 px-2 py-0.5 font-mono text-[10px] font-bold text-syndrome">ILLUSTRATIVE MODEL</span>
+          </div>
           <h3 className="font-display text-xl font-bold text-text-hi">
-            3D Spacetime Syndrome Lattice & MWPM Decoder
+            3D Spacetime Defect Matching (MWPM)
           </h3>
           <p className="mt-1 text-sm text-text-mid">
-            Inject Pauli X/Z physical errors into a (2+1)D spacetime lattice and observe real-time Minimum Weight Perfect Matching defect pairing.
+            Inject defects into a (2+1)D lattice and watch a <strong>real, exact minimum-weight perfect matching</strong> pair
+            them. The defect pattern shown is an illustrative model — it is <strong>not</strong> a physically-derived
+            surface-code syndrome (real detectors fire from stabilizer parity of neighbouring data errors).
           </p>
         </div>
 
