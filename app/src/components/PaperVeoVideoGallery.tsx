@@ -107,7 +107,9 @@ export default function PaperVeoVideoGallery() {
             </h2>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            AI-generated cinematic clips &amp; the prompts behind them for seminal quantum error correction papers.
+            <span className="font-semibold text-star">Illustrative</span> AI-generated cinematic
+            clips &amp; the prompts behind them — atmospheric B-roll, not accurate depictions of the
+            physics. The papers above are the primary sources.
           </p>
         </div>
 
