@@ -790,8 +790,8 @@ export default function DecoderDuel() {
               <p className="font-mono text-[12px] leading-relaxed text-text-low">
                 scoring: 🟩 clean solve (≤ decoder&apos;s weight) {POINTS.clean} pts · 🟨 solved
                 but heavier {POINTS.heavy} pts · 🟥 logical error or forfeit 0 pts. Learn the
-                moves in the <Link to="/lab" className="text-plaquette hover:underline">Lab</Link>{' '}
-                and the <Link to="/map?topic=decoding-mwpm" className="text-plaquette hover:underline">decoding topic</Link>.
+                moves in the <Link to="/lab" className="text-plaquette underline">Lab</Link>{' '}
+                and the <Link to="/map?topic=decoding-mwpm" className="text-plaquette underline">decoding topic</Link>.
               </p>
               <p className="mt-3 border-l-2 border-magic/60 pl-3 text-xs leading-5 text-text-low">
                 The puzzle id includes the UTC day, schema version, and a manually maintained manifest id. A representative golden-vector check catches drift in sampled generator/reference behavior and core judge outcomes. Scores are comparable only when the full puzzle id matches, and remain local and unverified: there is no identity check, server replay, or signed leaderboard.

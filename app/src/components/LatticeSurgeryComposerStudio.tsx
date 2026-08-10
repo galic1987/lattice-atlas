@@ -128,35 +128,46 @@ export default function LatticeSurgeryComposerStudio() {
     }, 400);
   };
 
-  // 3. Dynamic Auto-Generated Stim Circuit
+  // 3. Representative Stim snippet generated from the current layout. It is
+  //    illustrative and unvalidated, but it must at least be *valid Stim* — the
+  //    UI tells the reader to run it in Stim/Crumble, so it may not contain
+  //    range pseudo-syntax (Stim has no "start..end" shorthand — qubits must be
+  //    listed explicitly on reset/measure lines).
   const stimCircuitCode = useMemo(() => {
     const numQubitsPerPatch = distance * distance;
     const totalQubits = patches.length * numQubitsPerPatch;
     const weldName = activeWeldType === 'Z-Weld' ? 'Z_L1_Z_L2' : 'X_L1_X_L2';
-    const measureOp = activeWeldType === 'Z-Weld' ? 'MRZ' : 'MXX';
+    // Joint two-qubit Pauli-product measurement for the weld (valid Stim gates).
+    const jointOp = activeWeldType === 'Z-Weld' ? 'MZZ' : 'MXX';
+    const qubitList = Array.from({ length: totalQubits }, (_, i) => i).join(' ');
 
-    const patchRanges = patches.map((p, idx) => {
-      const start = idx * numQubitsPerPatch;
-      const end = start + numQubitsPerPatch - 1;
-      return `# Patch ${p.id} (${p.label}): qubits ${start}..${end}`;
-    }).join('\n');
+    const patchRanges = patches
+      .map((p, idx) => {
+        const start = idx * numQubitsPerPatch;
+        return `# Patch ${p.id} (${p.label}): qubits ${start}..${start + numQubitsPerPatch - 1}`;
+      })
+      .join('\n');
+
+    // Representative joint-parity weld between the last qubit of patch 1 and the
+    // first qubit of patch 2 — only defined once a second patch exists.
+    const weldLine =
+      patches.length >= 2
+        ? `${jointOp} ${numQubitsPerPatch - 1} ${numQubitsPerPatch}`
+        : '# (add a second patch to compose a boundary weld)';
 
     return `# Surface Code Lattice Surgery (${activeWeldType})
-# Generated dynamically by Lattice Atlas Visualizer & Compiler
+# Representative snippet from the current layout — illustrative, not validated.
 # Active Patches: ${patches.length} | Code Distance: d=${distance} | Total Qubits: ${totalQubits}
 
 ${patchRanges}
 
-R 0..${totalQubits - 1}
+R ${qubitList}
 TICK
-# Round 1: Stabilizer Parity Measurements
-MXX 0 1 2 3 4 5 8 9
-MRZ 6 7 10 11 12 13
+# Round 1: representative stabilizer readout (schematic)
+M ${qubitList}
 TICK
-# Round 2: Surgery Boundary Weld (${weldName})
-${measureOp} ${distance - 1} ${distance} ${distance * 2 - 1} ${distance * 2}
-TICK
-DETECTOR(2, 0) rec[-1] rec[-3]
+# Round 2: joint-parity boundary weld (${weldName})
+${weldLine}
 OBSERVABLE_INCLUDE(0) rec[-1]`;
   }, [patches, distance, activeWeldType]);
 

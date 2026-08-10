@@ -17,8 +17,7 @@
     "prepare-images": "node scripts/prepare-images.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test --config tests/release.playwright.config.ts",
-    "check-codes": "node scripts/check-codes.mjs",
-    "build:pages": "npm run build -- --base=/lattice-atlas/"
+    "check-codes": "node scripts/check-codes.mjs"
   },
   "dependencies": {
     "framer-motion": "^13.0.0",
@@ -38,6 +37,7 @@
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
+    "axe-core": "^4.13.0",
     "esbuild": "^0.27.2",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

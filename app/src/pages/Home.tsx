@@ -116,10 +116,24 @@ function Hero() {
   const reduce = useReducedMotion();
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
+  // On small screens, skip the ~1 MB ambience clip entirely and show the poster
+  // only — the biggest mobile media-weight saving. Lazy initial value avoids a
+  // mount-time setState; the effect only reacts to later viewport changes.
+  const [smallScreen, setSmallScreen] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = (e: MediaQueryListEvent) => setSmallScreen(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const posterOnly = reduce || smallScreen;
+
   // Viewport-gated playback, same discipline as ConceptClip.
   useEffect(() => {
     const video = heroVideoRef.current;
-    if (!video || reduce) return;
+    if (!video || posterOnly) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) video.play().catch(() => undefined);
@@ -129,13 +143,13 @@ function Hero() {
     );
     io.observe(video);
     return () => io.disconnect();
-  }, [reduce]);
+  }, [posterOnly]);
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
       {/* Torus ambience backdrop — AI clip with the generated poster as fallback */}
       <div className="absolute inset-0" aria-hidden>
-        {reduce ? (
+        {posterOnly ? (
           <img
             src={asset('hero_quantum_lattice.jpg')}
             alt=""
@@ -147,6 +161,7 @@ function Hero() {
             ref={heroVideoRef}
             src={asset('clips/hero-torus-ambience.mp4')}
             poster={asset('hero_quantum_lattice.jpg')}
+            preload="none"
             muted
             loop
             playsInline
@@ -382,10 +397,11 @@ function Stat({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-15% 0px' });
+  const reduce = useReducedMotion();
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || reduce) return;
     const controls = animate(0, value, {
       duration: 1.2,
       delay,
@@ -393,11 +409,17 @@ function Stat({
       onUpdate: (v) => setDisplay(Math.round(v)),
     });
     return () => controls.stop();
-  }, [inView, value, delay]);
+  }, [inView, value, delay, reduce]);
+
+  // Under reduced motion always show the final value — no count-up, and never a
+  // transient intermediate number (e.g. "13" mid-animation when the real count is
+  // 23). Deriving it (rather than seeding state) is robust to useReducedMotion
+  // resolving after mount.
+  const shown = reduce ? value : display;
 
   return (
     <div ref={ref} className="px-6 py-10 text-center md:py-14">
-      <p className={`font-display text-5xl font-bold ${colorClass}`}>{display}</p>
+      <p className={`font-display text-5xl font-bold ${colorClass}`}>{shown}</p>
       <motion.p
         className="mt-3 font-mono text-[13px] uppercase tracking-[0.18em] text-text-mid"
         initial={{ opacity: 0 }}

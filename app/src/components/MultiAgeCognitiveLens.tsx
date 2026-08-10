@@ -121,7 +121,7 @@ export default function MultiAgeCognitiveLens({ concept }: { concept: AltitudeCo
                   : 'min-h-11 rounded-lg border border-ink-600 bg-ink-800 px-2 py-2 font-mono text-[11px] text-text-mid hover:border-ink-500'}
               >
                 <span className="block">{LEVEL_NAMES[index] ?? item.badge}</span>
-                <span className="mt-0.5 block text-[9px] font-normal opacity-70">{LEVEL_MARKERS[index]}</span>
+                <span className="mt-0.5 block text-[9px] font-normal">{LEVEL_MARKERS[index]}</span>
               </button>
             );
           })}

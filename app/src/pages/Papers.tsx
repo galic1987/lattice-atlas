@@ -772,11 +772,6 @@ export default function Papers() {
         </div>
       </header>
 
-      {/* ---------------- Google Veo 3 AI Video Generation Studio ---------------- */}
-      <section className="mx-auto max-w-7xl px-6 py-8 md:px-8">
-        <PaperVeoVideoGallery />
-      </section>
-
       {/* ---------------- Section 4: mini-map ---------------- */}
       <MiniMap onJump={jumpToPaper} />
 
@@ -969,6 +964,13 @@ export default function Papers() {
             </div>
           );
         })}
+      </section>
+
+      {/* ---------------- Supplementary AI B-roll — kept BELOW the primary paper
+           timeline so labeled, illustrative AI video never outranks the canonical
+           sources above it. ---------------- */}
+      <section className="mx-auto max-w-7xl px-6 py-8 md:px-8">
+        <PaperVeoVideoGallery />
       </section>
 
       {/* ---------------- Section 5: bottom CTA ---------------- */}

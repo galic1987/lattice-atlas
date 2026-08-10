@@ -58,9 +58,9 @@ export default function CognitiveLensToggle({
           <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-plaquette">
             // COGNITIVE LENS CONTROL
           </span>
-          <h3 className="mt-1 font-display text-lg font-semibold text-text-hi">
+          <h2 className="mt-1 font-display text-lg font-semibold text-text-hi">
             Choose Your Mindset
-          </h3>
+          </h2>
           <p className="mt-1 text-xs text-text-mid">
             This two-position shortcut moves the same five-level depth preference used across the Atlas.
           </p>

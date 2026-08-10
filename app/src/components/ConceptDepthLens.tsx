@@ -1,5 +1,5 @@
-import { useId } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useId, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useProgress, type ExplanationDepth } from '@/store/progress';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -32,6 +32,8 @@ const DEPTHS: Array<{
   descriptor: string;
   active: string;
   accent: string;
+  /** Literal Tailwind solid-fill class for the gauge + aperture (kept literal so JIT keeps it). */
+  bar: string;
 }> = [
   {
     id: 'story',
@@ -40,6 +42,7 @@ const DEPTHS: Array<{
     descriptor: 'concrete',
     active: 'border-plaquette bg-plaquette/10 text-plaquette',
     accent: 'text-plaquette',
+    bar: 'bg-plaquette',
   },
   {
     id: 'cause',
@@ -48,6 +51,7 @@ const DEPTHS: Array<{
     descriptor: 'why',
     active: 'border-stabilizer bg-stabilizer/10 text-stabilizer',
     accent: 'text-stabilizer',
+    bar: 'bg-stabilizer',
   },
   {
     id: 'model',
@@ -56,6 +60,7 @@ const DEPTHS: Array<{
     descriptor: 'symbols',
     active: 'border-star bg-star/10 text-star',
     accent: 'text-star',
+    bar: 'bg-star',
   },
   {
     id: 'formal',
@@ -64,6 +69,7 @@ const DEPTHS: Array<{
     descriptor: 'limits',
     active: 'border-magic bg-magic/10 text-magic',
     accent: 'text-magic',
+    bar: 'bg-magic',
   },
   {
     id: 'verify',
@@ -72,8 +78,50 @@ const DEPTHS: Array<{
     descriptor: 'test',
     active: 'border-syndrome bg-syndrome/10 text-syndrome',
     accent: 'text-syndrome',
+    bar: 'bg-syndrome',
   },
 ];
+
+/**
+ * A small aperture that "focuses deeper" as the lens depth increases: five
+ * concentric rings light up outward, and a focus core brightens, giving the
+ * depth control a literal lens metaphor. Uses currentColor so it inherits the
+ * active depth's accent. Purely decorative — aria-hidden.
+ */
+function LensAperture({ activeIndex, reduce }: { activeIndex: number; reduce: boolean }) {
+  const rings = [7, 11, 15, 19, 23];
+  return (
+    <svg viewBox="0 0 48 48" className="h-10 w-10 shrink-0" aria-hidden="true">
+      {rings.map((r, i) => {
+        const lit = i <= activeIndex;
+        return (
+          <motion.circle
+            key={r}
+            cx="24"
+            cy="24"
+            r={r}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={i === activeIndex ? 2 : 1.25}
+            initial={false}
+            animate={{ opacity: lit ? (i === activeIndex ? 1 : 0.55) : 0.12 }}
+            transition={{ duration: reduce ? 0 : 0.3, delay: reduce ? 0 : i * 0.03 }}
+          />
+        );
+      })}
+      <motion.circle
+        cx="24"
+        cy="24"
+        r="3"
+        fill="currentColor"
+        initial={false}
+        animate={reduce ? { opacity: 1 } : { scale: [1, 1.25, 1], opacity: 1 }}
+        transition={{ duration: reduce ? 0 : 0.5 }}
+        style={{ transformOrigin: '24px 24px' }}
+      />
+    </svg>
+  );
+}
 
 const CONCEPTS: Record<ConceptDepthConcept, ConceptCopy> = {
   'bit-amplitude': {
@@ -228,15 +276,29 @@ export default function ConceptDepthLens({ concept }: { concept: ConceptDepthCon
   const reduce = useReducedMotion();
   const titleId = useId();
   const content = CONCEPTS[concept];
-  const selected = DEPTHS.find((item) => item.id === depth) ?? DEPTHS[0];
+  const activeIndex = Math.max(0, DEPTHS.findIndex((item) => item.id === depth));
+  const selected = DEPTHS[activeIndex] ?? DEPTHS[0];
   const copy = content.depths[depth];
+
+  // Direction of travel between depths, captured at click time, so the content can
+  // zoom TOWARD the reader when moving deeper and pull back when moving shallower.
+  const [direction, setDirection] = useState(1);
+  const pickDepth = (id: Depth, index: number) => {
+    setDirection(index >= activeIndex ? 1 : -1);
+    setDepth(id);
+  };
 
   return (
     <section className="rounded-xl border border-ink-600 bg-ink-850/80 p-4 md:p-5" aria-labelledby={titleId}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-plaquette">Depth lens · same idea, closer view</p>
-          <h3 id={titleId} className="mt-1 font-display text-base font-semibold text-text-hi">{content.title}</h3>
+        <div className="flex items-center gap-3">
+          <span className={selected.accent}>
+            <LensAperture activeIndex={activeIndex} reduce={Boolean(reduce)} />
+          </span>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-plaquette">Depth lens · same idea, closer view</p>
+            <h3 id={titleId} className="mt-1 font-display text-base font-semibold text-text-hi">{content.title}</h3>
+          </div>
         </div>
         <p className="max-w-xs text-right text-[11px] leading-4 text-text-low">Numbers mark detail density, never learner ability.</p>
       </div>
@@ -248,42 +310,66 @@ export default function ConceptDepthLens({ concept }: { concept: ConceptDepthCon
             <button
               key={item.id}
               type="button"
-              onClick={() => setDepth(item.id)}
+              onClick={() => pickDepth(item.id, index)}
               aria-pressed={active}
               aria-label={`${item.label} depth, ${item.marker} detail, ${item.descriptor}`}
-              className={`flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors ${active ? item.active : 'border-ink-600 bg-ink-900/65 text-text-mid hover:border-ink-500 hover:text-text-hi'}`}
+              className={`relative flex min-h-12 items-center gap-2 rounded-lg border px-3 py-2 text-left transition-colors ${active ? item.active : 'border-ink-600 bg-ink-900/65 text-text-mid hover:border-ink-500 hover:text-text-hi'}`}
             >
               <span className={`font-mono text-[10px] ${active ? item.accent : 'text-text-low'}`}>0{index + 1}</span>
               <span>
                 <span className="block text-xs font-semibold">{item.label} <span className="font-mono font-normal opacity-75">{item.marker}</span></span>
-                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-wider opacity-60">{item.descriptor}</span>
+                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-wider">{item.descriptor}</span>
               </span>
+              {active && (
+                <motion.span
+                  layoutId="depthLensCursor"
+                  className="pointer-events-none absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-current"
+                  transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
             </button>
           );
         })}
       </div>
 
-      <motion.div
-        key={`${concept}-${depth}`}
-        initial={reduce ? false : { opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduce ? 0 : 0.22, ease: EASE }}
-        className="mt-4 rounded-lg border border-ink-600 bg-ink-900/70 p-4"
-        aria-live="polite"
-      >
-        <div className="flex items-center gap-2">
-          <span className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${selected.accent}`}>{selected.label} depth</span>
-          <span className="h-px flex-1 bg-ink-600" aria-hidden="true" />
+      {/* Detail-density gauge: fills toward "Verify" as the lens goes deeper. */}
+      <div className="mt-3 flex items-center gap-2">
+        <span className="shrink-0 font-mono text-[9px] uppercase tracking-wider text-text-low">detail density</span>
+        <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-ink-700">
+          <motion.div
+            className={`absolute inset-y-0 left-0 rounded-full ${selected.bar}`}
+            initial={false}
+            animate={{ width: `${((activeIndex + 1) / DEPTHS.length) * 100}%` }}
+            transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 220, damping: 30 }}
+          />
         </div>
-        <p className="mt-3 text-sm leading-6 text-text-mid">{copy.explanation}</p>
-        {copy.notation && (
-          <p className="mt-3 overflow-x-auto rounded-md border border-ink-600 bg-ink-950/65 px-3 py-2 font-mono text-xs leading-5 text-text-hi">{copy.notation}</p>
-        )}
-        <p className="mt-3 border-l-2 border-star/60 pl-3 text-xs leading-5 text-text-low">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-star">What changed</span>
-          <span className="ml-2">{copy.changed}</span>
-        </p>
-      </motion.div>
+        <span className="shrink-0 font-mono text-[9px] text-text-low">{activeIndex + 1}/{DEPTHS.length}</span>
+      </div>
+
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={`${concept}-${depth}`}
+          initial={reduce ? false : { opacity: 0, scale: direction > 0 ? 0.96 : 1.04, y: 6 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, scale: direction > 0 ? 1.03 : 0.97, y: -4 }}
+          transition={{ duration: reduce ? 0 : 0.28, ease: EASE }}
+          className="mt-4 origin-center rounded-lg border border-ink-600 bg-ink-900/70 p-4"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-2">
+            <span className={`font-mono text-[10px] font-semibold uppercase tracking-[0.14em] ${selected.accent}`}>{selected.label} depth</span>
+            <span className="h-px flex-1 bg-ink-600" aria-hidden="true" />
+          </div>
+          <p className="mt-3 text-sm leading-6 text-text-mid">{copy.explanation}</p>
+          {copy.notation && (
+            <p className="mt-3 overflow-x-auto rounded-md border border-ink-600 bg-ink-950/65 px-3 py-2 font-mono text-xs leading-5 text-text-hi">{copy.notation}</p>
+          )}
+          <p className="mt-3 border-l-2 border-star/60 pl-3 text-xs leading-5 text-text-low">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-star">What changed</span>
+            <span className="ml-2">{copy.changed}</span>
+          </p>
+        </motion.div>
+      </AnimatePresence>
 
       <p className="mt-3 flex gap-2 text-[11px] leading-5 text-text-low">
         <span className="shrink-0 font-mono uppercase tracking-wider text-stabilizer">Invariant</span>

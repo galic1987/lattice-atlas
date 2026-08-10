@@ -102,12 +102,14 @@ export default function PaperVeoVideoGallery() {
         <div>
           <div className="flex items-center gap-2">
             <Film className="h-5 w-5 text-plaquette" />
-            <h3 className="font-display text-xl font-bold text-text-hi">
+            <h2 className="font-display text-xl font-bold text-text-hi">
               Landmark Research Paper Veo 3.1 Video Studio
-            </h3>
+            </h2>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            AI-generated cinematic clips &amp; the prompts behind them for seminal quantum error correction papers.
+            <span className="font-semibold text-star">Illustrative</span> AI-generated cinematic
+            clips &amp; the prompts behind them — atmospheric B-roll, not accurate depictions of the
+            physics. The papers above are the primary sources.
           </p>
         </div>
 
@@ -170,7 +172,7 @@ export default function PaperVeoVideoGallery() {
         <div className="flex flex-col justify-between rounded-xl border border-ink-600 bg-ink-800 p-5 font-mono text-xs">
           <div>
             <span className="eyebrow text-plaquette mb-2">// SEMINAL PAPER BREAKTHROUGH</span>
-            <h4 className="font-display text-base font-bold text-text-hi mb-1">{paper.paperTitle}</h4>
+            <h3 className="font-display text-base font-bold text-text-hi mb-1">{paper.paperTitle}</h3>
             <div className="text-text-low text-[11px] mb-3">{paper.authors} · {paper.year}</div>
 
             <p className="text-text-mid leading-relaxed font-sans text-xs mb-4">{paper.conceptSummary}</p>
