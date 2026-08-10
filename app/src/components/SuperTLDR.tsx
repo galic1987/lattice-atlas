@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, ChevronDown, Sparkles } from 'lucide-react';
 import { sound } from '@/lib/sound';
+import { papers } from '@/data';
 
 const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
   '/': {
@@ -62,7 +63,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     ],
   },
   '/papers': {
-    summary: 'Annotated bibliography of 23 seminal quantum error correction papers with PDF-verified reading prompts.',
+    summary: `Annotated bibliography of ${papers.length} key quantum error correction papers with PDF-verified reading prompts.`,
     takeaways: [
       'Chronological timeline from Bravyi–Kitaev 1998 to Willow 2024 and 2026 scheduling research.',
       'Each paper includes key contributions and why it matters; selected papers carry PDF-verified technical notes.',
@@ -82,7 +83,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     takeaways: [
       'Search and filter terms across Stabilizers, Topology, Decoders, and Distillation.',
       'Mathematical expressions formatted in clean JetBrains Mono notation.',
-      'Cross-linked to Knowledge Map topics and seminal research papers.',
+      'Cross-linked to Knowledge Map topics and key research papers.',
     ],
   },
   '/review': {
