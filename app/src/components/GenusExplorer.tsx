@@ -84,7 +84,7 @@ export default function GenusExplorer() {
                 : 'rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 font-mono text-xs text-text-mid hover:border-ink-500'
             }
           >
-            <span className="mr-1.5 text-text-low">g={s.g}</span>
+            <span className="mr-1.5 text-text-mid">g={s.g}</span>
             {s.name}
           </button>
         ))}

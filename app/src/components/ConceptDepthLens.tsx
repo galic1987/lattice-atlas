@@ -318,7 +318,7 @@ export default function ConceptDepthLens({ concept }: { concept: ConceptDepthCon
               <span className={`font-mono text-[10px] ${active ? item.accent : 'text-text-low'}`}>0{index + 1}</span>
               <span>
                 <span className="block text-xs font-semibold">{item.label} <span className="font-mono font-normal opacity-75">{item.marker}</span></span>
-                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-wider opacity-60">{item.descriptor}</span>
+                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-wider">{item.descriptor}</span>
               </span>
               {active && (
                 <motion.span

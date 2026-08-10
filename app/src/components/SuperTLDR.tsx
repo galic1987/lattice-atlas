@@ -139,9 +139,12 @@ export default function SuperTLDR({ summary: propsSummary, takeaways: propsTakea
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-plaquette flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> // {badge}
             </span>
-            <h3 className="font-display text-sm font-bold text-text-hi group-hover:text-plaquette transition-colors">
+            {/* A TL;DR callout, not a section heading — it renders in different
+                positions per page (sometimes above the page H1), so making it a
+                heading breaks the document outline. Kept as styled text. */}
+            <p className="font-display text-sm font-bold text-text-hi group-hover:text-plaquette transition-colors">
               {summary}
-            </h3>
+            </p>
           </div>
         </button>
 

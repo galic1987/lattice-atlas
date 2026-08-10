@@ -63,7 +63,7 @@ function PercolationExperiment() {
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// EXPERIMENT 01</span>
             <ComputedTag />
           </div>
-          <h3 className="mt-1 font-display text-xl font-bold text-text-hi">The threshold is a percolation transition</h3>
+          <h2 className="mt-1 font-display text-xl font-bold text-text-hi">The threshold is a percolation transition</h2>
         </div>
       </div>
 
@@ -217,7 +217,7 @@ function BlochExperiment() {
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// EXPERIMENT 02</span>
             <ComputedTag />
           </div>
-          <h3 className="mt-1 font-display text-xl font-bold text-text-hi">Rotate a qubit, then measure it</h3>
+          <h2 className="mt-1 font-display text-xl font-bold text-text-hi">Rotate a qubit, then measure it</h2>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {(['H', 'X', 'Z', 'S', 'T'] as Gate1[]).map((g) => (
@@ -364,7 +364,7 @@ function CommutationExperiment() {
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// EXPERIMENT 03</span>
             <ComputedTag />
           </div>
-          <h3 className="mt-1 font-display text-xl font-bold text-text-hi">Do these two operators commute?</h3>
+          <h2 className="mt-1 font-display text-xl font-bold text-text-hi">Do these two operators commute?</h2>
         </div>
       </div>
 
@@ -419,7 +419,7 @@ function DistanceRulerExperiment() {
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// EXPERIMENT 04</span>
             <ComputedTag />
           </div>
-          <h3 className="mt-1 font-display text-xl font-bold text-text-hi">How far is “far enough”? The code distance</h3>
+          <h2 className="mt-1 font-display text-xl font-bold text-text-hi">How far is “far enough”? The code distance</h2>
         </div>
         <div className="flex items-center gap-1.5 font-mono text-xs">
           <span className="mr-1 text-text-low">distance d</span>
