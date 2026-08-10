@@ -61,6 +61,7 @@ export default function CommandPalette() {
     { id: 'c18', title: 'TQEC Hardware Chip Benchmark Matrix (Willow, Heron, H2, Aquila)', category: 'Tool', url: '/lab?tab=chip-benchmarks' },
     { id: 'c19', title: 'Multi-Age & Multi-Perspective Cognitive Prism (5 Levels, 4 Angles)', category: 'Tool', url: '/lab?tab=cognitive-prism' },
     { id: 'c20', title: 'End-to-End Fault-Tolerant QEC Stage Architecture Walkthrough', category: 'Tool', url: '/lab?tab=pipeline-walkthrough' },
+    { id: 'c21', title: '3D Spacetime Syndrome Decoder Sandbox (MWPM & Noise Injection)', category: 'Tool', url: '/lab?tab=spacetime-3d-decoder' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
