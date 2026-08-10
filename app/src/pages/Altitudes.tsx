@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
+import DepthDive from '@/components/DepthDive';
 import SuperTLDR from '@/components/SuperTLDR';
 import ConceptClip from '@/components/ConceptClip';
 import { ALTITUDE_CONCEPTS } from '@/data/altitudes';
@@ -122,6 +123,7 @@ export default function Altitudes() {
             </button>
           ))}
         </div>
+        <DepthDive />
         <MultiAgeCognitiveLens key={concept.id} concept={concept} />
 
         <div className="mt-6 rounded-2xl border border-star/35 bg-star/[0.05] p-5 md:p-6">
