@@ -409,7 +409,7 @@ export default function QldpcTannerGraphVisualizer() {
               </div>
 
               <div className="rounded-lg bg-ink-900 p-3 border border-ink-700 opacity-80">
-                <div className="text-[11px] text-text-low">Equivalent 2D Surface Code Overhead:</div>
+                <div className="text-[11px] text-text-low">Equivalent 2D Surface Code Overhead (k·2d² distance-matched; bb-18 uses t-matched rotated patches):</div>
                 <div className="mt-1 text-base font-bold text-rose-400">
                   {preset.surfaceEquivQubits} Physical Qubits
                 </div>

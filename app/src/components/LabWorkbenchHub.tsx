@@ -293,13 +293,20 @@ export default function LabWorkbenchHub() {
   const [searchParams, setSearchParams] = useSearchParams();
   const hubRef = useRef<HTMLDivElement>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
+  const selfInflictedParam = useRef(false);
   const tabParam = searchParams.get('tab');
   const validTabParam = tabParam && WORKBENCH_TOOLS.some((w) => w.id === tabParam) ? (tabParam as ToolTab) : null;
   const [selectedTab, setSelectedTab] = useState<ToolTab>('surface-3d');
   const activeTab = validTabParam ?? selectedTab;
 
-  // Deep-link (?tab=…) from the command palette or URL: scroll into view
+  // Deep-link (?tab=…) from the command palette or URL: scroll into view.
+  // Skipped when the param change came from switchTab itself — otherwise this
+  // scroll back up to the hub defeats the scroll down to the workspace.
   useEffect(() => {
+    if (selfInflictedParam.current) {
+      selfInflictedParam.current = false;
+      return;
+    }
     if (validTabParam) {
       hubRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -315,6 +322,13 @@ export default function LabWorkbenchHub() {
     [defaultLattice, defaultErrors]
   );
 
+  // Bare /lab (no param — e.g. after Back): keep URL and workspace in sync
+  // by writing the active tab back into the URL without adding history.
+  useEffect(() => {
+    if (!tabParam) setSearchParams({ tab: activeTab }, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the param disappears
+  }, [tabParam]);
+
   const filteredTools =
     activeCategory === 'All'
       ? WORKBENCH_TOOLS
@@ -322,7 +336,10 @@ export default function LabWorkbenchHub() {
 
   const switchTab = (tab: ToolTab) => {
     sound.playDecoderLock();
+    selfInflictedParam.current = true;
     setSelectedTab(tab);
+    // The active tab's card must stay visible: reset the category filter to 'All'
+    setActiveCategory('All');
     // URL is the source of truth for the active tool (Back/refresh/copy-link keep it)
     setSearchParams({ tab }, { replace: false });
     // Mobile flow: bring the workspace into view and move focus to it

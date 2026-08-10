@@ -171,6 +171,43 @@ for (const [name, l, m, A, B, wantK] of BICYCLE_PRESETS) {
   // 3. No error → no correction.
   const silent = bp.bpMinSumDecode(code.xChecks, code.n, code.xChecks.map(() => 0), 0.05, 30);
   if (silent.estimate.some((b) => b === 1)) err(`${name}: BP invents a correction for the zero syndrome`);
+
+  // 4. bb-18 only: prove d = 4 exactly by exhaustive enumeration (2^18 strings).
+  //    d_sector = min weight of a zero-syndrome string outside the stabilizer span.
+  //    The two larger codes use the Bravyi et al. 2024 literature values instead —
+  //    exhaustive search is infeasible at n=72/144.
+  if (name.startsWith('bb-18')) {
+    const distanceOf = (H, Z) => {
+      const zSpan = Z.map((r) => new Set(r));
+      const inSpan = (v) => {
+        const s = new Set(v);
+        const basis = zSpan.map((r) => new Set(r));
+        for (;;) {
+          const row = basis.find((r) => [...r].some((q) => s.has(q)) && r.size > 0);
+          if (!row) break;
+          // reduce: pick a pivot in row ∩ s
+          const piv = [...row].find((q) => s.has(q));
+          for (const r of basis) if (r !== row && r.has(piv)) { for (const v of row) r.has(v) ? r.delete(v) : r.add(v); }
+          for (const v of row) s.has(v) ? s.delete(v) : s.add(v);
+          row.clear();
+        }
+        return s.size === 0;
+      };
+      let best = Infinity;
+      for (let v = 1; v < 1 << code.n; v++) {
+        const bits = [];
+        for (let q = 0; q < code.n; q++) if ((v >> q) & 1) bits.push(q);
+        if (bits.length >= best) continue;
+        const syn = H.map((row) => bits.filter((q) => row.includes(q)).length % 2);
+        if (syn.some((b) => b !== 0)) continue;
+        if (!inSpan(bits)) best = bits.length;
+      }
+      return best;
+    };
+    const dz = distanceOf(code.xChecks, code.zChecks);
+    const dx = distanceOf(code.zChecks, code.xChecks);
+    if (dz !== 4 || dx !== 4) err(`${name}: distance (${dx},${dz}), want (4,4)`);
+  }
 }
 
 /* ---------------- Concept Lookup: every suggested question resolves ---------------- */
