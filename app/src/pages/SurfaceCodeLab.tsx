@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import LabWorkbenchHub from '@/components/LabWorkbenchHub';
 import SuperTLDR from '@/components/SuperTLDR';
@@ -35,10 +35,19 @@ import {
   type Stabilizer,
 } from '@/lib/surfaceCode';
 import { topicById, shortName } from '@/data';
-import SpacetimeView3D from '@/components/SpacetimeView3D';
 import WasmQuantumSandbox from '@/components/WasmQuantumSandbox';
-import TorusTopologyViewer from '@/components/TorusTopologyViewer';
-import GenusExplorer from '@/components/GenusExplorer';
+// three.js-backed views are lazy-loaded: they pull the heavy 3D runtime that
+// would otherwise inflate the Lab's initial chunk (default view is 2D, and the
+// torus/genus explorers live far below the fold). See check-bundles budget.
+const SpacetimeView3D = lazy(() => import('@/components/SpacetimeView3D'));
+const TorusTopologyViewer = lazy(() => import('@/components/TorusTopologyViewer'));
+const GenusExplorer = lazy(() => import('@/components/GenusExplorer'));
+
+const ThreeViewFallback = ({ label }: { label: string }) => (
+  <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-ink-700 bg-ink-900 font-mono text-xs text-text-low">
+    loading {label}…
+  </div>
+);
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -951,6 +960,10 @@ export default function SurfaceCodeLab() {
     currentStepRef.current = currentStep;
   }, [currentStep]);
 
+  /** Ref-held challenge checker so the playback interval can award wins on the
+   *  Play path without pulling the (identity-unstable) checker into its deps. */
+  const checkChallengeRef = useRef<(e: Pauli[], r: DecodeResult | null) => void>(() => {});
+
   /** Playback auto-stepping interval effect. The step-driven side effects
    *  (halt at the end, decode once the correction is revealed) run in the
    *  async interval callback, never inside a setState updater. */
@@ -965,7 +978,13 @@ export default function SurfaceCodeLab() {
       }
       const next = prev + 1;
       setCurrentStep(next);
-      if (next >= 4 && !result) setResult(decode(lat, errors));
+      if (next >= 4 && !result) {
+        const res = decode(lat, errors);
+        setResult(res);
+        // Reveal-on-Play must also settle challenges (e.g. fool-the-decoder),
+        // same as the Decode button — otherwise a win via playback scores nothing.
+        checkChallengeRef.current(errors, res);
+      }
     }, speedMs);
     return () => clearInterval(timer);
   }, [isPlaying, playbackSpeed, lat, errors, result]);
@@ -992,6 +1011,9 @@ export default function SurfaceCodeLab() {
       return next;
     });
   };
+  useEffect(() => {
+    checkChallengeRef.current = checkChallenge;
+  });
 
   const changeD = (next: number) => {
     setD(next);
@@ -1024,7 +1046,11 @@ export default function SurfaceCodeLab() {
     sound.playDecoderLock();
     const res = decode(lat, errors);
     setResult(res);
-    setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
+    // A zero-fault decode is a sanity check, not a recovery trial — counting it
+    // would inflate the session's "% recovered" with vacuous 100%s.
+    if (errorCount > 0) {
+      setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
+    }
     setCurrentStep(4);
     checkChallenge(errors, res);
   };
@@ -1040,6 +1066,8 @@ export default function SurfaceCodeLab() {
     if (s >= 4 && !result) {
       const res = decode(lat, errors);
       setResult(res);
+      // Stepping to the correction reveal scores challenges too (see runDecoder).
+      checkChallenge(errors, res);
     }
     setCurrentStep(s);
   };
@@ -1338,14 +1366,16 @@ export default function SurfaceCodeLab() {
 
             {/* 3D Spacetime View */}
             {(labViewMode === '3d' || labViewMode === 'dual') && (
-              <SpacetimeView3D
-                key={d}
-                lat={lat}
-                errors={errors}
-                result={result}
-                currentStep={currentStep}
-                p={p}
-              />
+              <Suspense fallback={<ThreeViewFallback label="3D spacetime view" />}>
+                <SpacetimeView3D
+                  key={d}
+                  lat={lat}
+                  errors={errors}
+                  result={result}
+                  currentStep={currentStep}
+                  p={p}
+                />
+              </Suspense>
             )}
           </div>
 
@@ -1593,8 +1623,16 @@ export default function SurfaceCodeLab() {
                 Download this d={d} lattice as a generated noisy-memory circuit
                 in <span className="mono-pill">.stim</span> format. This page does
                 not execute the file: inspect it in Crumble or run it separately
-                with Stim and a decoder such as PyMatching. Its circuit-level
-                noise model is different from the ideal-measurement browser sweep above.
+                with Stim and a decoder such as PyMatching.
+              </p>
+              <p className="mt-2 rounded-lg border border-star/30 bg-ink-900/60 px-3 py-2 text-[12px] leading-relaxed text-text-mid">
+                <strong className="text-star">Different noise model — the sign flips.</strong>{' '}
+                This is a <em>circuit-level</em> model (noisy stabilizer measurements each
+                round), not the ideal-measurement sweep above. Its threshold sits far
+                lower, near <span className="mono-pill">p ≈ 0.01</span>. At the Lab's
+                default <span className="mono-pill">p = {p.toFixed(2)}</span> the circuit is
+                <em> above</em> that threshold, so here bigger codes decode <em>worse</em>,
+                the opposite of the curve above. Drop p to ~0.005 to see distance help again.
               </p>
               <button type="button" onClick={downloadStim} className="btn-secondary mt-4 w-full !border-star/50 !text-star hover:!bg-star/10">
                 <Download className="h-4 w-4" /> Download .stim circuit
@@ -1686,7 +1724,9 @@ export default function SurfaceCodeLab() {
             can shrink them away. That is the topology doing the protecting.
           </p>
         </div>
-        <TorusTopologyViewer />
+        <Suspense fallback={<ThreeViewFallback label="torus viewer" />}>
+          <TorusTopologyViewer />
+        </Suspense>
 
         <div className="mt-8 mb-6">
           <p className="eyebrow !text-star">{'// ONE STEP FURTHER'}</p>
@@ -1701,7 +1741,9 @@ export default function SurfaceCodeLab() {
             and where the tidy formula stops.
           </p>
         </div>
-        <GenusExplorer />
+        <Suspense fallback={<ThreeViewFallback label="genus explorer" />}>
+          <GenusExplorer />
+        </Suspense>
       </section>
 
       {/* Non-Linear Exploration Workbench Hub */}
