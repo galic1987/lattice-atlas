@@ -141,7 +141,10 @@ class ThresholdSuppression(Scene):
         self.play(FadeIn(title))
 
         p_th = 0.1
-        A = 0.5
+        # Crossing logical error at threshold (all distances meet here). Kept well
+        # below the 0.5 saturation so the curves have room to both suppress (below
+        # p_th) and diverge upward (above p_th) instead of pinning to a flat cap.
+        A = 0.1
         axes = Axes(
             x_range=[0.02, 0.2, 0.04], y_range=[-4, 0, 1], x_length=7.5, y_length=4.0,
             axis_config={"color": DIM, "include_tip": False},
@@ -151,21 +154,27 @@ class ThresholdSuppression(Scene):
         self.play(Create(axes), FadeIn(x_label), FadeIn(y_label))
 
         def logpl(p, d):
+            # P_L ~ A (p/p_th)^((d+1)/2): below p_th larger d suppresses harder,
+            # above p_th larger d is WORSE. Saturate at 0.5 (a logical coin flip),
+            # floor at 1e-4 for the plot window.
             val = A * (p / p_th) ** ((d + 1) / 2)
-            return max(-4.0, np.log10(min(0.6, val)))
+            return max(-4.0, np.log10(min(0.5, val)))
 
         colors = {3: "#F43F5E", 5: "#F5B83D", 7: "#22D3EE"}
 
         legend = VGroup()
         for d in [3, 5, 7]:
-            g = axes.plot(lambda p, d=d: logpl(p, d), x_range=[0.03, 0.125, 0.005], color=colors[d])
+            # Plot through p_th into the above-threshold regime so the reversal shows.
+            g = axes.plot(lambda p, d=d: logpl(p, d), x_range=[0.03, 0.16, 0.004], color=colors[d])
             lab = VGroup(
                 Line(ORIGIN, RIGHT * 0.35, color=colors[d], stroke_width=3),
                 Text(f"d={d}", font_size=20, color=colors[d]),
             ).arrange(RIGHT, buff=0.12)
             legend.add(lab)
             self.play(Create(g), run_time=0.8)
-        legend.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UR).shift(DOWN * 0.6 + LEFT * 0.2)
+        # Upper-left corner is empty (curves live at the bottom for small p), so the
+        # legend sits clear of both the rising curves and the bottom axis caption.
+        legend.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL).shift(DOWN * 1.2 + RIGHT * 0.35)
         self.play(FadeIn(legend))
 
         xthr = axes.c2p(p_th, 0)[0]
@@ -173,7 +182,12 @@ class ThresholdSuppression(Scene):
         thr_lab = Text("p_th", font_size=20, color="#F5B83D").next_to(thr, UP, buff=0.1)
         self.play(Create(thr), FadeIn(thr_lab))
 
-        self.play(FadeIn(stage_banner("left of the crossing, larger d drives Pl down exponentially", MUTE)))
+        banner = stage_banner("left of the crossing, larger d drives Pl down exponentially", MUTE)
+        self.play(FadeIn(banner))
+        self.wait(1.5)
+        # The reversal above threshold is the whole point — call it out explicitly.
+        banner2 = stage_banner("right of the crossing, larger d is WORSE — noise outruns correction", "#F43F5E")
+        self.play(Transform(banner, banner2))
         self.wait(1.5)
 
 
