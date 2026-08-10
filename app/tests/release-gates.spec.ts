@@ -379,26 +379,28 @@ test('Decoder Duel challenge links accept only a compatible full puzzle id', asy
   ).toBeVisible();
 });
 
-test('key pages have no WCAG colour-contrast or heading-order violations (axe)', async ({ page }) => {
-  // Locks the accessibility fixes from the E2E audit: every previously-failing
-  // page must stay free of serious colour-contrast and heading-order violations.
+test('key pages have no serious/critical WCAG A/AA violations (axe)', async ({ page }) => {
+  // Locks the accessibility fixes: every previously-failing page must stay free of
+  // serious or critical WCAG 2.0/2.1 A/AA violations. This covers colour-contrast
+  // and heading-order (the E2E audit) plus nested-interactive, missing labels,
+  // link-in-text-block, and scrollable-region-focusable (found via a full scan).
   // axe-core is injected from node_modules so the check needs no network.
   const axeSource = readFileSync(
     fileURLToPath(new URL('../node_modules/axe-core/axe.min.js', import.meta.url)),
     'utf8',
   );
-  // The pages the audit flagged (contrast on foundations/lab/altitudes, heading
-  // order on lab/path/experiments/papers) plus the home page.
-  for (const route of ['', 'foundations/', 'altitudes/', 'lab/', 'path/', 'experiments/', 'papers/']) {
+  for (const route of ['', 'foundations/', 'altitudes/', 'map/', 'lab/', 'path/', 'experiments/', 'duel/', 'papers/', 'field-today/']) {
     await page.goto(`${BASE_PATH}${route}`);
     await page.addScriptTag({ content: axeSource });
     const violations = await page.evaluate(async () => {
-      const result = await (window as unknown as { axe: { run: (d: Document, o: unknown) => Promise<{ violations: { id: string; nodes: unknown[] }[] }> } }).axe.run(
+      const result = await (window as unknown as { axe: { run: (d: Document, o: unknown) => Promise<{ violations: { id: string; impact: string; nodes: unknown[] }[] }> } }).axe.run(
         document,
-        { runOnly: ['color-contrast', 'heading-order'] },
+        { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'] } },
       );
-      return result.violations.map((v) => `${v.id} (${v.nodes.length})`);
+      return result.violations
+        .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+        .map((v) => `${v.id} (${v.impact}, ${v.nodes.length})`);
     });
-    expect(violations, `axe violations on /${route || '(home)'}`).toEqual([]);
+    expect(violations, `serious/critical axe violations on /${route || '(home)'}`).toEqual([]);
   }
 });

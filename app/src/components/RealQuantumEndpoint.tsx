@@ -168,7 +168,7 @@ export default function RealQuantumEndpoint() {
                 <Clipboard className="h-3.5 w-3.5" aria-hidden="true" /> Copy
               </button>
             </div>
-            <pre className="mt-3 max-h-72 max-w-full overflow-auto whitespace-pre rounded border border-ink-800 bg-ink-900 p-3 font-mono text-[11px] text-text-mid">{value}</pre>
+            <pre tabIndex={0} role="region" aria-label="Scrollable code output" className="mt-3 max-h-72 max-w-full overflow-auto whitespace-pre rounded border border-ink-800 bg-ink-900 p-3 font-mono text-[11px] text-text-mid focus:outline focus:outline-2 focus:outline-plaquette/60">{value}</pre>
           </div>
         ))}
       </div>
