@@ -2,8 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, X, Send, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { resolveTopic } from '@/data';
-import { matchGlossaryTerm } from '@/data/glossary';
+import { resolveConceptLookup, CONCEPT_LOOKUP_PROMPTS } from '@/lib/conceptLookup';
 import { sound } from '@/lib/sound';
 
 export interface ChatMessage {
@@ -15,12 +14,7 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-const INITIAL_PROMPTS = [
-  'What is Topological Quantum Error Correction in 1 sentence?',
-  'Why does a distance-5 surface code need 49 physical qubits?',
-  'What is Minimum Weight Perfect Matching (MWPM) decoding?',
-  'What is Google Willow’s Λ = 2.14 error suppression factor?',
-];
+const INITIAL_PROMPTS = CONCEPT_LOOKUP_PROMPTS;
 
 export default function AITutorDrawer({
   isOpen,
@@ -46,32 +40,12 @@ export default function AITutorDrawer({
   // glossary data first, then a small set of curated, fact-checked reference
   // entries. If nothing matches, say so — never fabricate an answer.
   const generateAnswer = (query: string): ChatMessage => {
-    const qLower = query.toLowerCase();
-    const topicMatch = resolveTopic(query);
-    const termMatch = matchGlossaryTerm(query);
-
-    let replyText = '';
-    const matchedTopicId: string | undefined = topicMatch?.id;
-
-    if (topicMatch) {
-      replyText = `${topicMatch.name} (Tier ${topicMatch.tier}): ${topicMatch.short}\n\n${topicMatch.detail.slice(0, 220)}…`;
-    } else if (termMatch) {
-      replyText = `${termMatch.term}: ${termMatch.short}`;
-    } else if (qLower.includes('willow') || qLower.includes('lambda')) {
-      replyText = 'Google Willow (Nature 638, 2024) reported a suppression factor Λ = 2.14 > 1 below threshold (p ≈ 0.3%): the logical error rate falls as the code distance grows from d=3 to d=5 to d=7.';
-    } else if (qLower.includes('mwpm') || qLower.includes('matching')) {
-      replyText = 'Minimum-Weight Perfect Matching pairs detection events (checks that flipped to −1) on the syndrome graph with minimum total edge weight — classically via Edmonds’ Blossom algorithm (1965).';
-    } else if (qLower.includes('qubit') || qLower.includes('49')) {
-      replyText = 'A distance-d rotated surface code uses N = d² + (d²−1) = 2d²−1 physical qubits — d² data qubits plus d²−1 syndrome ancillas. For d=5 that is 25 + 24 = 49.';
-    } else {
-      replyText = 'I don’t have a reference entry matching that phrasing. This panel only looks up the atlas’s own topics and glossary terms — it doesn’t generate answers — so try one of the suggested questions below, or browse the Glossary and Knowledge Map from the top nav.';
-    }
-
+    const { text, topicId } = resolveConceptLookup(query);
     return {
       id: Math.random().toString(),
       sender: 'tutor',
-      text: replyText,
-      topicId: matchedTopicId,
+      text,
+      topicId,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   };

@@ -35,6 +35,9 @@ const bundleFor = async (entry, name) => {
     outfile: out,
     logLevel: 'silent',
     alias: { '@': join(appRoot, 'src') },
+    // The data layer reads Vite's import.meta.env (e.g. DEV-gated self-tests);
+    // supply a production-shaped value so the bundle runs under plain Node.
+    define: { 'import.meta.env': JSON.stringify({ DEV: false, PROD: true, MODE: 'production' }) },
   });
   return import(pathToFileURL(out).href);
 };
@@ -170,6 +173,17 @@ for (const [name, l, m, A, B, wantK] of BICYCLE_PRESETS) {
   if (silent.estimate.some((b) => b === 1)) err(`${name}: BP invents a correction for the zero syndrome`);
 }
 
+/* ---------------- Concept Lookup: every suggested question resolves ---------------- */
+// The drawer offers a fixed set of suggested questions. Each MUST resolve to a
+// real reference answer — a suggestion the panel can't then answer is exactly
+// the trust bug the E2E audit caught (the TQEC "in 1 sentence?" prompt fell
+// through to "I don't have a reference entry").
+const lookup = await bundleFor('src/lib/conceptLookup.ts', 'lookup.mjs');
+for (const prompt of lookup.CONCEPT_LOOKUP_PROMPTS) {
+  const res = lookup.resolveConceptLookup(prompt);
+  if (!res.matched) err(`Concept Lookup suggestion does not resolve: "${prompt}"`);
+}
+
 rmSync(tmp, { recursive: true, force: true });
 if (errors.length) {
   console.error(`✗ ${errors.length} code-engine error(s):`);
@@ -180,6 +194,7 @@ console.log(
   `checked ${cc.CODE_ZOO.length} zoo entries, 3 repetition lengths × all words, ` +
     `16 Hamming messages × 8 flip cases, ${qc.QUANTUM_CODES.length} quantum codes × ` +
     `all single-qubit Paulis (commutation + exact decode + degeneracy), ` +
-    `${BICYCLE_PRESETS.length} bicycle codes (construction invariants + BP exact on all single-qubit errors)`,
+    `${BICYCLE_PRESETS.length} bicycle codes (construction invariants + BP exact on all single-qubit errors), ` +
+    `${lookup.CONCEPT_LOOKUP_PROMPTS.length} Concept Lookup suggestions all resolve`,
 );
 console.log('✓ all code-engine proofs passed');

@@ -154,6 +154,45 @@ OBSERVABLE_INCLUDE(0) rec[-1]`,
   },
 ];
 
+/**
+ * Count qubits / detectors / observables actually present in the displayed Stim
+ * snippet, so the header can never disagree with the circuit on screen (the
+ * mismatch the E2E audit caught: header "17 Qubits · 16 Detectors" over a snippet
+ * defining 6 qubits and 2 detectors). Qubit count follows Stim's max-index+1.
+ */
+function circuitStats(stim: string): { qubits: number; detectors: number; observables: number } {
+  let maxQubit = -1;
+  let detectors = 0;
+  const observables = new Set<number>();
+  for (const raw of stim.split('\n')) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const name = line.match(/^([A-Za-z_]+)/)?.[1] ?? '';
+    if (name === 'DETECTOR') {
+      detectors++;
+      continue;
+    }
+    if (name === 'OBSERVABLE_INCLUDE') {
+      const m = line.match(/OBSERVABLE_INCLUDE\((\d+)\)/);
+      observables.add(m ? Number(m[1]) : observables.size);
+      continue;
+    }
+    if (name === 'QUBIT_COORDS') {
+      const m = line.match(/\)\s+(\d+)\s*$/);
+      if (m) maxQubit = Math.max(maxQubit, Number(m[1]));
+      continue;
+    }
+    if (name === 'TICK' || name === 'SHIFT_COORDS' || name === 'REPEAT' || line.startsWith('}')) continue;
+    // Gate / reset / measure / noise op: operands after the name are qubit
+    // indices. Strip (...) params and rec[...] targets first.
+    const cleaned = line.replace(/\([^)]*\)/g, ' ').replace(/rec\[[^\]]*\]/g, ' ');
+    for (const tok of cleaned.split(/\s+/).slice(1)) {
+      if (/^\d+$/.test(tok)) maxQubit = Math.max(maxQubit, Number(tok));
+    }
+  }
+  return { qubits: maxQubit + 1, detectors, observables: observables.size };
+}
+
 type SimResult =
   | {
       method: 'sampled';
@@ -181,6 +220,8 @@ export default function ExecutableSimulatorStudio() {
     () => SIMULATOR_EXAMPLES.find((e) => e.id === selectedExampleId) || SIMULATOR_EXAMPLES[0],
     [selectedExampleId]
   );
+  // Stats are derived from the snippet on screen, never hardcoded — they must match.
+  const shownStats = useMemo(() => circuitStats(activeExample.stimCode), [activeExample.stimCode]);
 
   const runSimulationEngine = () => {
     sound.playDecoderLock();
@@ -305,7 +346,9 @@ export default function ExecutableSimulatorStudio() {
             <span className="flex items-center gap-1.5 text-plaquette font-bold">
               <Terminal className="h-4 w-4" /> Illustrative Stim circuit — not executed in-browser
             </span>
-            <span>{activeExample.qubitCount} Qubits · {activeExample.detectorCount} Detectors · {activeExample.observableCount} Observables</span>
+            <span title="Counted from the snippet shown below (a compact illustrative excerpt, not the full experiment)">
+              snippet: {shownStats.qubits} qubits · {shownStats.detectors} detector{shownStats.detectors === 1 ? '' : 's'} · {shownStats.observables} observable{shownStats.observables === 1 ? '' : 's'}
+            </span>
           </div>
 
           <div className="relative rounded-xl border border-ink-700 bg-ink-950 p-4 font-mono text-xs text-text-hi overflow-x-auto max-h-72">

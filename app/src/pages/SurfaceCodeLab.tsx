@@ -265,7 +265,7 @@ function LatticeView({
             key={q}
             role="button"
             tabIndex={0}
-            aria-label={`Data qubit ${q + 1}, ${e === 0 ? 'no painted error' : `painted ${PAULI_LABEL[e]} error`}`}
+            aria-label={`Data qubit row ${Math.floor(q / lat.d) + 1}, column ${(q % lat.d) + 1}, ${e === 0 ? 'no painted error' : `painted ${PAULI_LABEL[e]} error`}`}
             onClick={() => onQubitClick(q)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' || event.key === ' ') {
@@ -1088,11 +1088,30 @@ export default function SurfaceCodeLab() {
     a.click();
   };
 
+  // Screen-reader narration of the paint -> syndrome -> decode loop. Without this
+  // the only live region on the page was in the threshold section, so painting an
+  // error announced nothing about which stabilizers fired or how decoding resolved.
+  const liveStatus = useMemo(() => {
+    const fired = syndrome.size;
+    const base =
+      errorCount === 0
+        ? 'No painted errors; all stabilizers quiet.'
+        : `${errorCount} painted error${errorCount === 1 ? '' : 's'}; ${fired} stabilizer${fired === 1 ? '' : 's'} firing.`;
+    if (!result) return base;
+    return `${base} Decoder ran: ${
+      result.success ? 'logical state recovered, no logical error.' : 'a logical error remains after correction.'
+    }`;
+  }, [errorCount, syndrome, result]);
+
   const labTopics = ['surface-code', 'syndrome-extraction-circuits', 'decoding-mwpm'];
   const activeStepMeta = PLAYBACK_STEPS[currentStep] ?? PLAYBACK_STEPS[0];
 
   return (
     <div className="bg-ink-900">
+      {/* Screen-reader-only live narration of the interactive decoding loop. */}
+      <div aria-live="polite" className="sr-only">
+        {liveStatus}
+      </div>
       {/* header */}
       <header className="lattice-bg">
         <div className="mx-auto max-w-7xl px-6 pb-10 pt-16 md:px-8">
