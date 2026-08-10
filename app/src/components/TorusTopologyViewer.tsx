@@ -183,6 +183,8 @@ export default function TorusTopologyViewer() {
                 min="0"
                 max="90"
                 value={rotX}
+                aria-label="Torus pitch (X rotation angle) in degrees"
+                aria-valuetext={`${rotX} degrees pitch`}
                 onChange={(e) => {
                   setIsAutoSpin(false);
                   setRotX(Number(e.target.value));
@@ -197,6 +199,8 @@ export default function TorusTopologyViewer() {
                 min="-180"
                 max="180"
                 value={rotY}
+                aria-label="Torus yaw (Y rotation angle) in degrees"
+                aria-valuetext={`${rotY} degrees yaw`}
                 onChange={(e) => {
                   setIsAutoSpin(false);
                   setRotY(Number(e.target.value));
