@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FlaskConical, Waypoints, Grid3x3, Circle, RotateCcw, Ruler } from 'lucide-react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import SuperTLDR from '@/components/SuperTLDR';
 import { simulate, type SimGate } from '@/lib/statevector';
 import {
   percolate,
@@ -504,6 +505,8 @@ export default function ExperimentBench() {
           <span className="mx-1 font-mono text-[11px] text-magic">▷ computed, not drawn</span> as proof.
         </p>
       </div>
+
+      <SuperTLDR />
 
       <div className="space-y-8">
         <PercolationExperiment />
