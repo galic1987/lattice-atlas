@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
 import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
 import SuperTLDR from '@/components/SuperTLDR';
+import ConceptClip from '@/components/ConceptClip';
 import { ALTITUDE_CONCEPTS } from '@/data/altitudes';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
@@ -82,6 +83,20 @@ export default function Altitudes() {
             shows how to distinguish a browser model, a research simulation, a
             published hardware dataset, and direct hardware access.
           </motion.p>
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.24, ease: [...EASE] }}
+            className="mt-8"
+          >
+            <ConceptClip
+              name="metaphor-descent"
+              className="w-full rounded-xl border border-ink-600 object-cover"
+            />
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-text-low">
+              // The descent: chip → lattice → qubits — AI visualization, decorative
+            </p>
+          </motion.div>
         </div>
       </header>
 

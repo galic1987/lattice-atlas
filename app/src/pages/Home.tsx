@@ -117,16 +117,30 @@ function Hero() {
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
-      {/* Torus poster backdrop using generated high-res visual artwork */}
+      {/* Torus ambience backdrop — AI clip with the generated poster as fallback */}
       <div className="absolute inset-0" aria-hidden>
-        <motion.img
-          src={asset('hero_quantum_lattice.jpg')}
-          alt=""
-          className="h-full w-full object-cover opacity-60"
-          initial={reduce ? false : { scale: 1.02 }}
-          animate={reduce ? { scale: 1.02 } : { scale: [1.02, 1.06, 1.02] }}
-          transition={reduce ? { duration: 0 } : { duration: 36, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        {reduce ? (
+          <img
+            src={asset('hero_quantum_lattice.jpg')}
+            alt=""
+            className="h-full w-full object-cover opacity-60"
+            style={{ transform: 'scale(1.02)' }}
+          />
+        ) : (
+          <motion.video
+            src={asset('clips/hero-torus-ambience.mp4')}
+            poster={asset('hero_quantum_lattice.jpg')}
+            muted
+            loop
+            playsInline
+            autoPlay
+            preload="none"
+            className="h-full w-full object-cover opacity-60"
+            initial={{ scale: 1.02 }}
+            animate={{ scale: [1.02, 1.06, 1.02] }}
+            transition={{ duration: 36, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
         {/* lattice texture overlay at 20% */}
         <div className="lattice-bg absolute inset-0 opacity-20" />
         {/* bottom scrim into the next section */}
