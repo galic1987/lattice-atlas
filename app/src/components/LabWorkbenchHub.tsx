@@ -42,8 +42,10 @@ const QftQuantumStateVisualizer = lazy(() => import('@/components/QftQuantumStat
 const HardwareChipBenchmarkMatrix = lazy(() => import('@/components/HardwareChipBenchmarkMatrix'));
 const MultiAgeCognitivePrism = lazy(() => import('@/components/MultiAgeCognitivePrism'));
 const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineStageWalkthrough'));
+const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecoderSandbox3D'));
 
 export type ToolTab =
+  | 'spacetime-3d-decoder'
   | 'pipeline-walkthrough'
   | 'code-zoo'
   | 'surface-3d'
@@ -125,6 +127,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'spacetime-3d-decoder',
+    title: '3D Spacetime Syndrome Decoder Sandbox',
+    category: 'Simulation',
+    icon: Sparkles,
+    description: 'Inject Pauli errors into (2+1)D spacetime lattices (d=3,5) and observe real-time MWPM defect pairing.',
   },
   {
     id: 'pipeline-walkthrough',
@@ -375,6 +384,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'spacetime-3d-decoder' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading 3D Spacetime Syndrome Decoder Sandbox...</div>}>
+              <SpacetimeDecoderSandbox3D />
             </Suspense>
           </div>
         )}
