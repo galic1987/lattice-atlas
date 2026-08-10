@@ -59,34 +59,71 @@ export default function SpacetimeDecoderSandbox3D() {
     return list;
   }, [distance, rounds, injectedErrors]);
 
-  // 2. Compute Real-Time MWPM Matchings
+  // 2. Real minimum-weight perfect matching over the fired defects (exact — an
+  //    optimal pairing minimising total weight, not a greedy nearest-pair pass).
   const matchings = useMemo(() => {
     const defectNodes = nodes.filter((n) => n.isDetectorFire);
-    const edges: MatchingEdge[] = [];
-    
-    for (let i = 0; i < defectNodes.length; i++) {
-      for (let j = i + 1; j < defectNodes.length; j++) {
-        const n1 = defectNodes[i];
-        const n2 = defectNodes[j];
-        const dist = Math.abs(n1.x - n2.x) + Math.abs(n1.y - n2.y) + Math.abs(n1.t - n2.t);
-        const weight = Math.max(0.1, dist * (1.0 - errorProbability));
-        edges.push({ fromId: n1.id, toId: n2.id, weight });
+    const m = defectNodes.length;
+    if (m < 2) return [] as MatchingEdge[];
+
+    // Pairwise spacetime distances → edge weights.
+    const W: number[][] = Array.from({ length: m }, () => new Array<number>(m).fill(0));
+    for (let i = 0; i < m; i++) {
+      for (let j = i + 1; j < m; j++) {
+        const a = defectNodes[i];
+        const b = defectNodes[j];
+        const dist = Math.abs(a.x - b.x) + Math.abs(a.y - b.y) + Math.abs(a.t - b.t);
+        const w = Math.max(0.1, dist * (1.0 - errorProbability));
+        W[i][j] = w;
+        W[j][i] = w;
       }
     }
-    
-    // Pair defects
-    edges.sort((a, b) => a.weight - b.weight);
-    const paired = new Set<string>();
-    const matchedEdges: MatchingEdge[] = [];
-    
-    for (const e of edges) {
-      if (!paired.has(e.fromId) && !paired.has(e.toId)) {
-        matchedEdges.push(e);
-        paired.add(e.fromId);
-        paired.add(e.toId);
+    const toEdges = (pairs: [number, number][]): MatchingEdge[] =>
+      pairs.map(([i, j]) => ({ fromId: defectNodes[i].id, toId: defectNodes[j].id, weight: W[i][j] }));
+
+    // Exact min-weight matching, memoised over the remaining-node subset (2^m).
+    // Capped so the search stays fast; greedy fallback only for huge defect sets.
+    if (m <= 16) {
+      const memo = new Map<string, { cost: number; pairs: [number, number][] }>();
+      const solve = (rem: number[]): { cost: number; pairs: [number, number][] } => {
+        if (rem.length < 2) return { cost: 0, pairs: [] };
+        const key = rem.join(',');
+        const cached = memo.get(key);
+        if (cached) return cached;
+        const first = rem[0];
+        const rest = rem.slice(1);
+        let best: { cost: number; pairs: [number, number][] } | null = null;
+        for (let k = 0; k < rest.length; k++) {
+          const partner = rest[k];
+          const sub = rest.filter((_, x) => x !== k);
+          const r = solve(sub);
+          const cost = W[first][partner] + r.cost;
+          if (!best || cost < best.cost) best = { cost, pairs: [[first, partner], ...r.pairs] };
+        }
+        if (rem.length % 2 === 1) {
+          const r = solve(rest); // odd syndrome: leave one defect unmatched
+          if (!best || r.cost < best.cost) best = r;
+        }
+        memo.set(key, best!);
+        return best!;
+      };
+      return toEdges(solve(defectNodes.map((_, i) => i)).pairs);
+    }
+
+    // Greedy fallback (only for very large defect sets, kept honest by the cap).
+    const flat: { i: number; j: number; w: number }[] = [];
+    for (let i = 0; i < m; i++) for (let j = i + 1; j < m; j++) flat.push({ i, j, w: W[i][j] });
+    flat.sort((a, b) => a.w - b.w);
+    const paired = new Set<number>();
+    const pairs: [number, number][] = [];
+    for (const e of flat) {
+      if (!paired.has(e.i) && !paired.has(e.j)) {
+        pairs.push([e.i, e.j]);
+        paired.add(e.i);
+        paired.add(e.j);
       }
     }
-    return matchedEdges;
+    return toEdges(pairs);
   }, [nodes, errorProbability]);
 
   // 3. Inject Random Errors based on probability p
