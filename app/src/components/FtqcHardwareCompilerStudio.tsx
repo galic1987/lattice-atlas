@@ -162,7 +162,7 @@ export default function FtqcHardwareCompilerStudio() {
         </div>
 
         <span className="rounded-full border border-magic/40 bg-magic/10 px-3 py-1 font-mono text-xs font-bold text-magic">
-          FTQC Compiler v2.4
+          FTQC Resource Estimator
         </span>
       </div>
 
