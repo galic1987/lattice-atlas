@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { FlaskConical, Waypoints, Grid3x3, Circle, RotateCcw } from 'lucide-react';
+import { FlaskConical, Waypoints, Grid3x3, Circle, RotateCcw, Ruler } from 'lucide-react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { simulate, type SimGate } from '@/lib/statevector';
 import {
@@ -390,6 +390,100 @@ function CommutationExperiment() {
   );
 }
 
+/* ============ Experiment 4 — the distance ruler ============ */
+
+function RulerFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 rounded-lg border border-ink-800 bg-ink-950 p-2.5">
+      <span className="text-text-low">{label}</span>
+      <span className="font-bold text-text-hi">{value}</span>
+    </div>
+  );
+}
+
+function DistanceRulerExperiment() {
+  const [d, setD] = useState(5);
+  const corrects = Math.floor((d - 1) / 2);
+  const cell = 32;
+  const pad = 28;
+  const size = (d - 1) * cell + 2 * pad;
+  const mid = Math.floor(d / 2); // the middle row carries the minimal logical chain
+
+  return (
+    <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-700 pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Ruler className="h-4 w-4 text-plaquette" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-low">// EXPERIMENT 04</span>
+            <ComputedTag />
+          </div>
+          <h3 className="mt-1 font-display text-xl font-bold text-text-hi">How far is “far enough”? The code distance</h3>
+        </div>
+        <div className="flex items-center gap-1.5 font-mono text-xs">
+          <span className="mr-1 text-text-low">distance d</span>
+          {[3, 5, 7].map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => setD(v)}
+              className={`h-7 w-8 rounded border font-bold ${d === v ? 'border-plaquette bg-plaquette text-ink-950' : 'border-ink-600 text-plaquette'}`}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="mt-3 max-w-3xl text-xs leading-relaxed text-text-mid">
+        The shortest operator that flips the logical qubit is a chain crossing the whole code from one boundary
+        to the other — exactly <strong>d</strong> qubits long. That length <em>is</em> the code distance: it
+        takes ⌊(d−1)/2⌋ errors before a chain can span the code and cause an undetectable logical flip. Slide d
+        and watch the ruler grow.
+      </p>
+
+      <div className="mt-5 grid gap-6 sm:grid-cols-[auto_1fr]">
+        <div className="rounded-xl border border-ink-700 bg-ink-950 p-4">
+          <svg viewBox={`0 0 ${size} ${size}`} className="w-full max-w-[300px]">
+            <line x1={pad - 15} y1={pad - 15} x2={pad - 15} y2={size - pad + 15} stroke={VIOLET} strokeWidth={3} strokeOpacity={0.6} />
+            <line x1={size - pad + 15} y1={pad - 15} x2={size - pad + 15} y2={size - pad + 15} stroke={VIOLET} strokeWidth={3} strokeOpacity={0.6} />
+            <line x1={pad} y1={pad + mid * cell} x2={pad + (d - 1) * cell} y2={pad + mid * cell} stroke={ERR} strokeWidth={4} />
+            {Array.from({ length: d * d }).map((_, i) => {
+              const r = Math.floor(i / d);
+              const c = i % d;
+              const onChain = r === mid;
+              return (
+                <circle
+                  key={i}
+                  cx={pad + c * cell}
+                  cy={pad + r * cell}
+                  r={onChain ? 7 : 4}
+                  fill={onChain ? ERR : DIM}
+                  stroke={onChain ? ERR : DIM}
+                />
+              );
+            })}
+          </svg>
+          <div className="mt-2 text-center font-mono text-[11px]" style={{ color: ERR }}>
+            shortest logical = {d} qubits (the ruler)
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2.5 font-mono text-xs">
+          <RulerFact label="Code distance d" value={`${d}`} />
+          <RulerFact label="Shortest logical operator" value={`${d} qubits · boundary → boundary`} />
+          <RulerFact label="Guaranteed correctable errors" value={`⌊(d−1)/2⌋ = ${corrects}`} />
+          <RulerFact label="Data qubits (rotated patch)" value={`d² = ${d * d}`} />
+          <p className="text-[11px] leading-relaxed text-text-low">
+            A logical failure needs an error chain reaching all the way across, so it takes more errors as d
+            grows — which is exactly why, below threshold, a bigger code suppresses logical errors.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ============ page ============ */
 
 export default function ExperimentBench() {
@@ -415,6 +509,7 @@ export default function ExperimentBench() {
         <PercolationExperiment />
         <BlochExperiment />
         <CommutationExperiment />
+        <DistanceRulerExperiment />
       </div>
     </div>
   );
