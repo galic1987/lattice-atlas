@@ -9,7 +9,7 @@
  * The name-resolution logic mirrors src/data/index.ts and both read the
  * alias map from the same prereq_aliases.json.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -208,6 +208,33 @@ for (const m of fieldToday.matchAll(/CrossLinkChip kind="paper" id="([^"]+)"/g))
   if (!paperIds.has(m[1])) err(`FieldToday paper chip id "${m[1]}" is not in papers.json`);
 for (const m of fieldToday.matchAll(/^\s*slug: '([a-z0-9-]+)'/gm))
   if (!slugSet.has(m[1])) err(`FieldToday jargon slug "${m[1]}" has no glossary entry`);
+
+/* ---------------- clip references resolve to real files ---------------- */
+
+const clipsDir = join(appRoot, 'public', 'clips');
+const clipFiles = new Set(readdirSync(clipsDir));
+const requireClip = (name, where, exts = ['.mp4', '.jpg']) => {
+  for (const ext of exts) {
+    if (!clipFiles.has(`${name}${ext}`))
+      err(`clip "${name}${ext}" referenced by ${where} is missing from public/clips/`);
+  }
+};
+
+// topicClips.ts: TOPIC_CLIPS maps topic ids to clip basenames.
+const topicClipsSrc = readText('src/lib/topicClips.ts');
+const clipNames = [...topicClipsSrc.matchAll(/'([a-z0-9-]+)'/g)]
+  .map((m) => m[1])
+  .filter((s) => s.includes('-') && !topicIds.has(s)); // topic ids are kebab-case too; clips are the non-topic strings
+for (const name of clipNames) requireClip(name, 'src/lib/topicClips.ts');
+
+// PaperVeoVideoGallery: every paperId maps to a clip of the same basename.
+const gallerySrc = readText('src/components/PaperVeoVideoGallery.tsx');
+for (const m of gallerySrc.matchAll(/paperId: '([^']+)'/g)) requireClip(m[1], 'PaperVeoVideoGallery');
+
+// One-off clip references in pages (hero, depth dive).
+requireClip('hero-torus-ambience', 'src/pages/Home.tsx');
+requireClip('metaphor-descent', 'src/components/DepthDive.tsx');
+for (let i = 0; i < 5; i++) requireClip(`descent-level-${i}`, 'src/components/DepthDive.tsx', ['.jpg']);
 
 /* ---------------- report ---------------- */
 

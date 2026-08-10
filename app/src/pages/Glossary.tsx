@@ -171,7 +171,7 @@ export default function Glossary() {
             takeaways={[
               'Search and filter terms across Stabilizers, Topology, Decoders, and Distillation.',
               'Mathematical expressions formatted in clean JetBrains Mono notation.',
-              'Cross-linked to Knowledge Map topics and seminal research papers.',
+              'Cross-linked to Knowledge Map topics and key research papers.',
             ]}
           />
           <motion.p

@@ -85,7 +85,7 @@ export type ToolTab =
 export interface ToolMeta {
   id: ToolTab;
   title: string;
-  category: 'Foundations' | 'Simulation' | 'Topology' | 'Physics' | 'Engineering' | 'Mastery';
+  category: 'Foundations' | 'Simulation' | 'Topology' | 'Physics' | 'Engineering' | 'Mastery' | 'AI Media';
   icon: LucideIcon;
   description: string;
 }
@@ -157,7 +157,7 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   {
     id: 'veo-prompt-refiner',
     title: 'Custom Google Veo 3.1 AI Prompt Refiner Studio',
-    category: 'Simulation',
+    category: 'AI Media',
     icon: Sparkles,
     description: 'Tune camera motion, cryogenic lighting, & physical topic parameters for custom Veo 3.1 AI video prompts.',
   },
@@ -199,7 +199,7 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   {
     id: 'qft-visualizer',
     title: 'Quantum Field Theory (QFT) & Veo 3 Studio',
-    category: 'Physics',
+    category: 'AI Media',
     icon: Video,
     description: 'QFT field excitations, vacuum fluctuations, wavepacket collapse, & Google Veo 3 AI prompts.',
   },
@@ -220,7 +220,7 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   {
     id: 'manim-gallery',
     title: 'Manim Mathematical Animation Gallery',
-    category: 'Simulation',
+    category: 'AI Media',
     icon: Sparkles,
     description: '60fps Manim vector video explainers for stabilizer checks, MWPM graph matching, and lattice surgery.',
   },

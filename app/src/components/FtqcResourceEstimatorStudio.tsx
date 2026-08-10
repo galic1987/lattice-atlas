@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Cpu, Zap, Clock, ShieldCheck, Sparkles, Copy, Check, Code } from 'lucide-react';
+import { Cpu, Zap, Clock, ShieldCheck, Copy, Check, Code } from 'lucide-react';
 import { sound } from '@/lib/sound';
 
 interface AlgorithmTarget {
@@ -53,7 +53,6 @@ export default function FtqcResourceEstimatorStudio() {
   const [distillationScheme, setDistillationScheme] = useState<'15-to-1' | '20-to-4'>('15-to-1');
 
   const [copiedStim, setCopiedStim] = useState<boolean>(false);
-  const [copiedVeo, setCopiedVeo] = useState<boolean>(false);
 
   const currentAlgo = useMemo(() => {
     return ALGORITHMS.find((a) => a.id === selectedAlgoId) || ALGORITHMS[0];
@@ -134,15 +133,6 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
     sound.playDecoderLock();
     setCopiedStim(true);
     setTimeout(() => setCopiedStim(false), 2000);
-  };
-
-  const veoPrompt = `Cinematic 8K 3D photorealistic visualization of a mega-scale quantum supercomputer room. Rows of dilution refrigerators cool ${estimates.totalPhysicalQubits} physical qubits executing fault-tolerant ${currentAlgo.name} under distance-${codeDistance} surface code protection, 60fps.`;
-
-  const copyVeo = () => {
-    navigator.clipboard.writeText(veoPrompt);
-    sound.playDecoderLock();
-    setCopiedVeo(true);
-    setTimeout(() => setCopiedVeo(false), 2000);
   };
 
   return (
@@ -318,25 +308,6 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
         </pre>
       </div>
 
-      {/* Veo 3.1 AI Prompt Box */}
-      <div className="mt-4 rounded-xl border border-magic/30 bg-ink-900 p-4 font-mono text-xs">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-magic font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" /> Google Veo 3.1 AI Video Generation Prompt
-          </span>
-          <button
-            type="button"
-            onClick={copyVeo}
-            className="flex items-center gap-1 rounded bg-ink-800 px-2.5 py-1 text-[10px] text-plaquette hover:bg-ink-700 border border-ink-600"
-          >
-            {copiedVeo ? <Check className="h-3 w-3 text-stabilizer" /> : <Copy className="h-3 w-3" />}
-            {copiedVeo ? 'Copied Prompt!' : 'Copy Prompt'}
-          </button>
-        </div>
-        <div className="rounded-lg bg-ink-950 p-3 border border-ink-700 text-text-mid select-all">
-          &ldquo;{veoPrompt}&rdquo;
-        </div>
-      </div>
     </div>
   );
 }

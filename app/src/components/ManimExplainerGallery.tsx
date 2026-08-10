@@ -97,7 +97,7 @@ const VIDEOS: VideoExplainer[] = [
     keyTakeaways: [
       'Pre-rendered Veo 3.1 clip (illustrative — not an accurate depiction).',
       'Renders the 105-transmon grid inside dilution refrigerator at 15mK.',
-      'Demonstrates real-time surface-code error suppression below threshold (Λ = 2.14).',
+      'The paper behind it: Willow measured Λ = 2.14 ± 0.02 error suppression below threshold (Nature 638, 2024).',
     ],
   },
   {
@@ -108,7 +108,7 @@ const VIDEOS: VideoExplainer[] = [
     keyTakeaways: [
       'Pre-rendered Veo 3.1 clip (illustrative — not an accurate depiction).',
       'Renders electric (e) and magnetic (m) quasiparticle world-lines in (2+1)D spacetime.',
-      'Demonstrates topological memory protection immune to local noise perturbations.',
+      'The paper behind it: Kitaev\u2019s toric code protects quantum memory in the lattice topology — small local perturbations cannot change it (Annals Phys. 303, 2003).',
     ],
   },
   {
@@ -119,7 +119,7 @@ const VIDEOS: VideoExplainer[] = [
     keyTakeaways: [
       'Pre-rendered Veo 3.1 clip (illustrative — not an accurate depiction).',
       'Visualizes 15 noisy T-states purified through Reed-Muller [[15,1,3]] code block.',
-      'Achieves cubic error suppression O(ε³) to enable universal non-Clifford quantum logic.',
+      'The paper behind it: 15-to-1 distillation suppresses the error rate cubically, O(ε³) (Bravyi & Kitaev, 2005).',
     ],
   },
 ];

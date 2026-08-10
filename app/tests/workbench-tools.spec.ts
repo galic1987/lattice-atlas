@@ -30,6 +30,7 @@ const LAB_TOOLS = [
   'qec-overhead',
   'stim-uploader',
   't-distillation',
+  'mastery-cert',
 ] as const;
 
 test.describe('Exploration Workbench Smoke & Integration Suite', () => {
