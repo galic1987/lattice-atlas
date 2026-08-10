@@ -1,0 +1,3 @@
+# Evidence receipts are data, not source — keep them off the repo.
+*.json
+ibm_quantum_receipts/
