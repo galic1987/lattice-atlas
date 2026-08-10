@@ -363,7 +363,7 @@ export default function StimDetectorGraphVisualizer() {
               const isSelected = activeFaultId === fault.id;
 
               return (
-                <g key={fault.id} onClick={() => handleFaultClick(fault.id)} className="cursor-pointer group">
+                <g key={fault.id} onClick={() => handleFaultClick(fault.id)} className="cursor-pointer group" role="button" tabIndex={0} aria-label="Toggle element" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const h = () => handleFaultClick(fault.id); h(); } }}>
                   <line
                     x1={dFrom.x}
                     y1={dFrom.y}

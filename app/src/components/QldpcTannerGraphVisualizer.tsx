@@ -300,7 +300,7 @@ export default function QldpcTannerGraphVisualizer() {
                 const err = errors[q.id] ?? 'I';
                 const hasErr = err !== 'I';
                 return (
-                  <g key={q.id} className="cursor-pointer" onClick={() => toggleError(q.id)}>
+                  <g key={q.id} className="cursor-pointer" onClick={() => toggleError(q.id)} role="button" tabIndex={0} aria-label="Toggle element" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const h = () => toggleError(q.id); h(); } }}>
                     <circle
                       cx={q.x}
                       cy={q.y}
