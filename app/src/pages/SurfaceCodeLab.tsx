@@ -1219,9 +1219,9 @@ export default function SurfaceCodeLab() {
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink-700 pb-4">
             <div>
               <p className="eyebrow !text-magic mb-1">{'// PLAYBACK PIPELINE CONTROLLER'}</p>
-              <h3 className="font-display text-xl font-semibold text-text-hi">
+              <h2 className="font-display text-xl font-semibold text-text-hi">
                 Step-by-Step Error Correction Lifecycle
-              </h3>
+              </h2>
             </div>
 
             {/* Controls */}

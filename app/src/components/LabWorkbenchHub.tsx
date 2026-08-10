@@ -378,9 +378,9 @@ export default function LabWorkbenchHub() {
                     <div className={`p-1.5 rounded-lg ${active ? 'bg-plaquette text-ink-950' : 'bg-ink-800 text-plaquette'}`}>
                       <Icon className="h-4 w-4" />
                     </div>
-                    <span className="font-mono text-[9px] uppercase tracking-wider text-text-low">{t.category}</span>
+                    <span className="font-mono text-[9px] uppercase tracking-wider text-text-mid">{t.category}</span>
                   </div>
-                  <h4 className="font-display text-xs font-bold text-text-hi line-clamp-1">{t.title}</h4>
+                  <h3 className="font-display text-xs font-bold text-text-hi line-clamp-1">{t.title}</h3>
                   <p className="mt-1 text-[10px] text-text-mid line-clamp-2 leading-relaxed">{t.description}</p>
                 </div>
 
