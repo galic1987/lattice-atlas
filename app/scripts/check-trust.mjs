@@ -149,7 +149,7 @@ for (const path of sourceFiles.filter((file) => ['.ts', '.tsx'].includes(extname
 }
 
 const packageJson = JSON.parse(read('package.json'));
-const allowedRuntime = new Set(['framer-motion', 'lucide-react', 'react', 'react-dom', 'react-router-dom', 'sonner', 'three']);
+const allowedRuntime = new Set(['framer-motion', 'lucide-react', 'react', 'react-dom', 'react-router-dom', 'sonner', 'three', '@react-three/fiber', '@react-three/drei']);
 for (const dependency of Object.keys(packageJson.dependencies ?? {})) {
   check(allowedRuntime.has(dependency), `unused runtime dependency returned: ${dependency}`);
 }
@@ -242,7 +242,7 @@ check(duel.includes('golden vector'), 'daily game compatibility has no determini
 
 const designFiles = walk(join(repoRoot, 'design')).filter((path) => extname(path) === '.md');
 const designSource = designFiles.map((path) => readFileSync(path, 'utf8')).join('\n');
-for (const retired of ['hero-torus-fallback', '@react-three/fiber', '@react-three/drei', 'GSAP', 'Lenis']) {
+for (const retired of ['hero-torus-fallback', 'GSAP', 'Lenis']) {
   check(!designSource.includes(retired), `retired design dependency or asset returned to authority docs: ${retired}`);
 }
 

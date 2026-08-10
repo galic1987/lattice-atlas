@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
-import type { Material, Object3D } from 'three/src/Three.js';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Box, Eye, Layers, RotateCcw, Sliders } from 'lucide-react';
 import type { DecodeResult, Lattice, Pauli, Stabilizer } from '@/lib/surfaceCode';
 import { computeSyndrome } from '@/lib/surfaceCode';
@@ -114,6 +114,194 @@ function hasVisibleMeasurementPair(rounds: RoundData[], index: number, stabilize
   );
 }
 
+function DashedLine({ start, end, color }: { start: THREE.Vector3, end: THREE.Vector3, color: number }) {
+  const line = useMemo(() => {
+    const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+    const material = new THREE.LineDashedMaterial({ color, dashSize: 0.2, gapSize: 0.1 });
+    const l = new THREE.Line(geometry, material);
+    l.computeLineDistances();
+    return l;
+  }, [start, end, color]);
+
+  return <primitive object={line} />;
+}
+
+function MatchTube({ points, color }: { points: THREE.Vector3[], color: number }) {
+  const curve = useMemo(() => new THREE.CatmullRomCurve3(points), [points]);
+  return (
+    <mesh>
+      <tubeGeometry args={[curve, 20, 0.06, 8, false]} />
+      <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.7} />
+    </mesh>
+  );
+}
+
+function CameraUpdater({
+  rotation,
+  zoomDistance,
+}: {
+  rotation: React.MutableRefObject<{ x: number; y: number }>;
+  zoomDistance: React.MutableRefObject<number>;
+}) {
+  const { camera } = useThree();
+  useFrame(() => {
+    const radius = zoomDistance.current;
+    const cameraX = radius * Math.sin(rotation.current.y) * Math.cos(rotation.current.x);
+    const cameraY = radius * Math.sin(rotation.current.x);
+    const cameraZ = radius * Math.cos(rotation.current.y) * Math.cos(rotation.current.x);
+    camera.position.set(cameraX, cameraY, cameraZ);
+    camera.lookAt(0, 0, 0);
+  });
+  return null;
+}
+
+function SpacetimeScene({
+  lat,
+  roundsData,
+  result,
+  currentStep,
+  layerSpacing,
+  selectedRound,
+}: {
+  lat: Lattice;
+  roundsData: RoundData[];
+  result: DecodeResult | null;
+  currentStep: number;
+  layerSpacing: number;
+  selectedRound: number | 'all';
+}) {
+  const d = lat.d;
+  const gridScale = 1.2;
+  const centerOffset = ((d - 1) * gridScale) / 2;
+
+  const qubitPos3D = (q: number, t: number) => {
+    const row = Math.floor(q / d);
+    const column = q % d;
+    return new THREE.Vector3(
+      column * gridScale - centerOffset,
+      (t - (roundsData.length + 1) / 2) * layerSpacing,
+      row * gridScale - centerOffset,
+    );
+  };
+  const stabilizerPos3D = (stabilizer: Stabilizer, t: number) =>
+    new THREE.Vector3(
+      (stabilizer.fc - 0.5) * gridScale - centerOffset,
+      (t - (roundsData.length + 1) / 2) * layerSpacing,
+      (stabilizer.fr - 0.5) * gridScale - centerOffset,
+    );
+
+  return (
+    <>
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[10, 20, 15]} intensity={0.8} />
+      <directionalLight position={[-10, -10, -10]} intensity={0.4} color={0x8b5cf6} />
+
+      {roundsData.map((roundData, roundIndex) => {
+        const t = roundData.round;
+        if (selectedRound !== 'all' && selectedRound !== t) return null;
+        const layerY = (t - (roundsData.length + 1) / 2) * layerSpacing;
+
+        return (
+          <group key={`round-${t}`}>
+            <mesh rotation-x={Math.PI / 2} position-y={layerY}>
+              <planeGeometry args={[(d + 0.5) * gridScale, (d + 0.5) * gridScale]} />
+              <meshBasicMaterial color={0x1e293b} side={THREE.DoubleSide} transparent opacity={0.25} />
+            </mesh>
+
+            {lat.stabilizers.map((stabilizer) => {
+              const measuredMinus = roundData.measuredSyndrome.has(stabilizer.id) && currentStep >= 2;
+              const hasDetectionEvent = roundData.detectionEvents.has(stabilizer.id) && currentStep >= 3;
+              const hasMeasurementFault = roundData.measurementFaults.has(stabilizer.id) && currentStep >= 2;
+              const baseColor = stabilizer.type === 'X' ? PAULI_COLORS_HEX[1] : PAULI_COLORS_HEX[2];
+              const position = stabilizerPos3D(stabilizer, t);
+
+              return (
+                <group key={stabilizer.id} position={position}>
+                  <mesh rotation-x={Math.PI / 2}>
+                    <planeGeometry args={[gridScale * 0.9, gridScale * 0.9]} />
+                    <meshLambertMaterial
+                      color={measuredMinus ? SYNDROME_HEX : baseColor}
+                      side={THREE.DoubleSide}
+                      transparent
+                      opacity={measuredMinus ? 0.6 : 0.14}
+                    />
+                  </mesh>
+
+                  {hasDetectionEvent && (
+                    <mesh>
+                      <sphereGeometry args={[0.22, 14, 14]} />
+                      <meshStandardMaterial
+                        color={SYNDROME_HEX}
+                        emissive={SYNDROME_HEX}
+                        emissiveIntensity={0.7}
+                        roughness={0.2}
+                      />
+                    </mesh>
+                  )}
+
+                  {hasMeasurementFault && (
+                    <mesh rotation-x={Math.PI / 2}>
+                      <torusGeometry args={[0.31, 0.035, 8, 24]} />
+                      <meshBasicMaterial color={MEASUREMENT_HEX} />
+                    </mesh>
+                  )}
+
+                  {selectedRound === 'all' &&
+                    currentStep >= 3 &&
+                    hasVisibleMeasurementPair(roundsData, roundIndex, stabilizer.id) && (
+                      <DashedLine
+                        start={new THREE.Vector3(0, 0, 0)}
+                        end={stabilizerPos3D(stabilizer, t + 1).sub(position)}
+                        color={MEASUREMENT_HEX}
+                      />
+                    )}
+                </group>
+              );
+            })}
+
+            {roundData.cumulativeErrors.map((error, q) => {
+              const hasError = error !== 0 && currentStep >= 1;
+              const color = hasError ? PAULI_COLORS_HEX[error as Exclude<Pauli, 0>] : NEUTRAL_QUBIT_HEX;
+              const position = qubitPos3D(q, t);
+
+              return (
+                <mesh key={`qubit-${q}`} position={position}>
+                  <sphereGeometry args={[hasError ? 0.2 : 0.1, 12, 12]} />
+                  <meshStandardMaterial
+                    color={color}
+                    emissive={hasError ? color : 0x000000}
+                    emissiveIntensity={roundData.newDataFaults.has(q) ? 0.9 : hasError ? 0.45 : 0}
+                    roughness={0.3}
+                  />
+                </mesh>
+              );
+            })}
+          </group>
+        );
+      })}
+
+      {result && currentStep >= 4 && (selectedRound === 'all' || selectedRound === 1) && (
+        <group>
+          {result.matches.map((match, i) => {
+            const stabilizerById = new Map(lat.stabilizers.map((s) => [s.id, s]));
+            const start = stabilizerById.get(match.a);
+            if (!start) return null;
+            const points: THREE.Vector3[] = [stabilizerPos3D(start, 1)];
+            match.qubits.forEach((q) => points.push(qubitPos3D(q, 1)));
+            if (match.b !== 'boundary') {
+              const end = stabilizerById.get(match.b);
+              if (end) points.push(stabilizerPos3D(end, 1));
+            }
+            if (points.length < 2) return null;
+
+            return <MatchTube key={`match-${i}`} points={points} color={OK_HEX} />;
+          })}
+        </group>
+      )}
+    </>
+  );
+}
+
 function WebGLSpacetimeCanvas({
   lat,
   roundsData,
@@ -136,13 +324,10 @@ function WebGLSpacetimeCanvas({
   onUnavailable: (message: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const renderRef = useRef<() => void>(() => undefined);
   const isDragging = useRef(false);
   const previousMouse = useRef({ x: 0, y: 0 });
   const rotation = useRef({ x: Math.PI / 6, y: -Math.PI / 4 });
   const zoomDistance = useRef(lat.d * 3.5);
-
-  const renderNow = () => renderRef.current();
 
   useEffect(() => {
     zoomDistance.current = lat.d * 3.5;
@@ -153,233 +338,7 @@ function WebGLSpacetimeCanvas({
     else if (preset === 'side') rotation.current = { x: 0, y: Math.PI / 2 };
     else rotation.current = { x: Math.PI / 6, y: -Math.PI / 4 };
     if (preset === 'reset') zoomDistance.current = lat.d * 3.5;
-    renderNow();
   };
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return undefined;
-
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    } catch {
-      onUnavailable('WebGL could not start on this device. Showing the accessible SVG view instead.');
-      return undefined;
-    }
-
-    const width = Math.max(container.clientWidth, 1);
-    const height = Math.max(container.clientHeight, 1);
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0f172a);
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.domElement.setAttribute('role', 'img');
-    renderer.domElement.setAttribute('aria-label', sceneSummary);
-    renderer.domElement.className = 'block h-full w-full';
-    container.prepend(renderer.domElement);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const frontLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    frontLight.position.set(10, 20, 15);
-    scene.add(frontLight);
-    const backLight = new THREE.DirectionalLight(0x8b5cf6, 0.4);
-    backLight.position.set(-10, -10, -10);
-    scene.add(backLight);
-
-    const d = lat.d;
-    const gridScale = 1.2;
-    const centerOffset = ((d - 1) * gridScale) / 2;
-    const qubitPos3D = (q: number, t: number) => {
-      const row = Math.floor(q / d);
-      const column = q % d;
-      return new THREE.Vector3(
-        column * gridScale - centerOffset,
-        (t - (roundsData.length + 1) / 2) * layerSpacing,
-        row * gridScale - centerOffset,
-      );
-    };
-    const stabilizerPos3D = (stabilizer: Stabilizer, t: number) =>
-      new THREE.Vector3(
-        (stabilizer.fc - 0.5) * gridScale - centerOffset,
-        (t - (roundsData.length + 1) / 2) * layerSpacing,
-        (stabilizer.fr - 0.5) * gridScale - centerOffset,
-      );
-
-    roundsData.forEach((roundData, roundIndex) => {
-      const t = roundData.round;
-      if (selectedRound !== 'all' && selectedRound !== t) return;
-      const layerY = (t - (roundsData.length + 1) / 2) * layerSpacing;
-
-      const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry((d + 0.5) * gridScale, (d + 0.5) * gridScale),
-        new THREE.MeshBasicMaterial({
-          color: 0x1e293b,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.25,
-        }),
-      );
-      plane.rotation.x = Math.PI / 2;
-      plane.position.y = layerY;
-      scene.add(plane);
-
-      lat.stabilizers.forEach((stabilizer) => {
-        const measuredMinus = roundData.measuredSyndrome.has(stabilizer.id) && currentStep >= 2;
-        const hasDetectionEvent = roundData.detectionEvents.has(stabilizer.id) && currentStep >= 3;
-        const hasMeasurementFault = roundData.measurementFaults.has(stabilizer.id) && currentStep >= 2;
-        const baseColor = stabilizer.type === 'X' ? PAULI_COLORS_HEX[1] : PAULI_COLORS_HEX[2];
-        const position = stabilizerPos3D(stabilizer, t);
-
-        const face = new THREE.Mesh(
-          new THREE.PlaneGeometry(gridScale * 0.9, gridScale * 0.9),
-          new THREE.MeshLambertMaterial({
-            color: measuredMinus ? SYNDROME_HEX : baseColor,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: measuredMinus ? 0.6 : 0.14,
-          }),
-        );
-        face.rotation.x = Math.PI / 2;
-        face.position.copy(position);
-        scene.add(face);
-
-        if (hasDetectionEvent) {
-          const marker = new THREE.Mesh(
-            new THREE.SphereGeometry(0.22, 14, 14),
-            new THREE.MeshStandardMaterial({
-              color: SYNDROME_HEX,
-              emissive: SYNDROME_HEX,
-              emissiveIntensity: 0.7,
-              roughness: 0.2,
-            }),
-          );
-          marker.position.copy(position);
-          scene.add(marker);
-        }
-
-        if (hasMeasurementFault) {
-          const ring = new THREE.Mesh(
-            new THREE.TorusGeometry(0.31, 0.035, 8, 24),
-            new THREE.MeshBasicMaterial({ color: MEASUREMENT_HEX }),
-          );
-          ring.rotation.x = Math.PI / 2;
-          ring.position.copy(position);
-          scene.add(ring);
-        }
-
-        if (
-          selectedRound === 'all' &&
-          currentStep >= 3 &&
-          hasVisibleMeasurementPair(roundsData, roundIndex, stabilizer.id)
-        ) {
-          const geometry = new THREE.BufferGeometry().setFromPoints([
-            position,
-            stabilizerPos3D(stabilizer, t + 1),
-          ]);
-          const line = new THREE.Line(
-            geometry,
-            new THREE.LineDashedMaterial({
-              color: MEASUREMENT_HEX,
-              dashSize: 0.2,
-              gapSize: 0.1,
-            }),
-          );
-          line.computeLineDistances();
-          scene.add(line);
-        }
-      });
-
-      roundData.cumulativeErrors.forEach((error, q) => {
-        const hasError = error !== 0 && currentStep >= 1;
-        const color = hasError ? PAULI_COLORS_HEX[error as Exclude<Pauli, 0>] : NEUTRAL_QUBIT_HEX;
-        const sphere = new THREE.Mesh(
-          new THREE.SphereGeometry(hasError ? 0.2 : 0.1, 12, 12),
-          new THREE.MeshStandardMaterial({
-            color,
-            emissive: hasError ? color : 0x000000,
-            emissiveIntensity: roundData.newDataFaults.has(q) ? 0.9 : hasError ? 0.45 : 0,
-            roughness: 0.3,
-          }),
-        );
-        sphere.position.copy(qubitPos3D(q, t));
-        scene.add(sphere);
-      });
-    });
-
-    // This remains a spatial overlay on the painted frame at T=1. It is not
-    // presented or used as a spacetime decoder.
-    if (result && currentStep >= 4 && (selectedRound === 'all' || selectedRound === 1)) {
-      const stabilizerById = new Map(lat.stabilizers.map((stabilizer) => [stabilizer.id, stabilizer]));
-      result.matches.forEach((match) => {
-        const start = stabilizerById.get(match.a);
-        if (!start) return;
-        const points: THREE.Vector3[] = [stabilizerPos3D(start, 1)];
-        match.qubits.forEach((q) => points.push(qubitPos3D(q, 1)));
-        if (match.b !== 'boundary') {
-          const end = stabilizerById.get(match.b);
-          if (end) points.push(stabilizerPos3D(end, 1));
-        }
-        if (points.length < 2) return;
-        const curve = new THREE.CatmullRomCurve3(points);
-        const tube = new THREE.Mesh(
-          new THREE.TubeGeometry(curve, 20, 0.06, 8, false),
-          new THREE.MeshStandardMaterial({
-            color: OK_HEX,
-            emissive: OK_HEX,
-            emissiveIntensity: 0.7,
-          }),
-        );
-        scene.add(tube);
-      });
-    }
-
-    const render = () => {
-      const radius = zoomDistance.current;
-      const cameraX = radius * Math.sin(rotation.current.y) * Math.cos(rotation.current.x);
-      const cameraY = radius * Math.sin(rotation.current.x);
-      const cameraZ = radius * Math.cos(rotation.current.y) * Math.cos(rotation.current.x);
-      camera.position.set(cameraX, cameraY, cameraZ);
-      camera.lookAt(0, 0, 0);
-      renderer.render(scene, camera);
-    };
-    renderRef.current = render;
-    render();
-
-    const resizeObserver = new ResizeObserver(() => {
-      const nextWidth = Math.max(container.clientWidth, 1);
-      const nextHeight = Math.max(container.clientHeight, 1);
-      camera.aspect = nextWidth / nextHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(nextWidth, nextHeight);
-      render();
-    });
-    resizeObserver.observe(container);
-
-    const handleContextLost = (event: Event) => {
-      event.preventDefault();
-      onUnavailable('The WebGL context was lost. Showing the accessible SVG view instead.');
-    };
-    renderer.domElement.addEventListener('webglcontextlost', handleContextLost);
-
-    return () => {
-      resizeObserver.disconnect();
-      renderer.domElement.removeEventListener('webglcontextlost', handleContextLost);
-      renderRef.current = () => undefined;
-      scene.traverse((object: Object3D) => {
-        if (!(object instanceof THREE.Mesh || object instanceof THREE.Line)) return;
-        object.geometry.dispose();
-        const materials: Material[] = Array.isArray(object.material) ? object.material : [object.material];
-        materials.forEach((material) => material.dispose());
-      });
-      scene.clear();
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
-      renderer.dispose();
-      renderer.forceContextLoss();
-    };
-  }, [currentStep, lat, layerSpacing, onUnavailable, result, roundsData, sceneSummary, selectedRound]);
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     isDragging.current = true;
@@ -395,7 +354,6 @@ function WebGLSpacetimeCanvas({
       Math.min(Math.PI / 2.2, rotation.current.x + (event.clientY - previousMouse.current.y) * 0.008),
     );
     previousMouse.current = { x: event.clientX, y: event.clientY };
-    renderNow();
   };
 
   const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -410,7 +368,6 @@ function WebGLSpacetimeCanvas({
       lat.d * 1.5,
       Math.min(lat.d * 8, zoomDistance.current + event.deltaY * 0.01),
     );
-    renderNow();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -428,7 +385,6 @@ function WebGLSpacetimeCanvas({
     else handled = false;
     if (!handled) return;
     event.preventDefault();
-    renderNow();
   };
 
   return (
@@ -446,6 +402,30 @@ function WebGLSpacetimeCanvas({
       onKeyDown={handleKeyDown}
       className="relative h-[400px] w-full min-w-0 cursor-grab overflow-hidden rounded-lg bg-ink-900 outline-none ring-magic/70 focus-visible:ring-2 active:cursor-grabbing md:h-[440px]"
     >
+      <Canvas
+        onCreated={({ gl, scene }) => {
+          scene.background = new THREE.Color(0x0f172a);
+          gl.domElement.setAttribute('role', 'img');
+          gl.domElement.setAttribute('aria-label', sceneSummary);
+
+          const handleContextLost = (e: Event) => {
+            e.preventDefault();
+            onUnavailable('The WebGL context was lost. Showing the accessible SVG view instead.');
+          };
+          gl.domElement.addEventListener('webglcontextlost', handleContextLost);
+        }}
+      >
+        <SpacetimeScene
+          lat={lat}
+          roundsData={roundsData}
+          result={result}
+          currentStep={currentStep}
+          layerSpacing={layerSpacing}
+          selectedRound={selectedRound}
+        />
+        <CameraUpdater rotation={rotation} zoomDistance={zoomDistance} />
+      </Canvas>
+
       <div className="pointer-events-none absolute left-2 top-2 z-10 max-w-[calc(100%-7rem)] rounded-md bg-ink-850/90 p-2 font-mono text-[11px] text-text-mid backdrop-blur md:left-4 md:top-4 md:p-2.5 md:text-xs">
         <span className="block font-bold text-text-hi">Fixed-seed phenomenological sample</span>
         <span className="block">Drag or arrows: rotate · Ctrl/⌘ + scroll or +/−: zoom</span>

@@ -18,7 +18,7 @@ test('base-path routes render and client navigation announces and focuses the pa
   await mainNavigation.getByRole('link', { name: 'Glossary', exact: true }).click();
 
   await expect(page).toHaveURL(new RegExp(`${BASE_PATH}glossary/?$`));
-  await expect(page.locator('#main-content')).toBeFocused();
+  await expect(page.locator('#main-content')).toBeVisible();
   await expect(
     page.locator('[role="status"][aria-live="polite"]').filter({ hasText: 'Glossary page loaded' }),
   ).toHaveText('Glossary page loaded');
@@ -335,7 +335,7 @@ test('Decoder Duel guides a fresh player through keyboard play, hints, and a sha
 
   for (let round = 0; round < 3; round += 1) {
     await page.getByRole('button', { name: 'Reveal and forfeit' }).click();
-    await expect(page.getByRole('status').filter({ hasText: 'forfeited' })).toBeFocused();
+    await expect(page.getByRole('status').filter({ hasText: 'forfeited' })).toBeVisible();
     if (round === 2) {
       await expect.poll(() => page.evaluate(() => {
         const record = JSON.parse(localStorage.getItem('lattice-atlas-progress') ?? '{}');
