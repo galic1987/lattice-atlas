@@ -720,7 +720,7 @@ export default function Papers() {
 
         <div className="relative mx-auto max-w-7xl px-6 pb-10 pt-32 md:px-8">
           <SuperTLDR
-            summary="Annotated bibliography of 23 seminal quantum error correction papers with PDF-verified reading prompts."
+            summary={`Annotated bibliography of ${papers.length} key quantum error correction papers with PDF-verified reading prompts.`}
             takeaways={[
               'Chronological timeline from Bravyi–Kitaev 1998 to Willow 2024 and 2026 scheduling research.',
               'Each paper includes key contributions and why it matters; selected papers carry PDF-verified notes.',
@@ -743,7 +743,7 @@ export default function Papers() {
             ))}
           </h1>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-text-mid">
-            <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>The 23 key papers of the field, in order, with plain-English summaries.
+            <span className="mr-2 font-mono text-[11px] uppercase tracking-wider text-plaquette">{'// TL;DR'}</span>The {papers.length} key papers of the field, in order, with plain-English summaries.
           </p>
           <motion.p
             initial={reduceMotion ? false : { opacity: 0, y: 24 }}

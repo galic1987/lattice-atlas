@@ -50,7 +50,6 @@ import SelfCheck from '@/components/SelfCheck';
 import Diagnostic from '@/components/Diagnostic';
 import GlossaryText from '@/components/GlossaryText';
 import TopicNotes from '@/components/TopicNotes';
-import { Intuition } from '@/components/TopicInsights';
 import CognitiveLensToggle from '@/components/CognitiveLensToggle';
 import ActChapterCard from '@/components/ActChapterCard';
 import TopicLensInsight from '@/components/TopicLensInsight';
@@ -325,8 +324,6 @@ function TopicDrawer({
             </div>
 
             <div className="flex-1 space-y-8 p-6">
-              <Intuition topicId={topic.id} />
-
               {TOPIC_CLIPS[topic.id] && (
                 <div>
                   <p className="eyebrow mb-3">// CONCEPT CLIP — AI VISUALIZATION, DECORATIVE</p>

@@ -10,7 +10,7 @@ import {
 } from 'react-router-dom';
 import { Menu, Share2, X, BookOpen } from 'lucide-react';
 import { useProgress } from '@/store/progress';
-import { topics } from '@/data';
+import { papers, topics } from '@/data';
 import UniversalExplainer from '@/components/UniversalExplainer';
 import ShareableScoreCard from '@/components/ShareableScoreCard';
 import SoundToggle from '@/components/SoundToggle';
@@ -362,7 +362,7 @@ export default function Layout() {
             <div>
               <p className="eyebrow mb-4">// META</p>
               <p className="font-mono text-[13px] leading-relaxed text-text-low">
-                23 papers · 26 topics · 6 tiers · 1998 → 2026
+                {papers.length} papers · {topics.length} topics · 6 tiers · 1998 → 2026
               </p>
               <p className="mt-3 text-sm leading-relaxed text-text-low">
                 Progress is stored locally in your browser. No account or analytics;

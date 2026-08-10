@@ -210,8 +210,8 @@ function Hero() {
         >
           Topological Quantum Error Correction protects fragile quantum states by
           encoding them into the global properties of qubit lattices. This is your
-          guided path from the prerequisites to the research frontier — 26 topics,
-          23 landmark papers, one map.
+          guided path from the prerequisites to the research frontier — {topics.length} topics,{' '}
+          {papers.length} landmark papers, one map.
         </motion.p>
 
         <motion.p
@@ -269,7 +269,7 @@ function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.9, duration: 0.3 }}
         >
-          23 papers · 26 topics · 6 tiers · 1998 → 2026
+          {papers.length} papers · {topics.length} topics · 6 tiers · 1998 → 2026
         </motion.p>
       </div>
     </section>

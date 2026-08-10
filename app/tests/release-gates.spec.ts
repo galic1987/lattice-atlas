@@ -118,6 +118,7 @@ test('representative routes do not create horizontal overflow on mobile', async 
     'altitudes/',
     'map/',
     'path/',
+    'experiments/',
     'lab/',
     'duel/',
     'papers/',
