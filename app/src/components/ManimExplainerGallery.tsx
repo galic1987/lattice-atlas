@@ -79,6 +79,30 @@ const VIDEOS: VideoExplainer[] = [
     sourceScene: 'manim/gallery/color_code_transversal_scene.py :: ColorCodeTransversalScene',
   },
   {
+    id: 'threshold-suppression',
+    title: 'Below Threshold: Bigger Codes Suppress Errors',
+    filename: 'animations/threshold_suppression.mp4',
+    description: 'Manim vector animation of logical error P_L vs physical error p for d=3,5,7. Below p_th the curves fan down (larger d wins); they cross at threshold; above p_th the order REVERSES and larger d is worse.',
+    keyTakeaways: [
+      'Below threshold, increasing code distance drives the logical error rate down exponentially.',
+      'All distances cross at the threshold p_th — the break-even point.',
+      'Above threshold the effect inverts: bigger codes decode worse, because noise outruns correction.',
+    ],
+    sourceScene: 'manim/tqec_scenes.py :: ThresholdSuppression',
+  },
+  {
+    id: 'toric-code-logicals',
+    title: 'Logical Operators Are Loops That Wrap the Torus',
+    filename: 'animations/toric_code_logicals.mp4',
+    description: 'Manim vector animation of the toric code: the two logical operators are non-contractible loops — Z̄ around the tube (meridian), X̄ the long way (longitude) — while a local error loop shrinks to nothing.',
+    keyTakeaways: [
+      'A logical qubit is stored in loops that wrap the torus the two independent ways.',
+      'Z̄ (meridian) and X̄ (longitude) are non-contractible — no local operation removes them.',
+      'A contractible local loop is a stabilizer: it shrinks to nothing and does no logical harm.',
+    ],
+    sourceScene: 'manim/tqec_scenes.py :: ToricCodeLogicals',
+  },
+  {
     id: 'quantum-ldpc-bipartite',
     title: 'qLDPC Bipartite Tanner Graph & Belief Propagation',
     filename: 'animations/quantum_ldpc_bipartite.mp4',

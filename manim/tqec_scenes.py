@@ -205,18 +205,20 @@ class ToricCodeLogicals(Scene):
 
         z1 = Ellipse(width=0.9, height=2.4, color=DATA, stroke_width=5).move_to(LEFT * 1.8)
         z1_lab = Text("Z̄  (meridian)", font_size=20, color=DATA).next_to(z1, LEFT, buff=0.1)
-        self.play(Create(z1), FadeIn(z1_lab), FadeIn(stage_banner("① one logical loop wraps the tube the short way", DATA)))
+        # One banner, transformed through the three beats — so they never stack.
+        banner = stage_banner("① one logical loop wraps the tube the short way", DATA)
+        self.play(Create(z1), FadeIn(z1_lab), FadeIn(banner))
 
         x1 = Ellipse(width=5.2, height=1.8, color=CHECK, stroke_width=5)
         x1_lab = Text("X̄  (longitude)", font_size=20, color=CHECK).next_to(x1, DOWN, buff=0.1)
         b2 = stage_banner("② the other wraps the long way — two independent logical operators", CHECK)
         self.play(Create(x1), FadeIn(x1_lab))
-        self.play(FadeIn(b2))
+        self.play(Transform(banner, b2))
         self.wait(0.4)
 
         loop = Circle(radius=0.5, color=ERR, stroke_width=3.5).move_to(RIGHT * 1.6 + UP * 0.8)
         loop_lab = Text("local error loop", font_size=20, color=ERR).next_to(loop, UP, buff=0.1)
         self.play(Create(loop), FadeIn(loop_lab))
         b3 = stage_banner("③ a local loop shrinks to nothing — it's a stabilizer, harmless", ERR)
-        self.play(loop.animate.scale(0.02), FadeOut(loop_lab), FadeIn(b3), run_time=1.2)
+        self.play(loop.animate.scale(0.02), FadeOut(loop_lab), Transform(banner, b3), run_time=1.2)
         self.wait(1.5)
