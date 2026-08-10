@@ -117,13 +117,22 @@ export interface TopicCheckLedgerEvidence extends EvidenceBase {
   attempt: number;
 }
 
+export interface LabTaskEvidence extends EvidenceBase {
+  kind: 'lab-task';
+  topicId: string;
+  toolId: string;
+  taskId: string;
+  completed: boolean;
+}
+
 export type LearningEvidence =
   | FoundationPredictionEvidence
   | ReviewRecallEvidence
   | DuelResultEvidence
   | CapstoneEvidence
   | AltitudeStudyEvidence
-  | TopicCheckLedgerEvidence;
+  | TopicCheckLedgerEvidence
+  | LabTaskEvidence;
 
 export type EvidenceKind = LearningEvidence['kind'];
 export type EvidenceInput = LearningEvidence extends infer Entry
@@ -314,6 +323,13 @@ export function sanitizeEvidence(value: unknown): LearningEvidence | undefined {
     if (correct === undefined) return undefined;
     return { ...base, kind: value.kind, topicId, correct, total, attempt };
   }
+  if (value.kind === 'lab-task') {
+    const topicId = cleanString(value.topicId);
+    const toolId = cleanString(value.toolId);
+    const taskId = cleanString(value.taskId);
+    if (!topicId || !VALID_TOPIC_IDS.has(topicId) || !toolId || !taskId) return undefined;
+    return { ...base, kind: value.kind, topicId, toolId, taskId, completed: value.completed === true };
+  }
   return undefined;
 }
 
@@ -345,6 +361,7 @@ function cleanEvidence(value: unknown): LearningEvidence[] {
       if (entry.passed) pinned.set(`capstone:${entry.capstoneId}:passed`, entry);
     }
     else if (entry.kind === 'topic-check') pinned.set(`topic:${entry.topicId}`, entry);
+    else if (entry.kind === 'lab-task' && entry.completed) pinned.set(`lab:${entry.topicId}:${entry.taskId}`, entry);
     else if (entry.kind === 'duel-result' && entry.mode === 'daily' && entry.compatible === true) pinned.set('duel:latest-compatible-daily', entry);
   }
   const pinnedIds = new Set([...pinned.values()].map((entry) => entry.id));

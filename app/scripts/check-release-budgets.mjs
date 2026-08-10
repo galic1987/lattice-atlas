@@ -13,10 +13,13 @@ const KIB = 1024;
 // They load lazily (preload="none", poster-first), so they are NOT part of the
 // page-load budget — totalDistributionGzip excludes .mp4 and videos get their
 // own explicit caps instead: 4 MiB raw per clip, 45,000 KiB gzip for the whole set.
+// 2026-08-10 (roadmap Phase 2.5, reviewed): the old 175 KiB "SurfaceCodeLab"
+// cap measured only the empty page shell after the 3D split, so it is replaced
+// by a per-chunk cap that guards every lazy chunk individually.
 const LIMITS = Object.freeze({
   entryJavaScriptGzip: 160 * KIB,
   initialJavaScriptGraphGzip: 230 * KIB,
-  surfaceLabJavaScriptGzip: 175 * KIB,
+  perChunkJavaScriptGzip: 200 * KIB,
   totalJavaScriptGzip: 650 * KIB,
   totalDistributionGzip: 70000 * KIB,
   rasterAssetRaw: 300 * KIB,
@@ -67,10 +70,9 @@ if (!entryMatch) {
 
 const entryName = entryMatch[1].split('/').at(-1);
 const entry = javascript.find(({ file }) => file.pathname.endsWith(`/${entryName}`));
-const surfaceLab = javascript.find(({ file }) => /\/SurfaceCodeLab-[^/]+\.js$/.test(file.pathname));
 
-if (!entry || !surfaceLab) {
-  console.error('Expected entry and SurfaceCodeLab chunks were not both present in app/dist/assets.');
+if (!entry) {
+  console.error('Expected entry chunk was not present in app/dist/assets.');
   process.exit(1);
 }
 
@@ -105,8 +107,12 @@ function check(label, actual, limit) {
 
 check('entry JavaScript (gzip)', entry.gzip, LIMITS.entryJavaScriptGzip);
 check('initial static JavaScript graph (gzip)', initialJavaScriptGraphGzip, LIMITS.initialJavaScriptGraphGzip);
-check('Surface Code Lab chunk (gzip)', surfaceLab.gzip, LIMITS.surfaceLabJavaScriptGzip);
 check('all JavaScript (gzip)', totalJavaScriptGzip, LIMITS.totalJavaScriptGzip);
+for (const chunk of javascript) {
+  if (chunk === entry) continue;
+  if (chunk.gzip > LIMITS.perChunkJavaScriptGzip)
+    failures.push(`chunk ${chunk.path} is ${format(chunk.gzip)} gzip (limit ${format(LIMITS.perChunkJavaScriptGzip)})`);
+}
 check('complete distribution excl. video (gzip)', totalDistributionGzip, LIMITS.totalDistributionGzip);
 check('video clips total (gzip)', totalVideoClipsGzip, LIMITS.totalVideoClipsGzip);
 

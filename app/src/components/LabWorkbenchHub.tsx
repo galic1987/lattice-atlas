@@ -290,8 +290,9 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
 ];
 
 export default function LabWorkbenchHub() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const hubRef = useRef<HTMLDivElement>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
   const tabParam = searchParams.get('tab');
   const validTabParam = tabParam && WORKBENCH_TOOLS.some((w) => w.id === tabParam) ? (tabParam as ToolTab) : null;
   const [selectedTab, setSelectedTab] = useState<ToolTab>('surface-3d');
@@ -305,7 +306,7 @@ export default function LabWorkbenchHub() {
   }, [validTabParam]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  const categories = ['All', 'Foundations', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery'];
+  const categories = ['All', 'Foundations', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery', 'AI Media'];
 
   const defaultLattice = useMemo(() => buildLattice(3), []);
   const defaultErrors = useMemo<Pauli[]>(() => new Array(defaultLattice.n).fill(0), [defaultLattice]);
@@ -322,6 +323,13 @@ export default function LabWorkbenchHub() {
   const switchTab = (tab: ToolTab) => {
     sound.playDecoderLock();
     setSelectedTab(tab);
+    // URL is the source of truth for the active tool (Back/refresh/copy-link keep it)
+    setSearchParams({ tab }, { replace: false });
+    // Mobile flow: bring the workspace into view and move focus to it
+    requestAnimationFrame(() => {
+      workspaceRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      workspaceRef.current?.focus();
+    });
   };
 
   return (
@@ -344,6 +352,7 @@ export default function LabWorkbenchHub() {
                 key={cat}
                 type="button"
                 onClick={() => setActiveCategory(cat)}
+                aria-pressed={activeCategory === cat}
                 className={`px-3 py-1 rounded-full font-mono text-xs transition-colors ${
                   activeCategory === cat
                     ? 'bg-plaquette text-ink-950 font-bold'
@@ -357,7 +366,7 @@ export default function LabWorkbenchHub() {
         </div>
 
         {/* Non-Linear Tool Selector Cards Grid */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" role="tablist" aria-label="Workbench tools">
           {filteredTools.map((t) => {
             const Icon = t.icon;
             const active = activeTab === t.id;
@@ -366,6 +375,10 @@ export default function LabWorkbenchHub() {
                 key={t.id}
                 data-tab-id={t.id}
                 type="button"
+                role="tab"
+                id={`workbench-tab-${t.id}`}
+                aria-selected={active}
+                aria-controls="workbench-panel"
                 onClick={() => switchTab(t.id)}
                 className={`flex flex-col justify-between p-3.5 rounded-xl border text-left transition-all ${
                   active
@@ -380,7 +393,7 @@ export default function LabWorkbenchHub() {
                     </div>
                     <span className="font-mono text-[9px] uppercase tracking-wider text-text-mid">{t.category}</span>
                   </div>
-                  <h3 className="font-display text-xs font-bold text-text-hi line-clamp-1">{t.title}</h3>
+                  <span className="block font-display text-xs font-bold text-text-hi line-clamp-1">{t.title}</span>
                   <p className="mt-1 text-[10px] text-text-mid line-clamp-2 leading-relaxed">{t.description}</p>
                 </div>
 
@@ -394,7 +407,14 @@ export default function LabWorkbenchHub() {
       </div>
 
       {/* Active Workspace Viewport */}
-      <div className="rounded-2xl border border-ink-700 bg-ink-950 p-2 shadow-2xl">
+      <div
+        ref={workspaceRef}
+        role="tabpanel"
+        id="workbench-panel"
+        aria-labelledby={`workbench-tab-${activeTab}`}
+        tabIndex={-1}
+        className="rounded-2xl border border-ink-700 bg-ink-950 p-2 shadow-2xl outline-none"
+      >
         {activeTab === 'code-zoo' && (
           <div className="p-4">
             <ErrorCodeExplorer />

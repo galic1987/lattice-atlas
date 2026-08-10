@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import ConceptClip from '@/components/ConceptClip';
+import TryItChips from '@/components/TryItChips';
 import { TOPIC_CLIPS } from '@/lib/topicClips';
 import { Link } from 'react-router-dom';
 import {
@@ -338,6 +339,8 @@ function TopicDrawer({
                   </div>
                 </div>
               )}
+
+              <TryItChips topicId={topic.id} />
 
               <p className="leading-relaxed text-text-mid">
                 <GlossaryText text={topic.detail} />
