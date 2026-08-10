@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { bpMinSumDecode } from '@/lib/bp';
 import { RefreshCw, Zap, Layers, Play } from 'lucide-react';
 import { sound } from '@/lib/sound';
 
@@ -64,7 +65,7 @@ export default function QldpcTannerGraphVisualizer() {
   const [selectedPresetId, setSelectedPresetId] = useState<string>('bb-18');
   const [errors, setErrors] = useState<Pauli[]>(() => new Array(18).fill('I'));
   const [bpIteration, setBpIteration] = useState<number>(0);
-  const [isDecoding, setIsDecoding] = useState<boolean>(false);
+  const BP_MAX = 12;
 
   const preset = useMemo(
     () => QLDPC_PRESETS.find((p) => p.id === selectedPresetId) ?? QLDPC_PRESETS[0],
@@ -135,13 +136,13 @@ export default function QldpcTannerGraphVisualizer() {
   };
 
   const stepBeliefPropagation = () => {
-    if (bpIteration >= 5) return;
-    setIsDecoding(true);
+    if (bpIteration >= BP_MAX) return;
     sound.playSyndromeTick();
-    setTimeout(() => {
-      setBpIteration((prev) => prev + 1);
-      setIsDecoding(false);
-    }, 250);
+    setBpIteration((prev) => prev + 1); // BP re-runs for `bpIteration` rounds (see `bp` useMemo)
+  };
+  const runBeliefPropagation = () => {
+    sound.playDecoderLock();
+    setBpIteration(BP_MAX); // run min-sum BP to the iteration cap in one go
   };
 
   // Compute active check fires
@@ -156,6 +157,19 @@ export default function QldpcTannerGraphVisualizer() {
       return { id: cNode.id, fires };
     });
   }, [graphData, errors]);
+
+  // Real min-sum belief propagation over the Tanner graph. checkSupports[c] is
+  // the list of qubits in X-check c; the syndrome is the live activeFires vector.
+  const checkSupports = useMemo(
+    () => graphData.xCheckNodes.map((cNode) => graphData.edges.filter((e) => e.from === cNode.id).map((e) => e.to)),
+    [graphData],
+  );
+  const syndromeVec = useMemo(() => activeFires.map((f) => (f.fires ? 1 : 0)), [activeFires]);
+  const bp = useMemo(
+    () => bpMinSumDecode(checkSupports, preset.n, syndromeVec, 0.06, bpIteration),
+    [checkSupports, preset.n, syndromeVec, bpIteration],
+  );
+  const bpErrorCount = bp.estimate.reduce((a, b) => a + b, 0);
 
   const totalErrorCount = errors.slice(0, preset.n).filter((e) => e !== 'I').length;
   const totalFiresCount = activeFires.filter((f) => f.fires).length;
@@ -172,7 +186,7 @@ export default function QldpcTannerGraphVisualizer() {
             </h2>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Explore constant-rate QLDPC codes (k/n &gt; 0.1) with sparse bipartite Tanner graphs. The syndrome is computed live from the graph; the BP panel illustrates decoder rounds — it does not run a real BP-OSD decoder.
+            Explore constant-rate QLDPC codes (k/n &gt; 0.1) with sparse bipartite Tanner graphs. The syndrome is computed live from the graph, and a <strong>real min-sum belief-propagation decoder</strong> passes LLR messages over it to find a correction.
           </p>
         </div>
 
@@ -316,7 +330,7 @@ export default function QldpcTannerGraphVisualizer() {
         <div className="flex flex-col gap-4">
           {/* BP Decoder Controls */}
           <div className="rounded-xl border border-ink-600 bg-ink-800 p-5">
-            <h3 className="eyebrow mb-3 !text-magic">// BELIEF PROPAGATION — SCHEMATIC ROUNDS (no decoder runs)</h3>
+            <h3 className="eyebrow mb-3 !text-magic">// MIN-SUM BELIEF PROPAGATION DECODER (real)</h3>
 
             <div className="space-y-3 font-mono text-xs">
               <div className="flex justify-between items-center rounded-lg bg-ink-900 p-2.5 border border-ink-700">
@@ -335,22 +349,44 @@ export default function QldpcTannerGraphVisualizer() {
 
               <div className="flex justify-between items-center rounded-lg bg-ink-900 p-2.5 border border-ink-700">
                 <span className="text-text-mid">BP Iteration:</span>
-                <span className="font-bold text-plaquette">Round {bpIteration}/5</span>
+                <span className="font-bold text-plaquette">{bp.iterations} / {BP_MAX}</span>
+              </div>
+
+              <div className="flex justify-between items-center rounded-lg bg-ink-900 p-2.5 border border-ink-700">
+                <span className="text-text-mid">Decode result:</span>
+                {bpIteration === 0 ? (
+                  <span className="font-bold text-text-low">— (step to decode)</span>
+                ) : bp.converged ? (
+                  <span className="font-bold text-stabilizer">converged · {bpErrorCount}-qubit correction</span>
+                ) : (
+                  <span className="font-bold text-syndrome">not converged (needs OSD)</span>
+                )}
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={stepBeliefPropagation}
-              disabled={isDecoding || totalFiresCount === 0 || bpIteration >= 5}
-              className="btn-primary mt-4 w-full justify-center disabled:opacity-50"
-            >
-              <Play className="h-4 w-4" />
-              {bpIteration >= 5 ? '5 rounds shown' : 'Step a BP round (illustrative)'}
-            </button>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={stepBeliefPropagation}
+                disabled={bpIteration >= BP_MAX}
+                className="btn-primary flex-1 justify-center disabled:opacity-50"
+              >
+                <Play className="h-4 w-4" />
+                {bpIteration >= BP_MAX ? 'Max iterations' : 'Step BP iteration'}
+              </button>
+              <button
+                type="button"
+                onClick={runBeliefPropagation}
+                className="rounded-lg border border-ink-600 bg-ink-900 px-3 font-mono text-xs text-text-mid hover:border-plaquette/50 hover:text-plaquette"
+              >
+                Run BP
+              </button>
+            </div>
             <p className="mt-3 font-mono text-[10px] leading-relaxed text-text-low">
-              This animates BP’s round structure only — it does not pass real messages, run BP-OSD, or produce
-              a correction. The Active Errors and Syndrome Fires above are real (parity over the Tanner graph).
+              Real min-sum belief propagation: LLR messages pass between qubit and check nodes over the Tanner
+              graph for the shown iterations, hard-deciding each qubit’s marginal. “Converged” means the estimate
+              reproduces the syndrome (H·ê = s). A full BP-OSD decoder adds ordered-statistics post-processing when
+              BP alone stalls.
             </p>
           </div>
 
