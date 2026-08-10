@@ -114,16 +114,43 @@ export default function AITutorDrawer({
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Modal a11y: Escape to close, move focus into the drawer on open, restore on close.
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    lastFocusedRef.current = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    const t = window.setTimeout(() => drawerRef.current?.focus(), 40);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.clearTimeout(t);
+      lastFocusedRef.current?.focus?.();
+    };
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-ink-950/70 backdrop-blur-xs">
+        <div
+          className="fixed inset-0 z-50 flex justify-end bg-ink-950/70 backdrop-blur-xs"
+          onClick={onClose}
+        >
           <motion.div
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="TQEC concept lookup"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="flex h-full w-full flex-col border-l border-plaquette/30 bg-ink-900 shadow-2xl sm:w-[440px]"
+            className="flex h-full w-full flex-col border-l border-plaquette/30 bg-ink-900 shadow-2xl outline-none sm:w-[440px]"
           >
             {/* Drawer Header */}
             <div className="flex items-center justify-between border-b border-ink-700 p-4 bg-ink-850">
