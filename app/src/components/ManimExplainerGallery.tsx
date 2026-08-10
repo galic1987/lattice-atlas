@@ -105,14 +105,15 @@ const VIDEOS: VideoExplainer[] = [
   },
   {
     id: 'quantum-ldpc-bipartite',
-    title: 'qLDPC Bipartite Tanner Graph & Belief Propagation',
+    title: 'qLDPC Tanner Graph & Belief Propagation',
     filename: 'animations/quantum_ldpc_bipartite.mp4',
-    description: 'Manim vector animation demonstrating sparse Tanner graphs with degree-6 connectivity and Belief Propagation (BP) message-passing decoding.',
+    description: 'Manim vector animation: an error on a qubit fires exactly the parity checks that touch it, then belief-propagation messages pass along the sparse Tanner-graph edges until the qubit’s marginal flips and the error is localised. Schematic — the connectivity is thinned so the flow reads clearly (a real bivariate-bicycle qLDPC code has weight-6 checks).',
     keyTakeaways: [
-      'Bipartite Tanner graphs link data qubits (V-nodes) to parity checks (C-nodes).',
-      'Log-likelihood ratio (LLR) messages flow along graph edges to converge on errors.',
-      'Enables high encoding rates (k/n > 0.1) with 10x fewer physical qubits than surface codes.',
+      'A bipartite Tanner graph links qubit (variable) nodes to parity checks by sparse edges.',
+      'An error fires only the checks in its support — that pattern is the syndrome.',
+      'Belief propagation passes log-likelihood messages along the edges until the error is localised; sparse checks are what make high-rate (k/n > 0.1) qLDPC codes decodable.',
     ],
+    sourceScene: 'manim/tqec_scenes.py :: QuantumLdpcBipartite',
   },
   {
     id: 'google-willow-veo31',

@@ -280,3 +280,64 @@ class LatticeSurgery(Scene):
         b4 = stage_banner("④ split back → with single-patch ops this is a logical CNOT (no qubit moved)", OK)
         self.play(FadeOut(seam), FadeOut(joint), Transform(banner, b4))
         self.wait(1.5)
+
+
+class QuantumLdpcBipartite(Scene):
+    """Belief propagation on a sparse bipartite Tanner graph: qubit (variable)
+    nodes at top, parity checks at bottom, sparse edges. An error fires the checks
+    that touch it; log-likelihood messages pass along the edges until the qubit's
+    marginal flips and the error is identified. Schematic of the message-passing
+    idea — a real qLDPC (bivariate-bicycle) graph has weight-6 checks; here the
+    connectivity is thinned so the flow reads clearly."""
+
+    def construct(self):
+        self.camera.background_color = INK
+        title = Text("Quantum LDPC: sparse Tanner graph + belief propagation", font_size=24).to_edge(UP, buff=0.4)
+        self.play(FadeIn(title))
+
+        # Six qubit (variable) nodes on top, three parity checks below.
+        qpos = [np.array([-3.0 + i * 1.2, 1.3, 0]) for i in range(6)]
+        cpos = [np.array([-2.4 + j * 2.4, -1.4, 0]) for j in range(3)]
+        qnodes = VGroup(*[Dot(p, radius=0.18, color=DATA) for p in qpos])
+        cnodes = VGroup(*[Square(0.42, color=CHECK, fill_color=CHECK, fill_opacity=0.18, stroke_width=3).move_to(p) for p in cpos])
+        qlabs = VGroup(*[Text(f"q{i}", font_size=16, color=DATA).next_to(qnodes[i], UP, buff=0.1) for i in range(6)])
+        clabs = VGroup(*[Text(f"c{j}", font_size=16, color=CHECK).next_to(cnodes[j], DOWN, buff=0.1) for j in range(3)])
+
+        # Sparse support: each check touches three qubits (schematic, not weight-6).
+        support = {0: [0, 1, 2], 1: [1, 2, 3], 2: [3, 4, 5]}
+        edges = {}
+        egroup = VGroup()
+        for j, qs in support.items():
+            for i in qs:
+                e = Line(cpos[j], qpos[i], stroke_color=DIM, stroke_width=2)
+                edges[(j, i)] = e
+                egroup.add(e)
+
+        self.play(Create(egroup), LaggedStartMap(GrowFromCenter, qnodes), FadeIn(cnodes), FadeIn(qlabs), FadeIn(clabs))
+        b1 = stage_banner("① qubit nodes and parity checks — sparse (low-density) connections", DATA)
+        self.play(FadeIn(b1))
+        self.wait(0.5)
+
+        # ② An error on q2 fires exactly the checks that touch it (c0 and c1).
+        fired = [j for j, qs in support.items() if 2 in qs]  # -> [0, 1]
+        self.play(qnodes[2].animate.set_color(ERR).scale(1.25))
+        self.play(*[cnodes[j].animate.set_fill(ERR, opacity=0.35).set_stroke(ERR) for j in fired],
+                  *[edges[(j, 2)].animate.set_stroke(ERR, width=4) for j in fired])
+        b2 = stage_banner("② an error on q2 fires only the checks touching it (syndrome)", ERR)
+        self.play(Transform(b1, b2))
+        self.wait(0.5)
+
+        # ③ Belief propagation: LLR messages pulse along the edges, check -> qubit.
+        pulses = VGroup(*[Dot(cpos[j], radius=0.09, color=OK) for j in fired])
+        self.add(pulses)
+        b3 = stage_banner("③ belief propagation: log-likelihood messages pass along the edges", OK)
+        self.play(Transform(b1, b3))
+        self.play(*[MoveAlongPath(pulses[k], Line(cpos[j], qpos[2])) for k, j in enumerate(fired)], run_time=1.1)
+        self.play(FadeOut(pulses))
+        self.wait(0.3)
+
+        # ④ The marginal at q2 crosses over: BP has localised the error.
+        check = Text("✓ q2 localised", font_size=20, color=OK).next_to(qlabs[2], UP, buff=0.22)
+        b4 = stage_banner("④ the marginal flips → the error is localised. High rate, sparse checks.", OK)
+        self.play(qnodes[2].animate.set_color(OK), FadeIn(check), Transform(b1, b4))
+        self.wait(1.5)
