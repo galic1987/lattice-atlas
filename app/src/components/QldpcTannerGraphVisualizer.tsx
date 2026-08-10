@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { bpMinSumDecode } from '@/lib/bp';
+import { buildBicycleCode } from '@/lib/bicycleCodes';
 import { RefreshCw, Zap, Layers, Play } from 'lucide-react';
 import { sound } from '@/lib/sound';
 
@@ -15,6 +16,9 @@ interface QldpcPreset {
   m: number;
   aPoly: string;
   bPoly: string;
+  /** Exponent pairs over Z_l x Z_m — the real algebraic construction. */
+  aTerms: Array<readonly [number, number]>;
+  bTerms: Array<readonly [number, number]>;
   description: string;
   surfaceEquivQubits: number;
 }
@@ -22,15 +26,17 @@ interface QldpcPreset {
 const QLDPC_PRESETS: QldpcPreset[] = [
   {
     id: 'bb-18',
-    name: '[[18, 2, 3]] Compact Bivariate Bicycle',
+    name: '[[18, 4, 4]] Compact Bivariate Bicycle',
     n: 18,
-    k: 2,
-    d: 3,
+    k: 4,
+    d: 4,
     l: 3,
     m: 3,
-    aPoly: 'x + y + y^2',
-    bPoly: 'y + x + x^2',
-    description: 'Compact 18-qubit demonstration QLDPC code encoding 2 logical qubits with degree-6 sparse Tanner graph couplings.',
+    aPoly: '1 + x + y',
+    bPoly: '1 + y + x^2·y',
+    aTerms: [[0, 0], [0, 1], [1, 0]],
+    bTerms: [[0, 0], [0, 1], [2, 1]],
+    description: 'Compact 18-qubit demonstration bicycle code; k and d verified by exhaustive GF(2) rank and distance computation.',
     surfaceEquivQubits: 36,
   },
   {
@@ -43,6 +49,8 @@ const QLDPC_PRESETS: QldpcPreset[] = [
     m: 6,
     aPoly: 'x^3 + y + y^2',
     bPoly: 'y^3 + x + x^2',
+    aTerms: [[3, 0], [0, 1], [0, 2]],
+    bTerms: [[0, 3], [1, 0], [2, 0]],
     description: 'IBM 2021 landmark Bivariate Bicycle code encoding 12 logical qubits in 72 physical qubits (16.7% encoding rate vs <2% for surface codes).',
     surfaceEquivQubits: 864,
   },
@@ -54,8 +62,10 @@ const QLDPC_PRESETS: QldpcPreset[] = [
     d: 12,
     l: 12,
     m: 6,
-    aPoly: 'x^3 + y + y^7',
-    bPoly: 'y^3 + x + x^7',
+    aPoly: 'x^3 + y + y^2',
+    bPoly: 'y^3 + x + x^2',
+    aTerms: [[3, 0], [0, 1], [0, 2]],
+    bTerms: [[0, 3], [1, 0], [2, 0]],
     description: 'High-rate QLDPC architecture using far fewer physical qubits than an equal number of distance-12 surface-code patches (see the live ratio below).',
     surfaceEquivQubits: 3456,
   },
@@ -72,11 +82,12 @@ export default function QldpcTannerGraphVisualizer() {
     [selectedPresetId]
   );
 
-  // Generate sparse Tanner graph nodes & edges for the selected preset
+  // The real bivariate-bicycle Tanner graph for the selected preset
+  // (algebraic construction, verified by scripts/check-codes.mjs).
   const graphData = useMemo(() => {
-    const n = preset.n;
-    const numChecks = (n - preset.k) / 2; // Split equally into X and Z checks
-    
+    const code = buildBicycleCode(preset.l, preset.m, preset.aTerms, preset.bTerms);
+    const n = code.n;
+
     // Position data qubits on a large outer circle
     const dataNodes = Array.from({ length: n }).map((_, i) => {
       const angle = (i * 360 / n - 90) * (Math.PI / 180);
@@ -89,8 +100,9 @@ export default function QldpcTannerGraphVisualizer() {
       };
     });
 
-    // Position X checks in an inner left circle and Z checks in an inner right circle
-    const xCheckNodes = Array.from({ length: numChecks }).map((_, i) => {
+    // One X-check node per real check row of the bicycle construction
+    const xCheckNodes = code.xChecks.map((_, i) => {
+      const numChecks = code.xChecks.length;
       const angle = (i * 360 / numChecks - 90) * (Math.PI / 180);
       const r = 75;
       return {
@@ -102,19 +114,13 @@ export default function QldpcTannerGraphVisualizer() {
       };
     });
 
-    // Sparse Tanner edges connecting checks to qubits based on degree 3+3 = 6
+    // Real edges: check c touches exactly the qubits in its support (weight 6)
     const edges: Array<{ from: string; to: number; type: 'X' | 'Z' }> = [];
-    xCheckNodes.forEach((cNode, cIdx) => {
-      // Connect to 3 data qubits cyclically
-      const q1 = (cIdx * 2) % n;
-      const q2 = (cIdx * 2 + 1) % n;
-      const q3 = (cIdx * 2 + 3) % n;
-      edges.push({ from: cNode.id, to: q1, type: 'X' });
-      edges.push({ from: cNode.id, to: q2, type: 'X' });
-      edges.push({ from: cNode.id, to: q3, type: 'X' });
+    code.xChecks.forEach((support, cIdx) => {
+      for (const q of support) edges.push({ from: `X${cIdx}`, to: q, type: 'X' });
     });
 
-    return { dataNodes, xCheckNodes, edges };
+    return { dataNodes, xCheckNodes, edges, code };
   }, [preset]);
 
   const toggleError = (idx: number) => {
@@ -186,7 +192,7 @@ export default function QldpcTannerGraphVisualizer() {
             </h2>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Explore constant-rate QLDPC codes (k/n &gt; 0.1) with sparse bipartite Tanner graphs. The syndrome is computed live from the graph, and a <strong>real min-sum belief-propagation decoder</strong> passes LLR messages over it to find a correction.
+            Explore constant-rate QLDPC codes (k/n &gt; 0.1) with sparse bipartite Tanner graphs. The Tanner graph is the actual algebraic bicycle construction (verified by the build), the syndrome is computed live from it, and a <strong>real min-sum belief-propagation decoder</strong> passes LLR messages over it to find a correction.
           </p>
         </div>
 
