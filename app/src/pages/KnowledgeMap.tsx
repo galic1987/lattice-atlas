@@ -427,7 +427,7 @@ function TopicNode({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: 0.06 * index, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div data-node-id={topic.id}>
+      <div data-node-id={topic.id} className="relative">
         <div
           role="button"
           tabIndex={0}
@@ -464,11 +464,10 @@ function TopicNode({
         >
           <div className="flex items-start justify-between gap-2">
             <TierBadge tier={topic.tier} compact />
-            <CheckToggle
-              active={isUnderstood}
-              onToggle={onToggle}
-              label={`Mark ${shortName(topic)} as explored`}
-            />
+            {/* Spacer reserves room for the CheckToggle, which is rendered as a
+                sibling overlay below so it is not an interactive control nested
+                inside this role="button" card (a WCAG nested-interactive failure). */}
+            <span aria-hidden="true" className="h-6 w-6 shrink-0" />
           </div>
           <h3 className="mt-2.5 font-display text-lg font-semibold leading-snug text-text-hi">
             {shortName(topic)}
@@ -478,6 +477,13 @@ function TopicNode({
               ? 'no prerequisites'
               : `depends on ${topic.depends_on.length} topic${topic.depends_on.length > 1 ? 's' : ''}`}
           </p>
+        </div>
+        <div className="absolute right-4 top-4 z-10">
+          <CheckToggle
+            active={isUnderstood}
+            onToggle={onToggle}
+            label={`Mark ${shortName(topic)} as explored`}
+          />
         </div>
       </div>
     </motion.div>

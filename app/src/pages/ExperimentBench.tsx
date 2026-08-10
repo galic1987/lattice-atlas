@@ -120,6 +120,8 @@ function PercolationExperiment() {
               max={0.7}
               step={0.01}
               value={p}
+              aria-label="Physical error rate p"
+              aria-valuetext={`${(p * 100).toFixed(0)} percent physical error rate`}
               onChange={(e) => onP(parseFloat(e.target.value))}
               className="mt-2 w-full accent-plaquette"
             />
