@@ -46,14 +46,15 @@ const VIDEOS: VideoExplainer[] = [
   },
   {
     id: 'lattice-surgery',
-    title: 'Lattice Surgery Boundary Weld',
+    title: 'Lattice Surgery: Merge, Measure Joint Parity, Split',
     filename: 'animations/lattice_surgery.mp4',
-    description: 'Manim vector animation showing smooth Z-boundary welding between two planar surface code patches for fault-tolerant logical CNOT gates.',
+    description: 'Manim vector animation: two surface-code patches merge along their facing smooth Z-boundaries to measure the joint parity Z_L1 · Z_L2, then split — the move that (with single-patch operations) realises a logical CNOT without moving a qubit. Schematic of the protocol, not a full stabilizer simulation.',
     keyTakeaways: [
-      'Merges smooth boundaries to measure joint operator Z_L1 · Z_L2.',
-      'Generates fault-tolerant logical Bell states without non-transversal gates.',
-      'Split & merge cycles form the foundation of topological quantum computation.',
+      'Merging the smooth boundaries measures the joint operator Z_L1 · Z_L2 — the outcome is a single classical parity bit.',
+      'The patches stay encoded throughout; only a boundary is welded and unwelded.',
+      'Merge → measure → split, combined with single-patch operations, composes a logical CNOT — no qubit is physically moved.',
     ],
+    sourceScene: 'manim/tqec_scenes.py :: LatticeSurgery',
   },
   {
     id: 'topological-braiding',
