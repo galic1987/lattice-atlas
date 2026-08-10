@@ -16,7 +16,8 @@
     "prepare-images": "node scripts/prepare-images.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test --config tests/release.playwright.config.ts",
-    "check-codes": "node scripts/check-codes.mjs"
+    "check-codes": "node scripts/check-codes.mjs",
+    "build:pages": "npm run build -- --base=/lattice-atlas/"
   },
   "dependencies": {
     "framer-motion": "^13.0.0",
