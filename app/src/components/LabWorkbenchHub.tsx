@@ -1,4 +1,5 @@
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, useMemo, useRef, useEffect, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Layers,
   Cpu,
@@ -268,7 +269,27 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
 ];
 
 export default function LabWorkbenchHub() {
-  const [activeTab, setActiveTab] = useState<ToolTab>('surface-3d');
+  const [searchParams] = useSearchParams();
+  const hubRef = useRef<HTMLDivElement>(null);
+  const initialTab = (() => {
+    const t = searchParams.get('tab');
+    return t && WORKBENCH_TOOLS.some((w) => w.id === t) ? (t as ToolTab) : 'surface-3d';
+  })();
+  const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
+
+  // Deep-link (?tab=…) from the command palette: open that tool and scroll the
+  // workbench into view (it sits far below the fold on the Lab page).
+  useEffect(() => {
+    const t = searchParams.get('tab');
+    if (t && WORKBENCH_TOOLS.some((w) => w.id === t)) {
+      const id = window.setTimeout(() => {
+        setActiveTab(t as ToolTab);
+        hubRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+      return () => window.clearTimeout(id);
+    }
+    return undefined;
+  }, [searchParams]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
   const categories = ['All', 'Foundations', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery'];
@@ -291,7 +312,7 @@ export default function LabWorkbenchHub() {
   };
 
   return (
-    <div className="space-y-8">
+    <div ref={hubRef} className="space-y-8" style={{ scrollMarginTop: '5rem' }}>
       {/* Non-Linear Workbench Control Hub */}
       <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-ink-700 pb-4">

@@ -16,7 +16,9 @@ export interface CommandItem {
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastFocusedRef = useRef<HTMLElement | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,10 +36,18 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  // Focus into the input on open; restore focus to the trigger on close.
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      lastFocusedRef.current = document.activeElement as HTMLElement | null;
+      const t = window.setTimeout(() => {
+        setSelectedIndex(0);
+        inputRef.current?.focus();
+      }, 50);
+      return () => window.clearTimeout(t);
     }
+    lastFocusedRef.current?.focus?.();
+    return undefined;
   }, [isOpen]);
 
   const COMMAND_ITEMS: CommandItem[] = [
@@ -106,8 +116,15 @@ export default function CommandPalette() {
 
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-ink-950/80 backdrop-blur-md p-4">
+          <div
+            className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-ink-950/80 backdrop-blur-md p-4"
+            onClick={() => setIsOpen(false)}
+          >
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Command palette — jump to anything"
+              onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -120,8 +137,25 @@ export default function CommandPalette() {
                   ref={inputRef}
                   type="text"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Jump anywhere non-linearly (e.g. Surface Code, MWPM, Willow, Review)..."
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setSelectedIndex(0);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setSelectedIndex((i) => Math.min(i + 1, filteredItems.length - 1));
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setSelectedIndex((i) => Math.max(i - 1, 0));
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const it = filteredItems[selectedIndex];
+                      if (it) selectItem(it.url);
+                    }
+                  }}
+                  aria-label="Search commands"
+                  placeholder="Type then ↑/↓ and Enter (e.g. Surface Code, MWPM, Willow)…"
                   className="flex-1 bg-transparent font-mono text-sm text-text-hi placeholder:text-text-low focus:outline-none"
                 />
                 <button
@@ -134,25 +168,33 @@ export default function CommandPalette() {
               </div>
 
               {/* Filtered Command List */}
-              <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+              <div className="max-h-80 overflow-y-auto p-2 space-y-1" role="listbox" aria-label="Results">
                 {filteredItems.length === 0 ? (
                   <div className="p-6 text-center font-mono text-xs text-text-low">
                     No results found for "{query}". Try searching for "Surface Code", "Torus", or "Review".
                   </div>
                 ) : (
-                  filteredItems.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => selectItem(item.url)}
-                      className="flex w-full items-center justify-between rounded-xl p-3 text-left transition-colors hover:bg-plaquette/15 hover:border-plaquette/40 border border-transparent"
-                    >
-                      <span className="font-display text-sm font-semibold text-text-hi">{item.title}</span>
-                      <span className="rounded bg-ink-800 px-2 py-0.5 font-mono text-[10px] text-plaquette">
-                        {item.category}
-                      </span>
-                    </button>
-                  ))
+                  filteredItems.map((item, idx) => {
+                    const selected = idx === selectedIndex;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        role="option"
+                        aria-selected={selected}
+                        onMouseEnter={() => setSelectedIndex(idx)}
+                        onClick={() => selectItem(item.url)}
+                        className={`flex w-full items-center justify-between rounded-xl p-3 text-left transition-colors border ${
+                          selected ? 'bg-plaquette/15 border-plaquette/40' : 'border-transparent hover:bg-plaquette/10'
+                        }`}
+                      >
+                        <span className="font-display text-sm font-semibold text-text-hi">{item.title}</span>
+                        <span className="rounded bg-ink-800 px-2 py-0.5 font-mono text-[10px] text-plaquette">
+                          {item.category}
+                        </span>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </motion.div>
