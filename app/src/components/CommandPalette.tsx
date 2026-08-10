@@ -63,6 +63,7 @@ export default function CommandPalette() {
     { id: 'c20', title: 'End-to-End Fault-Tolerant QEC Stage Architecture Walkthrough', category: 'Tool', url: '/lab?tab=pipeline-walkthrough' },
     { id: 'c21', title: '3D Spacetime Syndrome Decoder Sandbox (MWPM & Noise Injection)', category: 'Tool', url: '/lab?tab=spacetime-3d-decoder' },
     { id: 'c22', title: 'Quantum Color Code Transversal Gate Simulator (6.6.6 & 4.8.8)', category: 'Tool', url: '/lab?tab=color-code-transversal' },
+    { id: 'c23', title: 'Custom Google Veo 3.1 AI Video Prompt Refiner Studio', category: 'Tool', url: '/lab?tab=veo-prompt-refiner' },
     ...topics.map((t) => ({
       id: `topic-${t.id}`,
       title: `${t.name} (Tier ${t.tier})`,
