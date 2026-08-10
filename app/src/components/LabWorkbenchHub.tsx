@@ -43,8 +43,10 @@ const HardwareChipBenchmarkMatrix = lazy(() => import('@/components/HardwareChip
 const MultiAgeCognitivePrism = lazy(() => import('@/components/MultiAgeCognitivePrism'));
 const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineStageWalkthrough'));
 const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecoderSandbox3D'));
+const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTransversalStudio'));
 
 export type ToolTab =
+  | 'color-code-transversal'
   | 'spacetime-3d-decoder'
   | 'pipeline-walkthrough'
   | 'code-zoo'
@@ -127,6 +129,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'color-code-transversal',
+    title: 'Quantum Color Code Transversal Gate Simulator',
+    category: 'Foundations',
+    icon: Sparkles,
+    description: 'Interactive 6.6.6 & 4.8.8 color code lattice executing H, S, & CNOT transversal logic without distillation.',
   },
   {
     id: 'spacetime-3d-decoder',
@@ -384,6 +393,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'color-code-transversal' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Color Code Transversal Gate Simulator...</div>}>
+              <ColorCodeTransversalStudio />
             </Suspense>
           </div>
         )}
