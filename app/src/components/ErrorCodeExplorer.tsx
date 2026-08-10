@@ -521,7 +521,7 @@ function QuantumLab({
 /* ---------------- the explorer ---------------- */
 
 export default function ErrorCodeExplorer() {
-  const { recordEvidence } = useProgress();
+  const { recordEvidence, evidenceFor } = useProgress();
   const [labsDone, setLabsDone] = useState<ReadonlySet<string>>(new Set());
   const recordedRef = useRef(false);
 
@@ -540,6 +540,10 @@ export default function ErrorCodeExplorer() {
   const taskComplete = labsDone.size >= QUANTUM_CODES.length;
   useEffect(() => {
     if (!taskComplete || recordedRef.current) return;
+    if (evidenceFor('lab-task').some((e) => e.taskId === 'correct-single-pauli' && e.completed)) {
+      recordedRef.current = true; // already on the record from a previous run
+      return;
+    }
     recordedRef.current = true;
     recordEvidence({
       kind: 'lab-task',
@@ -548,7 +552,7 @@ export default function ErrorCodeExplorer() {
       taskId: 'correct-single-pauli',
       completed: true,
     });
-  }, [taskComplete, recordEvidence]);
+  }, [taskComplete, recordEvidence, evidenceFor]);
 
   return (
     <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, ChevronDown, Sparkles } from 'lucide-react';
 import { sound } from '@/lib/sound';
-import { papers } from '@/data';
+import { papers, topics } from '@/data';
 
 const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
   '/': {
@@ -27,15 +27,15 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     takeaways: [
       'Explore prerequisite paths connecting classical error correction to fault-tolerant algorithms.',
       'Toggle between Physical Metaphor (Intuition) and Rigorous Math (Formalism) cognitive lenses.',
-      'Track your mastery progress across all 26 core topological concepts.',
+      `Track your mastery progress across all ${topics.length} core topological concepts.`,
     ],
   },
   '/path': {
-    summary: 'Structured 5-Act curriculum taking you from fundamental quantum mechanics to fault-tolerant architectures.',
+    summary: 'Structured 6-act curriculum taking you from fundamental quantum mechanics to fault-tolerant architectures.',
     takeaways: [
-      'Act 1 & 2: Quantum foundations, superposition paradoxes, and stabilizer algebra.',
-      'Act 3 & 4: Rotated surface codes, syndrome decoding, and anyon braiding topology.',
-      'Act 5: Fault-tolerant compilation, magic state distillation, and physical resource overheads.',
+      'Acts 1–2: Quantum foundations, superposition paradoxes, and stabilizer algebra.',
+      'Acts 3–4: Rotated surface codes, syndrome decoding, and anyon braiding topology.',
+      'Acts 5–6: Fault-tolerant compilation, magic states, and the experimental frontier.',
     ],
   },
   '/altitudes': {
@@ -63,7 +63,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     ],
   },
   '/papers': {
-    summary: `Annotated bibliography of ${papers.length} key quantum error correction papers with PDF-verified reading prompts.`,
+    summary: `Annotated bibliography of ${papers.length} key quantum error correction papers with reading prompts; selected papers carry PDF-verified notes.`,
     takeaways: [
       'Chronological timeline from Bravyi–Kitaev 1998 to Willow 2024 and 2026 scheduling research.',
       'Each paper includes key contributions and why it matters; selected papers carry PDF-verified technical notes.',

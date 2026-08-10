@@ -940,11 +940,11 @@ export default function LearningPath() {
       {/* Section 1 — header + progress hero */}
       <section className="mx-auto max-w-6xl px-6 pt-32 pb-12 md:px-8">
         <SuperTLDR
-          summary="Structured 5-Act curriculum taking you from fundamental quantum mechanics to fault-tolerant quantum computing architectures."
+          summary="Structured 6-act curriculum taking you from fundamental quantum mechanics to fault-tolerant quantum computing architectures."
           takeaways={[
-            'Act 1 & 2: Quantum foundations, superposition paradoxes, and stabilizer algebra.',
-            'Act 3 & 4: Rotated surface codes, syndrome decoding, and anyon braiding topology.',
-            'Act 5: Fault-tolerant compilation, magic state distillation, and physical resource overheads.',
+            'Acts 1–2: Quantum foundations, superposition paradoxes, and stabilizer algebra.',
+            'Acts 3–4: Rotated surface codes, syndrome decoding, and anyon braiding topology.',
+            'Acts 5–6: Fault-tolerant compilation, magic states, and the experimental frontier.',
           ]}
         />
         <p className="eyebrow !text-stabilizer">// GUIDED ROUTE</p>
