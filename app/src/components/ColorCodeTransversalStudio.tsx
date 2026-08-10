@@ -268,7 +268,7 @@ export default function ColorCodeTransversalStudio() {
             if (v.hasZError) strokeColor = '#3b82f6';
 
             return (
-              <g key={v.id} onClick={() => toggleQubitError(v.id)} className="cursor-pointer">
+              <g key={v.id} onClick={() => toggleQubitError(v.id)} className="cursor-pointer" role="button" tabIndex={0} aria-label="Toggle element" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const h = () => toggleQubitError(v.id); h(); } }}>
                 <circle
                   cx={v.x}
                   cy={v.y}

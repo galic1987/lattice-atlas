@@ -259,7 +259,7 @@ export default function StandardCodeZooStudio() {
                   const err = qubitErrors[pt.id];
                   const hasErr = err !== 'I';
                   return (
-                    <g key={pt.id} className="cursor-pointer" onClick={() => togglePauli(pt.id)}>
+                    <g key={pt.id} className="cursor-pointer" onClick={() => togglePauli(pt.id)} role="button" tabIndex={0} aria-label="Toggle element" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const h = () => togglePauli(pt.id); h(); } }}>
                       <circle
                         cx={pt.x}
                         cy={pt.y}
@@ -354,7 +354,7 @@ export default function StandardCodeZooStudio() {
                   const err = qubitErrors[i];
                   const hasErr = err !== 'I';
                   return (
-                    <g key={i} className="cursor-pointer" onClick={() => togglePauli(i)}>
+                    <g key={i} className="cursor-pointer" onClick={() => togglePauli(i)} role="button" tabIndex={0} aria-label="Toggle element" onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const h = () => togglePauli(i); h(); } }}>
                       <circle
                         cx={x}
                         cy={y}
