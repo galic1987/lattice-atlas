@@ -54,7 +54,7 @@ const HARDWARE_CHIPS: QuantumChip[] = [
     architecture: 'Superconducting Transmon (Heavy-Hex Lattice)',
     twoQubitFidelityPercent: 99.60,
     gateTimeNs: 68,
-    lambdaSuppression: 1.45,
+    lambdaSuppression: 0, // Λ not published for this platform
     distanceSupported: 5,
     scores: {
       fidelity: 88,
@@ -77,7 +77,7 @@ const HARDWARE_CHIPS: QuantumChip[] = [
     architecture: 'Trapped Ytterbium Ion Shuttle (QCCD)',
     twoQubitFidelityPercent: 99.95,
     gateTimeNs: 10000, // 10μs
-    lambdaSuppression: 3.20,
+    lambdaSuppression: 0, // Λ not published for this platform
     distanceSupported: 5,
     scores: {
       fidelity: 99,
@@ -88,7 +88,7 @@ const HARDWARE_CHIPS: QuantumChip[] = [
     },
     highlights: [
       'World-record 99.95% 2-qubit gate fidelity with all-to-all QCCD shuttle routing.',
-      'Demonstrated 48 logical qubits using color code and surface code encoding.',
+      'Demonstrated up to ~12 logical qubits with real-time QEC (2024).',
       'Zero crosstalk with state detection fidelity >99.9%.',
     ],
   },
@@ -100,7 +100,7 @@ const HARDWARE_CHIPS: QuantumChip[] = [
     architecture: 'Neutral Atom Array (Optical Tweezers)',
     twoQubitFidelityPercent: 99.50,
     gateTimeNs: 1000, // 1μs
-    lambdaSuppression: 1.80,
+    lambdaSuppression: 0, // Λ not published for this platform
     distanceSupported: 5,
     scores: {
       fidelity: 85,
@@ -138,7 +138,9 @@ export default function HardwareChipBenchmarkMatrix() {
             </h3>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Comprehensive benchmark specs for Google Willow, IBM Heron, Quantinuum H2, &amp; QuEra Aquila chips.
+            Comparison of Google Willow, IBM Heron, Quantinuum H2, &amp; QuEra Aquila. The radar is an illustrative
+            side-by-side; Λ = ε(d)/ε(d+2) is a surface-code memory metric published only for Willow (2.14) — the
+            others show “not published”.
           </p>
         </div>
 
@@ -222,7 +224,7 @@ export default function HardwareChipBenchmarkMatrix() {
           </div>
 
           <div className="text-center font-mono text-[11px] text-plaquette font-bold">
-            2-Qubit Fidelity: {chip.twoQubitFidelityPercent}% · Λ = {chip.lambdaSuppression}
+            2-Qubit Fidelity: {chip.twoQubitFidelityPercent}% · Λ = {chip.lambdaSuppression > 0 ? chip.lambdaSuppression : 'not published'}
           </div>
         </div>
 

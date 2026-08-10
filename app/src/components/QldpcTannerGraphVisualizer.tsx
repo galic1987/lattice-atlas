@@ -47,7 +47,7 @@ const QLDPC_PRESETS: QldpcPreset[] = [
   },
   {
     id: 'pk-144',
-    name: '[[144, 12, 12]] Panteleev-Kalachev QLDPC',
+    name: '[[144, 12, 12]] Bivariate-Bicycle (IBM, Bravyi et al. 2024)',
     n: 144,
     k: 12,
     d: 12,
@@ -55,7 +55,7 @@ const QLDPC_PRESETS: QldpcPreset[] = [
     m: 6,
     aPoly: 'x^3 + y + y^7',
     bPoly: 'y^3 + x + x^7',
-    description: 'High-distance QLDPC architecture requiring 8.1x fewer physical qubits than distance-12 surface codes.',
+    description: 'High-rate QLDPC architecture using far fewer physical qubits than an equal number of distance-12 surface-code patches (see the live ratio below).',
     surfaceEquivQubits: 3456,
   },
 ];

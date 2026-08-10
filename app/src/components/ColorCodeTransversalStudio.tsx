@@ -306,7 +306,7 @@ export default function ColorCodeTransversalStudio() {
           <ShieldCheck className="h-4 w-4" /> Why Color Codes Enable Transversal Clifford Gates
         </div>
         <p className="text-text-mid leading-relaxed font-sans text-xs">
-          Color codes possess 3-colorable and 3-valent graph properties where every face has an even number of vertices. This topological structure maps Pauli operators bitwise under Hadamard (H^⊗n), Phase (S^⊗n), and CNOT (CX^⊗n) gates without spreading errors across physical qubits, completely eliminating the need for expensive magic state distillation factories for Clifford gates!
+          Color codes live on 3-valent, 3-colorable lattices whose plaquettes have even weight (e.g. the hexagons of the 6.6.6 code) — the triangular faces drawn here are a simplified schematic, not the true tiling. Because the stabilizers are even-weight and self-dual, transversal Hadamard (H^⊗n) swaps the X and Z checks bitwise without spreading errors, so 2D color codes get transversal Clifford gates (H, S, CNOT) with no magic-state distillation. (Below, H shows that real X↔Z swap; the S and CNOT buttons are illustrative.)
         </p>
       </div>
 

@@ -31,8 +31,8 @@ const PAPER_VIDEOS: PaperVideoMeta[] = [
     authors: 'Alexei Yu. Kitaev',
     year: 1997,
     arxivOrDoi: 'Annals Phys. 303 (2003) 2-30',
-    conceptSummary: 'Introduces the Toric Code and topological quantum memory, demonstrating that non-Abelian anyon braiding in 2D space yields fault-tolerant logic immune to local noise.',
-    veoPrompt: 'Hyperrealistic 3D rendering of non-Abelian electric and magnetic anyon quasiparticles braiding world-lines in a 2+1D spacetime lattice, luminous cyan and violet energy ribbons, 60fps.',
+    conceptSummary: 'Introduces the Toric Code and topological quantum memory, demonstrating that Abelian anyon (e, m) braiding in 2D space yields fault-tolerant logic immune to local noise.',
+    veoPrompt: 'Hyperrealistic 3D rendering of Abelian electric and magnetic anyon quasiparticles braiding world-lines in a 2+1D spacetime lattice, luminous cyan and violet energy ribbons, 60fps.',
     keyEquation: 'H = -J_e ∑_v A_v - J_m ∑_p B_p',
   },
   {

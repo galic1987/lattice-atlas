@@ -62,7 +62,7 @@ export default function AITutorDrawer({
     } else if (qLower.includes('mwpm') || qLower.includes('matching')) {
       replyText = 'Minimum-Weight Perfect Matching pairs detection events (checks that flipped to −1) on the syndrome graph with minimum total edge weight — classically via Edmonds’ Blossom algorithm (1965).';
     } else if (qLower.includes('qubit') || qLower.includes('49')) {
-      replyText = 'A distance-d rotated surface code uses N = d² + (d−1)² physical qubits — d² data qubits plus d²−1 syndrome ancillas. For d=5 that is 25 + 24 = 49.';
+      replyText = 'A distance-d rotated surface code uses N = d² + (d²−1) = 2d²−1 physical qubits — d² data qubits plus d²−1 syndrome ancillas. For d=5 that is 25 + 24 = 49.';
     } else {
       replyText = 'I don’t have a reference entry matching that phrasing. This panel only looks up the atlas’s own topics and glossary terms — it doesn’t generate answers — so try one of the suggested questions below, or browse the Glossary and Knowledge Map from the top nav.';
     }

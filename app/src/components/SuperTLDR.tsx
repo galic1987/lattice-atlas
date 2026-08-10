@@ -46,11 +46,11 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     ],
   },
   '/lab': {
-    summary: 'Interactive FTQC Workbench Hub for 3D surface code patches, spacetime braid weaving, and Stim execution.',
+    summary: 'Interactive FTQC Workbench Hub for 3D surface code patches, spacetime braid weaving, and illustrative Stim example circuits.',
     takeaways: [
       'Simulate d=3, 5, 7 rotated surface code lattices under depolarizing noise.',
       'Visualize 3D spacetime defect braiding worldlines and lattice surgery boundary welds.',
-      'Run executable Stim circuit models and analyze Detector Error Model (.dem) graphs.',
+      'Browse illustrative Stim example circuits and explore Detector Error Model (.dem) graphs (not executed in-browser).',
     ],
   },
   '/duel': {
@@ -58,7 +58,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     takeaways: [
       'Identify rose-ringed syndrome detector fires on a d=3 surface code lattice.',
       'Apply exact data qubit correction chains (X, Z) to prevent logical Pauli flips.',
-      'Earn verified Stim checksum badges and track your daily high score leaderboard.',
+      'Paint the correction, beat the built-in matching decoder, and share your (local, unverified) daily score.',
     ],
   },
   '/papers': {
@@ -90,7 +90,7 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
     takeaways: [
       'Diagnose syndrome pattern anticommutation rules on rotated surface code lattices.',
       'Submit dual-depth teach-back explanations (5-yr physical metaphor + 20-yr formal math).',
-      'Generate verified local evidence records for full curriculum completion.',
+      'Generate a local, self-recorded evidence log of your progress (stored in your browser — not verified).',
     ],
   },
 };

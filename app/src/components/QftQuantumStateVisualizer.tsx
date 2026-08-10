@@ -46,7 +46,7 @@ const QFT_CONCEPTS: QftConcept[] = [
     subtitle: 'Environmental Entanglement & Wavefunction Collapse',
     description: 'Measurement is the rapid entanglement of a qubit field with an external macroscopic environment reservoir.',
     qftInsight: 'Environmental decoherence suppresses off-diagonal density matrix elements ρ_01 → 0 in time t_decoherence < t_gate.',
-    mathNotation: 'ρ(t) = ∑_k E_k ρ(0) E_k^†  (Lindblad Master Equation)',
+    mathNotation: 'ρ(t) = ∑_k E_k ρ(0) E_k^†  (Kraus operator-sum representation)',
     veo3Prompt: 'Dramatic visual of a quantum superposition field collapsing into a definite measurement eigenstate upon environmental contact, glowing particles, photorealistic 8K, Google Veo 3 simulation.',
   },
 ];
