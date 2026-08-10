@@ -68,6 +68,45 @@ test('reduced-motion preference disables long CSS animation', async ({ page }) =
   expect(motion.iterations).toBe('1');
 });
 
+test('Surface Code Lab core loop: paint error -> syndrome -> decode -> challenge credit', async ({ page }) => {
+  await page.goto(`${BASE_PATH}lab/`);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+  // Paint error by clicking first qubit
+  const qubit = page.locator('[role="button"][aria-label*="Data qubit"]').first();
+  await qubit.click();
+
+  // Click Decode & correct
+  const decodeBtn = page.getByRole('button', { name: /Decode & correct/ });
+  await decodeBtn.click();
+
+  // Assert decoder output
+  await expect(page.locator('text=✓ corrected — logical sector preserved')).toBeVisible();
+});
+
+test('Concept Lookup: all suggested questions resolve without fallback warning', async ({ page }) => {
+  await page.goto(BASE_PATH);
+  const lookupBtn = page.locator('#concept-lookup-btn');
+  await expect(lookupBtn).toBeVisible({ timeout: 15000 });
+  await lookupBtn.click();
+
+  const dialog = page.getByRole('dialog', { name: 'TQEC concept lookup' });
+  await expect(dialog).toBeVisible();
+
+  const prompts = [
+    'What is Topological Quantum Error Correction in 1 sentence?',
+    'Why does a distance-5 surface code need 49 physical qubits?',
+    'What is Minimum Weight Perfect Matching (MWPM) decoding?',
+    'What is Google Willow’s Λ = 2.14 error suppression factor?',
+  ];
+
+  for (const promptText of prompts) {
+    const promptBtn = dialog.getByText(promptText, { exact: true });
+    await promptBtn.click();
+    await expect(page.locator('text=I don’t have a reference entry matching that phrasing')).toHaveCount(0);
+  }
+});
+
 test('representative routes do not create horizontal overflow on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 

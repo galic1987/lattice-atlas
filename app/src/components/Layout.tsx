@@ -108,7 +108,7 @@ function DesktopNav() {
           end={(to as string) === '/'}
           aria-label={'ariaLabel' in item ? item.ariaLabel : undefined}
           className={({ isActive }) =>
-            `relative px-2 py-2 text-sm font-medium transition-colors duration-200 ${
+            `relative px-1.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
               isActive ? 'text-plaquette' : 'text-text-mid hover:text-text-hi'
             }`
           }
@@ -265,6 +265,17 @@ export default function Layout() {
     return () => window.clearTimeout(timer);
   }, [location.hash, location.pathname, navigationType]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setAiTutorOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col overflow-x-clip bg-ink-900 text-text-mid selection:bg-plaquette/30 selection:text-plaquette">
       <a
@@ -281,21 +292,24 @@ export default function Layout() {
       <AITutorDrawer isOpen={aiTutorOpen} onClose={() => setAiTutorOpen(false)} />
       <CommandPalette />
       <header className="fixed top-0 z-40 w-full border-b border-ink-600/80 bg-ink-900/90 backdrop-blur-md">
-        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6 md:px-8">
-          <Logo />
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
-            <DesktopNav />
-            <SoundToggle />
+            <Logo />
             <button
+              id="concept-lookup-btn"
               type="button"
               onClick={() => setAiTutorOpen(true)}
-              title="Open TQEC concept lookup"
-              aria-label="Open TQEC concept lookup"
+              title="Concept Lookup"
+              aria-label="Concept Lookup"
               className="inline-flex items-center gap-1.5 rounded-full border border-plaquette/50 bg-plaquette/10 px-2.5 py-1 font-mono text-xs text-plaquette transition-colors hover:bg-plaquette/20"
             >
               <BookOpen className="h-3.5 w-3.5" />
-              <span>Concept Lookup</span>
+              <span className="hidden sm:inline">Concept Lookup</span>
             </button>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <DesktopNav />
+            <SoundToggle />
             <ProgressPill onShare={() => setShareOpen(true)} />
             <button
               type="button"
