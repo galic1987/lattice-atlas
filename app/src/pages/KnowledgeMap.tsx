@@ -1,6 +1,7 @@
 import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import ConceptClip from '@/components/ConceptClip';
+import TryItChips from '@/components/TryItChips';
 import { TOPIC_CLIPS } from '@/lib/topicClips';
 import {
   useCallback,
@@ -1013,6 +1014,8 @@ function TopicDrawer({
                   </div>
                 </div>
               )}
+
+              <TryItChips topicId={topic.id} />
 
               <div className="mt-8 flex flex-col gap-8">
                 <TopicLensInsight topicId={topic.id} />
