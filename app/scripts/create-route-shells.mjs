@@ -128,13 +128,10 @@ function shellFor(html, routePath, meta) {
 
 const source_html = readFileSync(source, 'utf8');
 
-// Home page: rewrite dist/index.html in place with canonical/og:url for the root.
-writeFileSync(source, shellFor(source_html, '', ROUTE_META['']));
-
-for (const route of routes) {
+for (const [route, meta] of Object.entries(ROUTE_META).filter(([r]) => r !== '')) {
   const directory = join(dist, route);
   mkdirSync(directory, { recursive: true });
-  writeFileSync(join(directory, 'index.html'), shellFor(source_html, route, ROUTE_META[route]));
+  writeFileSync(join(directory, 'index.html'), shellFor(source_html, route, meta));
 }
 
 // 404 fallback keeps the homepage head (it is not a canonical page).

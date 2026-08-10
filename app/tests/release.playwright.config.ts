@@ -7,7 +7,7 @@ const appDirectory = fileURLToPath(new URL('../', import.meta.url));
 
 export default defineConfig({
   testDir: '.',
-  testMatch: 'release-gates.spec.ts',
+  testMatch: '*.spec.ts',
   outputDir: '../test-results/release-playwright',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
@@ -27,7 +27,7 @@ export default defineConfig({
     command: 'node scripts/serve-release-build.mjs',
     cwd: appDirectory,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 15_000,
   },
 });

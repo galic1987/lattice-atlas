@@ -44,7 +44,7 @@ const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineS
 const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecoderSandbox3D'));
 const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTransversalStudio'));
 const VideoPromptRefinerStudio = lazy(() => import('@/components/VideoPromptRefinerStudio'));
-const LatticeSurgeryComposerStudio = lazy(() => import('@/components/LatticeSurgeryComposerStudio'));
+import LatticeSurgeryComposerStudio from '@/components/LatticeSurgeryComposerStudio';
 const FtqcResourceEstimatorStudio = lazy(() => import('@/components/FtqcResourceEstimatorStudio'));
 // three.js-backed views: lazy so the heavy 3D runtime is a separate chunk loaded
 // only when a 3D tab mounts, keeping it out of the Lab's initial bundle.
@@ -149,10 +149,10 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
   },
   {
     id: 'lattice-surgery-composer',
-    title: 'Multi-Qubit Surface Code Lattice Surgery Composer Studio',
+    title: 'Multi-Qubit Surface Code Lattice Surgery Visualizer & Circuit Generator',
     category: 'Simulation',
     icon: Move,
-    description: 'Drag-and-drop surface code patches, draw Z-weld & X-weld surgery boundaries, & auto-compile Stim circuits.',
+    description: 'Arrange surface code patches, draw Z-weld & X-weld surgery boundaries, & compile Stim circuits.',
   },
   {
     id: 'veo-prompt-refiner',
@@ -292,25 +292,17 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
 export default function LabWorkbenchHub() {
   const [searchParams] = useSearchParams();
   const hubRef = useRef<HTMLDivElement>(null);
-  const initialTab = (() => {
-    const t = searchParams.get('tab');
-    return t && WORKBENCH_TOOLS.some((w) => w.id === t) ? (t as ToolTab) : 'surface-3d';
-  })();
-  const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
+  const tabParam = searchParams.get('tab');
+  const validTabParam = tabParam && WORKBENCH_TOOLS.some((w) => w.id === tabParam) ? (tabParam as ToolTab) : null;
+  const [selectedTab, setSelectedTab] = useState<ToolTab>('surface-3d');
+  const activeTab = validTabParam ?? selectedTab;
 
-  // Deep-link (?tab=…) from the command palette: open that tool and scroll the
-  // workbench into view (it sits far below the fold on the Lab page).
+  // Deep-link (?tab=…) from the command palette or URL: scroll into view
   useEffect(() => {
-    const t = searchParams.get('tab');
-    if (t && WORKBENCH_TOOLS.some((w) => w.id === t)) {
-      const id = window.setTimeout(() => {
-        setActiveTab(t as ToolTab);
-        hubRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 0);
-      return () => window.clearTimeout(id);
+    if (validTabParam) {
+      hubRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    return undefined;
-  }, [searchParams]);
+  }, [validTabParam]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
   const categories = ['All', 'Foundations', 'Simulation', 'Topology', 'Physics', 'Engineering', 'Mastery'];
@@ -329,7 +321,7 @@ export default function LabWorkbenchHub() {
 
   const switchTab = (tab: ToolTab) => {
     sound.playDecoderLock();
-    setActiveTab(tab);
+    setSelectedTab(tab);
   };
 
   return (
@@ -372,6 +364,7 @@ export default function LabWorkbenchHub() {
             return (
               <button
                 key={t.id}
+                data-tab-id={t.id}
                 type="button"
                 onClick={() => switchTab(t.id)}
                 className={`flex flex-col justify-between p-3.5 rounded-xl border text-left transition-all ${
@@ -460,9 +453,7 @@ export default function LabWorkbenchHub() {
 
         {activeTab === 'lattice-surgery-composer' && (
           <div className="p-4">
-            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Multi-Qubit Surface Code Lattice Surgery Composer Studio...</div>}>
-              <LatticeSurgeryComposerStudio />
-            </Suspense>
+            <LatticeSurgeryComposerStudio />
           </div>
         )}
 
