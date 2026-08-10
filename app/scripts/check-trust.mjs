@@ -130,6 +130,24 @@ check(!ftqc.includes('Compiled Stim'), 'FTQC estimator reinstated a "Compiled St
 check(ftqc.includes('Rough order-of-magnitude model'), 'FTQC estimator lost its order-of-magnitude disclaimer');
 check(!ftqc.includes('2.8 : 2.14'), 'FTQC estimator reinstated the hardcoded two-value Lambda literal');
 
+// Manim gallery provenance: the strong "rendered from the real code" badge is only
+// shown when a clip declares a sourceScene, and every declared sourceScene must
+// point to a manim file that actually exists in the repo — no claiming provenance
+// we can't show. (Three clips previously carried the badge with no source at all.)
+const gallery = read('src/components/ManimExplainerGallery.tsx');
+check(
+  gallery.includes('video.sourceScene ?'),
+  'gallery no longer gates the "rendered from the real code" badge on a committed source scene',
+);
+check(
+  gallery.includes('source scene not in this repo'),
+  'gallery lost its unverified-provenance badge for clips without a committed source',
+);
+for (const m of gallery.matchAll(/sourceScene:\s*'([^':]+?)\s*::/g)) {
+  const rel = m[1].trim();
+  check(existsSync(join(repoRoot, rel)), `gallery sourceScene references a missing manim file: ${rel}`);
+}
+
 const tour = read('src/components/InteractiveTour.tsx');
 check(tour.includes('both adjacent Z checks'), 'guided toy lost the two-check X-error invariant');
 check(tour.includes('does not run MWPM'), 'guided toy falsely implies a decoder run');
