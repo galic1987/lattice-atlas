@@ -14,6 +14,7 @@ import {
   Binary,
   Shield,
   Video,
+  Move,
   type LucideIcon,
 } from 'lucide-react';
 import SpacetimeView3D from '@/components/SpacetimeView3D';
@@ -46,8 +47,10 @@ const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineS
 const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecoderSandbox3D'));
 const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTransversalStudio'));
 const VideoPromptRefinerStudio = lazy(() => import('@/components/VideoPromptRefinerStudio'));
+const LatticeSurgeryComposerStudio = lazy(() => import('@/components/LatticeSurgeryComposerStudio'));
 
 export type ToolTab =
+  | 'lattice-surgery-composer'
   | 'veo-prompt-refiner'
   | 'color-code-transversal'
   | 'spacetime-3d-decoder'
@@ -132,6 +135,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'lattice-surgery-composer',
+    title: 'Multi-Qubit Surface Code Lattice Surgery Composer Studio',
+    category: 'Simulation',
+    icon: Move,
+    description: 'Drag-and-drop surface code patches, draw Z-weld & X-weld surgery boundaries, & auto-compile Stim circuits.',
   },
   {
     id: 'veo-prompt-refiner',
@@ -423,6 +433,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'lattice-surgery-composer' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Multi-Qubit Surface Code Lattice Surgery Composer Studio...</div>}>
+              <LatticeSurgeryComposerStudio />
             </Suspense>
           </div>
         )}
