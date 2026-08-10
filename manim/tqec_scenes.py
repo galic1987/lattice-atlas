@@ -222,3 +222,61 @@ class ToricCodeLogicals(Scene):
         b3 = stage_banner("③ a local loop shrinks to nothing — it's a stabilizer, harmless", ERR)
         self.play(loop.animate.scale(0.02), FadeOut(loop_lab), Transform(banner, b3), run_time=1.2)
         self.wait(1.5)
+
+
+class LatticeSurgery(Scene):
+    """Two surface-code patches merge along their facing smooth Z-boundaries to
+    measure the joint parity Z_L1 · Z_L2, then split — the move that (with
+    single-patch operations) realises a logical CNOT without moving any qubit.
+    Schematic of the protocol's structure, not a full stabilizer simulation."""
+
+    def construct(self):
+        self.camera.background_color = INK
+        title = Text("Lattice surgery: merge → measure joint parity → split", font_size=24).to_edge(UP, buff=0.4)
+        self.play(FadeIn(title))
+
+        def patch(cx, label, color):
+            body = RoundedRectangle(
+                width=2.4, height=2.4, corner_radius=0.12,
+                stroke_color=color, fill_color="#0f172a", fill_opacity=1.0, stroke_width=2.5,
+            ).move_to([cx, -0.2, 0])
+            dots = VGroup(*[
+                Dot([cx + i * 0.6 - 0.6, -0.2 + j * 0.6 - 0.6, 0], radius=0.07, color=color)
+                for i in range(3) for j in range(3)
+            ])
+            lab = Text(label, font_size=20, color=color).next_to(body, UP, buff=0.12)
+            return VGroup(body, dots, lab)
+
+        pA = patch(-2.0, "Q_A  |ψ⟩", DATA)
+        pB = patch(2.0, "Q_B  |+⟩", OK)
+        banner = stage_banner("① two logical patches, facing smooth Z-boundaries", DATA)
+        self.play(FadeIn(pA), FadeIn(pB), FadeIn(banner))
+        self.wait(0.4)
+
+        # Highlight the two facing smooth Z-boundaries (inner edges of each patch).
+        bA = Line([-0.8, -1.4, 0], [-0.8, 1.0, 0], color=CHECK, stroke_width=6)
+        bB = Line([0.8, -1.4, 0], [0.8, 1.0, 0], color=CHECK, stroke_width=6)
+        self.play(Create(bA), Create(bB))
+        self.wait(0.3)
+
+        # ② MERGE: a seam of joint Z-checks welds the boundary and measures Z_L1·Z_L2.
+        seam = RoundedRectangle(
+            width=1.6, height=2.4, corner_radius=0.08,
+            stroke_color=CHECK, fill_color=CHECK, fill_opacity=0.22, stroke_width=2.5,
+        ).move_to([0, -0.2, 0]).set_stroke(opacity=0.9)
+        joint = Text("measure  Z_L1 · Z_L2", font_size=22, color=CHECK).move_to([0, 1.55, 0])
+        b2 = stage_banner("② merge the boundary → measure the JOINT parity Z_L1 · Z_L2", CHECK)
+        self.play(FadeOut(bA), FadeOut(bB), FadeIn(seam), Transform(banner, b2))
+        self.play(Write(joint))
+        self.wait(0.5)
+
+        # ③ The outcome is a single classical parity bit; both patches stay encoded.
+        outcome = Text("outcome = ±1  (one classical bit)", font_size=22, color=OK).move_to([0, 1.55, 0])
+        b3 = stage_banner("③ the result is a single parity bit — the patches stay encoded", OK)
+        self.play(Transform(joint, outcome), seam.animate.set_stroke(OK).set_fill(OK, opacity=0.15), Transform(banner, b3))
+        self.wait(0.5)
+
+        # ④ SPLIT back — with single-patch ops this whole move is a logical CNOT.
+        b4 = stage_banner("④ split back → with single-patch ops this is a logical CNOT (no qubit moved)", OK)
+        self.play(FadeOut(seam), FadeOut(joint), Transform(banner, b4))
+        self.wait(1.5)
