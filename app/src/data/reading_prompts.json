@@ -1,94 +1,210 @@
 {
-  "quant-ph/9811052": [
-    "Find where the boundaries enter: what distinguishes a 'rough' edge from a 'smooth' edge, and which logical operator ends on which?",
-    "The torus needed periodic boundary conditions. What does this paper's planar construction give up, and what does it gain for real hardware?"
-  ],
-  "quant-ph/0110143": [
-    "Locate the mapping from decoding to a statistical-mechanics model — which physical quantity plays the role of temperature?",
-    "This paper coined the error threshold for the toric code under faulty measurements. What number do they estimate, and under which noise model?"
-  ],
-  "quant-ph/0510135": [
-    "How does a 3D cluster state encode the same physics as a 2D surface code run through time? Find the picture that convinced you.",
-    "What threshold do the authors report, and why was it the field's high-water mark for years?"
-  ],
-  "quant-ph/0610082": [
-    "The 3D cluster is never built all at once. Trace how the scheme only ever needs a 2D slice of live qubits.",
-    "Which operations does the scheme demand of the hardware, and which does it deliberately avoid?"
-  ],
-  "quant-ph/0703143": [
-    "Find the three transformations the authors apply to cluster-state schemes — what does each one buy?",
-    "How does the 3D-to-(2D+time) reduction here prefigure the modern circuit-based surface code?"
-  ],
-  "0803.0272": [
-    "How is a CNOT performed by braiding one defect around another? Follow one full braid in their figures.",
-    "What overhead does universality cost here — where do the non-Clifford gates come from?"
-  ],
-  "0805.3202": [
-    "This is a review: map each section to a topic you have studied and note which one the paper treats differently.",
-    "What practical constraints (geometry, measurement, timing) do the authors emphasize that earlier theory papers ignored?"
-  ],
-  "1009.3686": [
-    "Error rates above 1% were tolerated — what specific assumptions about the hardware make that possible?",
-    "Compare their simulated threshold with the asymptotic theory numbers you know. Where does the gap come from?"
-  ],
-  "1110.5133": [
-    "What part of decoding is the bottleneck this paper attacks, and what complexity does it achieve?",
-    "Find the argument that decoding can be parallelized to constant time per round. What resource pays for it?"
-  ],
-  "1111.4022": [
-    "Walk through one merge and one split: which stabilizers change, and what joint operator gets measured?",
-    "Why does lattice surgery keep everything 2D-local where transversal gates and braiding could not?"
-  ],
-  "1206.0800": [
-    "What exactly is proven here that earlier threshold estimates only measured numerically?",
-    "Which realistic circuit features (measurement errors, gate errors) does the proof include, and at what threshold value?"
-  ],
-  "1208.0928": [
-    "This is the field's standard tutorial: find the qubit-count formula for a factoring-scale machine and identify what dominates it.",
-    "Follow one full syndrome-extraction cycle in their figures until you can redraw it from memory."
-  ],
-  "1209.0510": [
-    "What is the 'bridge' compression, and which resource does it trade — physical qubits or time — to lower the overhead of surface-code logical operations?",
-    "How much overhead reduction do Fowler and Devitt claim, and for which operations does the bridge help most?"
-  ],
-  "1210.4626": [
-    "How do the authors compress a logical computation in the time direction, and what limits how far this goes?",
-    "Which assumptions about classical control speed does the construction quietly require?"
-  ],
-  "1307.1740": [
-    "What makes average-O(1) parallel decoding possible when worst-case matching is much harder?",
-    "Find where locality of errors enters the argument — why do distant defects rarely need each other?"
-  ],
-  "1310.0863": [
-    "How does this decoder use information from the X-syndrome to improve Z-decoding (and vice versa)?",
-    "At what error rates does correlated decoding beat independent matching, and by how much?"
-  ],
-  "1402.4848": [
-    "Which gate fidelities did this experiment reach, and which single number put the surface code within reach?",
-    "What does 'poised for fault tolerance' mean concretely — what was still missing after this result?"
-  ],
-  "1808.06709": [
-    "Find the lattice-surgery implementation of a logical CNOT: how many patches, how many rounds?",
-    "How much of the qubit-count reduction comes from the rotated code, and how much from better scheduling?"
-  ],
-  "1812.01238": [
-    "How does the CCZ factory's footprint compare with the 15-to-1 T factories you know from earlier papers?",
-    "Find the catalysis trick: what state is borrowed, used, and returned intact?"
-  ],
-  "1905.08916": [
-    "What does AutoCCZ automate that earlier layouts did by hand?",
-    "Find the spacetime-volume accounting: which operation dominates the budget for a large computation?"
-  ],
-  "2207.06431": [
-    "What does the d=5 vs d=3 comparison show, and why is the margin so thin in this experiment?",
-    "Which error sources dominate their budget breakdown — and which of them are not qubit errors at all?"
-  ],
-  "2408.13687": [
-    "Find Λ: how is it measured, what value do they get, and what would Λ = 1 mean physically?",
-    "How does the real-time decoder keep up with the syndrome stream, and what latency do they report?"
-  ],
-  "2602.09099": [
-    "What is a hook error's orientation, and how does the diagonal schedule rotate it harmless?",
-    "Which operations (junctions, Hadamards, rotations) does the uniform schedule simplify, and why does uniformity matter to hardware?"
-  ]
+ "quant-ph/9811052": [
+  "Find where the boundaries enter: what distinguishes a 'rough' edge from a 'smooth' edge, and which logical operator ends on which?",
+  "The torus needed periodic boundary conditions. What does this paper's planar construction give up, and what does it gain for real hardware?"
+ ],
+ "quant-ph/0110143": [
+  "Locate the mapping from decoding to a statistical-mechanics model — which physical quantity plays the role of temperature?",
+  "This paper coined the error threshold for the toric code under faulty measurements. What number do they estimate, and under which noise model?"
+ ],
+ "quant-ph/0510135": [
+  "How does a 3D cluster state encode the same physics as a 2D surface code run through time? Find the picture that convinced you.",
+  "What threshold do the authors report, and why was it the field's high-water mark for years?"
+ ],
+ "quant-ph/0610082": [
+  "The 3D cluster is never built all at once. Trace how the scheme only ever needs a 2D slice of live qubits.",
+  "Which operations does the scheme demand of the hardware, and which does it deliberately avoid?"
+ ],
+ "quant-ph/0703143": [
+  "Find the three transformations the authors apply to cluster-state schemes — what does each one buy?",
+  "How does the 3D-to-(2D+time) reduction here prefigure the modern circuit-based surface code?"
+ ],
+ "0803.0272": [
+  "How is a CNOT performed by braiding one defect around another? Follow one full braid in their figures.",
+  "What overhead does universality cost here — where do the non-Clifford gates come from?"
+ ],
+ "0805.3202": [
+  "This is a review: map each section to a topic you have studied and note which one the paper treats differently.",
+  "What practical constraints (geometry, measurement, timing) do the authors emphasize that earlier theory papers ignored?"
+ ],
+ "1009.3686": [
+  "Error rates above 1% were tolerated — what specific assumptions about the hardware make that possible?",
+  "Compare their simulated threshold with the asymptotic theory numbers you know. Where does the gap come from?"
+ ],
+ "1110.5133": [
+  "What part of decoding is the bottleneck this paper attacks, and what complexity does it achieve?",
+  "Find the argument that decoding can be parallelized to constant time per round. What resource pays for it?"
+ ],
+ "1111.4022": [
+  "Walk through one merge and one split: which stabilizers change, and what joint operator gets measured?",
+  "Why does lattice surgery keep everything 2D-local where transversal gates and braiding could not?"
+ ],
+ "1206.0800": [
+  "What exactly is proven here that earlier threshold estimates only measured numerically?",
+  "Which realistic circuit features (measurement errors, gate errors) does the proof include, and at what threshold value?"
+ ],
+ "1208.0928": [
+  "This is the field's standard tutorial: find the qubit-count formula for a factoring-scale machine and identify what dominates it.",
+  "Follow one full syndrome-extraction cycle in their figures until you can redraw it from memory."
+ ],
+ "1209.0510": [
+  "What is the 'bridge' compression, and which resource does it trade — physical qubits or time — to lower the overhead of surface-code logical operations?",
+  "How much overhead reduction do Fowler and Devitt claim, and for which operations does the bridge help most?"
+ ],
+ "1210.4626": [
+  "How do the authors compress a logical computation in the time direction, and what limits how far this goes?",
+  "Which assumptions about classical control speed does the construction quietly require?"
+ ],
+ "1307.1740": [
+  "What makes average-O(1) parallel decoding possible when worst-case matching is much harder?",
+  "Find where locality of errors enters the argument — why do distant defects rarely need each other?"
+ ],
+ "1310.0863": [
+  "How does this decoder use information from the X-syndrome to improve Z-decoding (and vice versa)?",
+  "At what error rates does correlated decoding beat independent matching, and by how much?"
+ ],
+ "1402.4848": [
+  "Which gate fidelities did this experiment reach, and which single number put the surface code within reach?",
+  "What does 'poised for fault tolerance' mean concretely — what was still missing after this result?"
+ ],
+ "1808.06709": [
+  "Find the lattice-surgery implementation of a logical CNOT: how many patches, how many rounds?",
+  "How much of the qubit-count reduction comes from the rotated code, and how much from better scheduling?"
+ ],
+ "1812.01238": [
+  "How does the CCZ factory's footprint compare with the 15-to-1 T factories you know from earlier papers?",
+  "Find the catalysis trick: what state is borrowed, used, and returned intact?"
+ ],
+ "1905.08916": [
+  "What does AutoCCZ automate that earlier layouts did by hand?",
+  "Find the spacetime-volume accounting: which operation dominates the budget for a large computation?"
+ ],
+ "2207.06431": [
+  "What does the d=5 vs d=3 comparison show, and why is the margin so thin in this experiment?",
+  "Which error sources dominate their budget breakdown — and which of them are not qubit errors at all?"
+ ],
+ "2408.13687": [
+  "Find Λ: how is it measured, what value do they get, and what would Λ = 1 mean physically?",
+  "How does the real-time decoder keep up with the syndrome stream, and what latency do they report?"
+ ],
+ "2602.09099": [
+  "What is a hook error's orientation, and how does the diagonal schedule rotate it harmless?",
+  "Which operations (junctions, Hadamards, rotations) does the uniform schedule simplify, and why does uniformity matter to hardware?"
+ ],
+ "1704.08670": [
+  "Find where the merge enters: which ZX generator does a lattice-surgery merge correspond to, and what does the spider-fusion rewrite rule say about a merge immediately followed by a split?",
+  "Merge-and-split tables were already enough to describe lattice surgery by hand. What does recasting it as diagrammatic rewriting give up in physical concreteness, and what does it gain for automating fault-tolerant compilation?"
+ ],
+ "1904.04735": [
+  "Find where the T-count savings enter: what is a phase gadget, and which rewrite strategies — spider fusion, local complementation and pivoting — does PyZX chain together to eliminate them?",
+  "A fully simplified ZX diagram is not yet a circuit. What does the extraction step back to gates give up, and what does the simplify-then-extract pipeline gain over optimizing the circuit gate by gate?"
+ ],
+ "2103.02202": [
+  "Find where the speed enters: how does Stim split a circuit into a bulk stabilizer part and a measurement part, and why does analyzing the error channels once let it sample millions of shots without resimulating the tableau?",
+  "Stim only simulates stabilizer circuits. What does that restriction give up, and what do the detector and logical-observable annotations gain for running QEC experiments specifically?"
+ ],
+ "2209.08552": [
+  "Find where the windows enter: why must consecutive decoding windows overlap, and what role does the buffer region around each window play in keeping its independent decode faithful?",
+  "A streaming decoder that falls behind builds a backlog that grows without bound. What does splitting the problem into windows cost in merging logic and redundancy, and what does it gain as the code distance grows?"
+ ],
+ "2302.02459": [
+  "Find where the gate sequence stops being a gate sequence: how does the Litinski-style decomposition turn a circuit into multi-body Pauli measurements, and where in the pipeline do magic state factories get inserted?",
+  "liblsqecc lays out and routes patches with heuristics rather than optimizing the topology. What does a routing-aware pipeline give up, and what did having a working end-to-end baseline gain for the compilers that measured themselves against it?"
+ ],
+ "2303.15933": [
+  "Find where the sparsity enters: what graph does Sparse Blossom run the blossom algorithm on instead of the dense graph of detection events, and why does the cost then scale with the number of errors rather than the code size?",
+  "Minimum-weight matching was already the accuracy standard; it was just too slow. What does the sparse reformulation trade between worst-case and average-case runtime, and what does a million errors per core second gain for exploring TQEC designs?"
+ ],
+ "2305.08307": [
+  "Find where the parallelism enters: how does the precomputed tree partition the decoding graph into independent sub-problems, and what must be fused along the boundary where two separately solved regions meet?",
+  "One global matching is the accuracy ideal. What does the divide-and-fuse scheme give up by solving pieces independently, and what does near-linear throughput scaling with parallel units gain for real-time decoding hardware?"
+ ],
+ "2311.18042": [
+  "Find where the dependency graph enters: when DASCOT extracts the structure of multi-qubit Pauli measurements, what becomes a node and what becomes an edge, and which reorderings and parallelizations does this expose that a gate-by-gate compiler cannot see?",
+  "DASCOT searches over placements and schedules instead of following a fixed transcription pipeline. What does search-based compilation give up in compile time, and what does it gain in space-time volume over liblsqecc-style compilation?"
+ ],
+ "2403.01353": [
+  "Find where the spatial windows enter: when lattice surgery makes logical qubits interact, how is the decoding graph partitioned into regions, and what intermediate solutions must one window pass to its neighbor?",
+  "Earlier window decoding parallelized a single memory experiment along time. What does splitting in space cost in inter-window communication, and what does it gain when the workload is a real multi-qubit computation rather than one memory?"
+ ],
+ "2404.18369": [
+  "Find where the SAT encoding enters: what does a lattice surgery subroutine look like as a 3D space-time volume of constraints, and which constraints enforce fault tolerance rather than mere connectivity?",
+  "Hand-designed subroutines had been refined for years. What does solver-based synthesis give up in scalability and human readability, and what does a provably space-time-optimal, verified construction gain?"
+ ],
+ "2406.08491": [
+  "Find where the cluster-growing step enters: how does Helios map the Union-Find graph onto a grid of FPGA processing elements so that clusters grow and merge locally, and what exchange between neighbors replaces the global data structure?",
+  "Union-Find already had linear scaling on paper. What does distributing it across processing elements give up (accuracy? generality?), and what does it buy that a fast CPU decoder cannot deliver for a ~1 microsecond syndrome cycle?"
+ ],
+ "2409.17595": [
+  "Find where postselection enters: how does the protocol fault-tolerantly measure the logical Hadamard-basis observable of the small color code, and what does that measurement actually certify about the injected T state?",
+  "Distillation factories were the accepted cost of doing anything non-Clifford. What does cultivation give up by relying on postselection and staged growth, and what does it gain by landing at a spacetime cost comparable to a single lattice surgery CNOT?"
+ ],
+ "2502.01743": [
+  "Find where the color code is removed: how does this protocol perform injection, verification, and growth natively on surface code patches, and which verification step substitutes for the color-code Hadamard measurement?",
+  "The protocol leans on non-local connectivity that superconducting chips lack. What does it give up in hardware generality, and what does it gain in postselection acceptance rate over color-code cultivation at comparable fidelity?"
+ ],
+ "2504.11805": [
+  "Find where the decoding graph gets split: how does DECONET partition the global graph into per-logical-qubit blocks, and how do fusion within a node and window-based methods across nodes stitch those partial decodings back together during lattice surgery?",
+  "Helios already decoded one memory in real time. What overhead does the hybrid tree-grid network add as logical qubit count grows, and why is O(log l) latency growth the price worth paying for decoding whole computations instead of isolated patches?"
+ ],
+ "2509.05232": [
+  "Find where the mid-cycle trick enters: how does deforming the surface code mid-syndrome-round into a self-dual code enable a fault-tolerant Hadamard-basis logical measurement without mid-circuit measurement?",
+  "Color-code and RP2 cultivation use richer primitives. What does restricting to two-qubit gates and rigid array translations cost in acceptance rate at d=5 (the entry cites ~1%), and what does it open up for neutral-atom hardware?"
+ ],
+ "2509.08658": [
+  "Find where the decomposition happens: how do ZX-calculus cutting techniques compress the 53 non-Clifford spiders of the d=5 cultivation circuit, and why does the naive 6.4-million-term expansion collapse to about 8 Clifford terms on average?",
+  "Stim-class simulators only handle Clifford circuits. What does exact simulation of the true non-Clifford circuit give up in generality (exponential scaling in magic), and what does it gain over the proxy approximations designers had been trusting?"
+ ],
+ "2512.07737": [
+  "Find where the streaming architecture enters: how do the interleaved per-stabilizer recurrent layers and attention-based spatial mixing give AQ2 constant cost per cycle, and what does temporal compression do to million-cycle memory experiments?",
+  "Matching and union-find decoders are hand-designed and fast; neural decoders were accurate but heavy. What does AQ2 give up by needing a learned model per code and noise model, and what does it gain now that AQ2-RT fits inside the 1 microsecond superconducting cycle budget up to distance 11?"
+ ],
+ "2512.23037": [
+  "Find where the generalized stabilizer formalism enters: how does SOFT extend stabilizer tableaux to track Clifford+T circuits with mid-circuit measurement, and why does a fully device-resident, shot-parallel GPU design matter for billions of shots?",
+  "Earlier cultivation studies relied on Clifford-proxy estimates. What does ground-truth simulation of the d=5 circuit (42 qubits, 72 T gates, 200+ billion shots) reveal — the entry cites discrepancies up to ~8x — and what does that imply for every resource estimate built on proxies?"
+ ],
+ "2601.23109": [
+  "Find where the ZX diagram enters: how does rewriting the circuit as a ZX IR and applying semantics-preserving transformations like spider fusion expose merge-split parallelism that gate-centric compilers cannot see?",
+  "MCTS search over 3D space-time layouts is slower than a deterministic pass. What does TopoLS give up in compilation time and search complexity, and what does the cited 46% average space-time volume reduction buy for fault-tolerant resource budgets?"
+ ],
+ "2604.01059": [
+  "Find where the ZX simplification enters: how does Tsim compile a noisy circuit written as a ZX diagram with parameterized Pauli-noise vertices into a vectorized GPU sampler, and why is the cost linear in Clifford gates but exponential only in non-Clifford ones?",
+  "Tsim deliberately extends the Stim format rather than replacing it. What does staying inside the Stim API constrain about the circuits it can express, and what does it gain for low-magic workloads like cultivation that need exact, high-throughput sampling?"
+ ],
+ "2604.27058": [
+  "Find where the simulation cost enters: how does Clifft factor the state into a Clifford frame, a Pauli frame, and an active state vector, and why does the exponential cost scale with the peak active dimension rather than the qubit count?",
+  "Stim already lets you compile once and sample many. What does generalizing that model to non-Clifford circuits gain for verifying fault-tolerant protocols, and which circuits still resist this trick?"
+ ],
+ "2607.28600": [
+  "Find where the per-shot cost disappears: how does SymFT push residual Clifford and Pauli frames into symbolic signs, and what do the shared stabilizer-destabilizer coordinates let it skip that Stim still does every shot?",
+  "The paper reports speedups over both Stim and Clifft on cultivation and distillation circuits. What assumptions about the circuit being simulated make this technique work, and where would those assumptions break down?"
+ ],
+ "joss-tqec": [
+  "Find where the abstraction boundary sits: what exactly is a BlockGraph of 3D topological primitives, and how does tqec turn each block into syndrome-extraction circuits with the detector and observable information a decoder needs?",
+  "The package automates steps that were previously done by hand, including hook-error handling with stretched stabilizers and correlation-surface finding. What flexibility does the fixed set of primitive blocks and junction types give up, and what does it gain for designing fault-tolerant computations?"
+ ],
+ "2503.18657": [
+  "Find where the grafting step is removed: how do the morphing circuits between the SRP-3 and SRP-5 codes double-check the logical T state, and how does the one-round expansion stage grow the RP^2 code directly into a rotated surface code?",
+  "The protocol cuts space-time volume by roughly an order of magnitude, but it needs non-local connectivity of the kind found on neutral atoms and ion traps. What does a square-grid-only platform give up by not being able to run it, and why does the code geometry do the work here instead of the decoding?"
+ ],
+ "2504.02935": [
+  "Find where the erasure information pays off: why does postselecting on heralded erasures leave the logical error rate set only by the residual Pauli error, and why do just three strategically placed erasure qubits capture almost all of the benefit for surface-code injection?",
+  "The analysis suggests distillation-grade fidelities at erasure rates below about 4e-3 with residual Pauli errors around 1e-4. What hardware capabilities does this trade demand, and why is injection — rather than a later stage of the pipeline — the highest-leverage place to spend erasure resources?"
+ ],
+ "2510.24615": [
+  "Find where the grafted code is replaced: how does MSC-LS teleport the cultivated magic state onto a rotated surface code through a lattice-surgery merge, and what role do intermediate-distance transfer and early rejection from the syndrome lookup table play in the halved overhead?",
+  "At color-code distance 3 and physical error rate 1e-3 the protocol matches the original cultivation logical error rate of about 3e-6 at half the space-time cost. What does staying on a square grid with ordinary lattice surgery gain for integration into fault-tolerant architectures, and what does it give up compared to variants that use non-local connectivity?"
+ ],
+ "2603.05429": [
+  "Find where the depth bottleneck is broken: how does gauging the color code's transversal Clifford gate produce a constant-depth logical Clifford measurement, and what is the emergent Clifford stabilizer code that appears along the way?",
+  "Instead of error-correcting the emergent code, the protocol repeats gauging measurements with post-selection and trades scalability for simplicity, reaching the 1e-12 regime at distance 7 while keeping more than 1% of shots. Why was the original cultivation protocol limited to distance 5, and when does this post-selection trade stop being worth it?"
+ ],
+ "2605.21867": [
+  "Find where the CCZ state enters fault-tolerantly: how does the transversal T/T-dagger of the [[8,3,2]] code encode CCZ|+++>, and how does adaptively initialized teleportation handle the move to three surface-code logical qubits of a different distance?",
+  "The full circuit uses only 22 physical qubits, 3 logical qubits, and depth 24, with logical error rate scaling as p_L ~ 300 p^2. What does skipping logical-level distillation entirely give up in fidelity guarantees, and why is a physical-level CCZ factory especially valuable for Toffoli-heavy algorithms?"
+ ],
+ "1808.02892": [
+  "Find where the tile rules enter: how are surface-code patches merged, split, and measured as multi-qubit Pauli measurements, and how do the fast and compact data block layouts differ in what they optimize?",
+  "The paper prices a classically intractable 100-qubit, 1e8-T computation at 4 hours on 55,000 qubits or 22 minutes on 120,000. What does this space-time accounting reveal about where the cost of fault-tolerant computation actually lives, and why do all later magic state factory proposals measure themselves against it?"
+ ]
 }
