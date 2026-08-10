@@ -116,10 +116,24 @@ function Hero() {
   const reduce = useReducedMotion();
   const heroVideoRef = useRef<HTMLVideoElement>(null);
 
+  // On small screens, skip the ~1 MB ambience clip entirely and show the poster
+  // only — the biggest mobile media-weight saving. Lazy initial value avoids a
+  // mount-time setState; the effect only reacts to later viewport changes.
+  const [smallScreen, setSmallScreen] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = (e: MediaQueryListEvent) => setSmallScreen(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const posterOnly = reduce || smallScreen;
+
   // Viewport-gated playback, same discipline as ConceptClip.
   useEffect(() => {
     const video = heroVideoRef.current;
-    if (!video || reduce) return;
+    if (!video || posterOnly) return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) video.play().catch(() => undefined);
@@ -129,13 +143,13 @@ function Hero() {
     );
     io.observe(video);
     return () => io.disconnect();
-  }, [reduce]);
+  }, [posterOnly]);
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
       {/* Torus ambience backdrop — AI clip with the generated poster as fallback */}
       <div className="absolute inset-0" aria-hidden>
-        {reduce ? (
+        {posterOnly ? (
           <img
             src={asset('hero_quantum_lattice.jpg')}
             alt=""
@@ -147,6 +161,7 @@ function Hero() {
             ref={heroVideoRef}
             src={asset('clips/hero-torus-ambience.mp4')}
             poster={asset('hero_quantum_lattice.jpg')}
+            preload="none"
             muted
             loop
             playsInline
