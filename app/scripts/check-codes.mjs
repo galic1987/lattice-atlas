@@ -125,8 +125,52 @@ for (const code of qc.QUANTUM_CODES) {
   }
 }
 
-rmSync(tmp, { recursive: true, force: true });
+/* ---------------- qLDPC bicycle codes: construction + real decoder ---------------- */
 
+const bc = await bundleFor('src/lib/bicycleCodes.ts', 'bicycle.mjs');
+const bp = await bundleFor('src/lib/bp.ts', 'bp.mjs');
+
+const BICYCLE_PRESETS = [
+  // [name, l, m, aTerms, bTerms, expectedK]
+  ['bb-18 [[18,4,4]]', 3, 3, [[0, 0], [0, 1], [1, 0]], [[0, 0], [0, 1], [2, 1]], 4],
+  ['bb-72 [[72,12,6]]', 6, 6, [[3, 0], [0, 1], [0, 2]], [[0, 3], [1, 0], [2, 0]], 12],
+  ['pk-144 [[144,12,12]]', 12, 6, [[3, 0], [0, 1], [0, 2]], [[0, 3], [1, 0], [2, 0]], 12],
+];
+
+for (const [name, l, m, A, B, wantK] of BICYCLE_PRESETS) {
+  const code = bc.buildBicycleCode(l, m, A, B);
+
+  // 1. Real-code invariants: CSS commutation, k from ranks, weight-6 rows.
+  for (const rx of code.xChecks)
+    for (const rz of code.zChecks) {
+      const overlap = rx.filter((q) => rz.includes(q)).length;
+      if (overlap % 2 !== 0) err(`${name}: X/Z checks anticommute (overlap ${overlap})`);
+    }
+  const k = code.n - bc.gf2Rank(code.xChecks, code.n) - bc.gf2Rank(code.zChecks, code.n);
+  if (k !== wantK) err(`${name}: k=${k}, want ${wantK}`);
+  for (const row of code.xChecks) if (row.length !== 6) err(`${name}: X check row weight ${row.length}, want 6`);
+  for (const row of code.zChecks) if (row.length !== 6) err(`${name}: Z check row weight ${row.length}, want 6`);
+
+  // 2. The shipped min-sum BP decoder decodes every single-qubit error on the
+  //    real graph exactly (measured 100% on all three codes at p=0.05).
+  for (let q = 0; q < code.n; q++) {
+    const syndrome = code.xChecks.map((row) => (row.includes(q) ? 1 : 0));
+    const r = bp.bpMinSumDecode(code.xChecks, code.n, syndrome, 0.05, 30);
+    if (!r.converged) {
+      err(`${name}: BP failed to converge on single error qubit ${q}`);
+      continue;
+    }
+    const weight = r.estimate.reduce((a, b) => a + b, 0);
+    if (weight !== 1 || r.estimate[q] !== 1)
+      err(`${name}: BP correction for qubit ${q} was ${weight} flips, want exactly that qubit`);
+  }
+
+  // 3. No error → no correction.
+  const silent = bp.bpMinSumDecode(code.xChecks, code.n, code.xChecks.map(() => 0), 0.05, 30);
+  if (silent.estimate.some((b) => b === 1)) err(`${name}: BP invents a correction for the zero syndrome`);
+}
+
+rmSync(tmp, { recursive: true, force: true });
 if (errors.length) {
   console.error(`✗ ${errors.length} code-engine error(s):`);
   errors.forEach((e) => console.error(`  - ${e}`));
@@ -135,6 +179,7 @@ if (errors.length) {
 console.log(
   `checked ${cc.CODE_ZOO.length} zoo entries, 3 repetition lengths × all words, ` +
     `16 Hamming messages × 8 flip cases, ${qc.QUANTUM_CODES.length} quantum codes × ` +
-    `all single-qubit Paulis (commutation + exact decode + degeneracy)`,
+    `all single-qubit Paulis (commutation + exact decode + degeneracy), ` +
+    `${BICYCLE_PRESETS.length} bicycle codes (construction invariants + BP exact on all single-qubit errors)`,
 );
 console.log('✓ all code-engine proofs passed');
