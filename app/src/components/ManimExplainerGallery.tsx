@@ -115,7 +115,10 @@ const VIDEOS: VideoExplainer[] = [
 ];
 
 export default function ManimExplainerGallery() {
-  const [selectedId, setSelectedId] = useState<string>('google-willow');
+  // Default to the first entry — an accurate Manim film, not an illustrative Veo
+  // clip. (The previous literal 'google-willow' matched no id and only worked via
+  // the VIDEOS[0] fallback below; make the honest default explicit and robust.)
+  const [selectedId, setSelectedId] = useState<string>(VIDEOS[0].id);
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const reduce = useReducedMotion();
 
