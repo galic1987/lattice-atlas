@@ -390,8 +390,14 @@ test('key pages have no serious/critical WCAG A/AA violations (axe)', async ({ p
     fileURLToPath(new URL('../node_modules/axe-core/axe.min.js', import.meta.url)),
     'utf8',
   );
+  // Test the SETTLED DOM under reduced motion: entrance/scroll animations are
+  // disabled, so axe can't catch a transient mid-fade contrast state (a fading-in
+  // label is momentarily low-contrast even when its resting state passes AA). This
+  // keeps the gate deterministic — it asserts the accessibility of what the user
+  // actually reads, not a frame in the middle of an animation.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const route of ['', 'foundations/', 'altitudes/', 'map/', 'lab/', 'path/', 'experiments/', 'duel/', 'papers/', 'field-today/']) {
-    await page.goto(`${BASE_PATH}${route}`);
+    await page.goto(`${BASE_PATH}${route}`, { waitUntil: 'networkidle' });
     await page.addScriptTag({ content: axeSource });
     const violations = await page.evaluate(async () => {
       const result = await (window as unknown as { axe: { run: (d: Document, o: unknown) => Promise<{ violations: { id: string; impact: string; nodes: unknown[] }[] }> } }).axe.run(
