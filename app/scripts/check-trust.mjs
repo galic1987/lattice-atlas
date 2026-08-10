@@ -97,6 +97,24 @@ check(braidSketch.includes('not a compiled patch layout'), 'lattice-surgery sket
 check(braidSketch.includes('e and m excitations are Abelian'), 'mutual-braid sketch lost the Abelian surface-code boundary');
 check(braidSketch.includes('not an executable defect schedule'), 'mutual-braid sketch is not scoped as non-executing');
 
+const surgeryComposer = read('src/components/LatticeSurgeryComposerStudio.tsx');
+check(
+  surgeryComposer.includes('Illustrative sequence — no stabilizer simulation or circuit execution'),
+  'lattice-surgery composer lost its illustrative evidence boundary',
+);
+check(
+  !surgeryComposer.includes('parity measured (+1)'),
+  'lattice-surgery composer reinstated a fabricated measured-parity outcome',
+);
+check(
+  !surgeryComposer.includes('Run Joint Parity Check'),
+  'lattice-surgery composer relabeled the preview as an executable parity check',
+);
+check(
+  surgeryComposer.includes('not executed or validated'),
+  'lattice-surgery composer no longer scopes its Stim snippet as unexecuted',
+);
+
 const tour = read('src/components/InteractiveTour.tsx');
 check(tour.includes('both adjacent Z checks'), 'guided toy lost the two-check X-error invariant');
 check(tour.includes('does not run MWPM'), 'guided toy falsely implies a decoder run');
