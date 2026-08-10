@@ -37,6 +37,15 @@ export interface RoundPlan {
 }
 
 /** Ten daily rounds, ramping distance and error weight. */
+
+export const BIASED_PLAN: RoundPlan[] = [
+  { d: 3, errors: 2, allowZ: false },
+  { d: 5, errors: 4, allowZ: false },
+  { d: 7, errors: 6, allowZ: false },
+  { d: 7, errors: 8, allowZ: false },
+  { d: 9, errors: 10, allowZ: false },
+];
+
 export const DAILY_PLAN: RoundPlan[] = [
   { d: 3, errors: 1, allowZ: false },
   { d: 3, errors: 2, allowZ: false },

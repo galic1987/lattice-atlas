@@ -1,106 +1,650 @@
 {
   "linear-algebra": [
-    { "q": "Two states satisfy ⟨u|v⟩ = 0. What does that tell you?", "options": ["They are the same state", "They are orthogonal — perfectly distinguishable by some measurement", "They are both zero vectors", "They differ only by a global phase"], "answer": 1, "why": "A zero inner product means orthogonality, and orthogonal states can be distinguished with certainty by measuring in a basis that contains them." },
-    { "q": "The eigenvalues of a Hermitian operator are always…", "options": ["Complex with unit modulus", "Positive", "Real", "Either +1 or −1"], "answer": 2, "why": "Hermitian operators have real eigenvalues — that is why observables are Hermitian. Only special ones (like the Paulis) have eigenvalues ±1." }
+    {
+      "q": "Two states satisfy ⟨u|v⟩ = 0. What does that tell you?",
+      "options": [
+        "They are the same state",
+        "They are orthogonal — perfectly distinguishable by some measurement",
+        "They are both zero vectors",
+        "They differ only by a global phase"
+      ],
+      "answer": 1,
+      "why": "A zero inner product means orthogonality, and orthogonal states can be distinguished with certainty by measuring in a basis that contains them."
+    },
+    {
+      "q": "The eigenvalues of a Hermitian operator are always…",
+      "options": [
+        "Complex with unit modulus",
+        "Positive",
+        "Real",
+        "Either +1 or −1"
+      ],
+      "answer": 2,
+      "why": "Hermitian operators have real eigenvalues — that is why observables are Hermitian. Only special ones (like the Paulis) have eigenvalues ±1."
+    }
   ],
   "complex-numbers-dirac-notation": [
-    { "q": "How is the bra ⟨ψ| related to the ket |ψ⟩?", "options": ["It is the same vector written backwards", "It is the inverse", "It is the conjugate transpose (dagger)", "It is the complex conjugate of each amplitude, kept as a column"], "answer": 2, "why": "⟨ψ| = (|ψ⟩)† — transpose the column into a row and complex-conjugate each amplitude." },
-    { "q": "How do |ψ⟩ and e^{iθ}|ψ⟩ differ physically?", "options": ["They give different measurement statistics", "They are orthogonal", "Not at all — a global phase is unobservable", "They differ only when θ = π"], "answer": 2, "why": "All probabilities are |amplitude|², so a global phase cancels in every prediction. Only relative phases between components matter." }
+    {
+      "q": "How is the bra ⟨ψ| related to the ket |ψ⟩?",
+      "options": [
+        "It is the same vector written backwards",
+        "It is the inverse",
+        "It is the conjugate transpose (dagger)",
+        "It is the complex conjugate of each amplitude, kept as a column"
+      ],
+      "answer": 2,
+      "why": "⟨ψ| = (|ψ⟩)† — transpose the column into a row and complex-conjugate each amplitude."
+    },
+    {
+      "q": "How do |ψ⟩ and e^{iθ}|ψ⟩ differ physically?",
+      "options": [
+        "They give different measurement statistics",
+        "They are orthogonal",
+        "Not at all — a global phase is unobservable",
+        "They differ only when θ = π"
+      ],
+      "answer": 2,
+      "why": "All probabilities are |amplitude|², so a global phase cancels in every prediction. Only relative phases between components matter."
+    }
   ],
   "quantum-mechanics-basics": [
-    { "q": "What does measuring a normalized qubit α|0⟩ + β|1⟩ in the Z basis do?", "options": ["Reads out α and β without disturbance", "Returns 0 or 1 with probabilities |α|² or |β|² and updates to that basis state", "Rotates it by a random angle", "Nothing, if done slowly enough"], "answer": 1, "why": "The projectors |0⟩⟨0| and |1⟩⟨1| give Born probabilities |α|² and |β|². Conditional on the outcome, the normalized post-measurement state is |0⟩ or |1⟩; an input already in that eigenstate is unchanged." },
-    { "q": "Why can't an error-correcting code simply measure each data qubit in the computational basis to locate errors?", "options": ["Data qubits are physically inaccessible", "It would take too long", "Those outcomes reveal logical information and generally dephase the encoded state", "Errors are too small to see"], "answer": 2, "why": "Direct basis measurements generally reveal which logical components were present and dephase their superposition. QEC instead measures commuting parity checks through ancillas, extracting syndrome information without resolving the logical amplitudes." }
+    {
+      "q": "What does measuring a normalized qubit α|0⟩ + β|1⟩ in the Z basis do?",
+      "options": [
+        "Reads out α and β without disturbance",
+        "Returns 0 or 1 with probabilities |α|² or |β|² and updates to that basis state",
+        "Rotates it by a random angle",
+        "Nothing, if done slowly enough"
+      ],
+      "answer": 1,
+      "why": "The projectors |0⟩⟨0| and |1⟩⟨1| give Born probabilities |α|² and |β|². Conditional on the outcome, the normalized post-measurement state is |0⟩ or |1⟩; an input already in that eigenstate is unchanged."
+    },
+    {
+      "q": "Why can't an error-correcting code simply measure each data qubit in the computational basis to locate errors?",
+      "options": [
+        "Data qubits are physically inaccessible",
+        "It would take too long",
+        "Those outcomes reveal logical information and generally dephase the encoded state",
+        "Errors are too small to see"
+      ],
+      "answer": 2,
+      "why": "Direct basis measurements generally reveal which logical components were present and dephase their superposition. QEC instead measures commuting parity checks through ancillas, extracting syndrome information without resolving the logical amplitudes."
+    }
   ],
   "qubits-pauli-operators": [
-    { "q": "What is the algebraic relation between Pauli X and Z on the same qubit?", "options": ["They commute: XZ = ZX", "They anticommute: XZ = −ZX", "They are equal up to phase", "They are inverses of each other"], "answer": 1, "why": "XZ = −ZX. This anticommutation is the engine of QEC: a stabilizer flips sign exactly when an error anticommutes with it." },
-    { "q": "Up to phase, the Pauli Y equals…", "options": ["X + Z", "XZ", "X², squared", "the identity"], "answer": 1, "why": "Y = iXZ — a bit flip and a phase flip together. That is why a Y error triggers both X-type and Z-type stabilizers." }
+    {
+      "q": "What is the algebraic relation between Pauli X and Z on the same qubit?",
+      "options": [
+        "They commute: XZ = ZX",
+        "They anticommute: XZ = −ZX",
+        "They are equal up to phase",
+        "They are inverses of each other"
+      ],
+      "answer": 1,
+      "why": "XZ = −ZX. This anticommutation is the engine of QEC: a stabilizer flips sign exactly when an error anticommutes with it."
+    },
+    {
+      "q": "Up to phase, the Pauli Y equals…",
+      "options": [
+        "X + Z",
+        "XZ",
+        "X², squared",
+        "the identity"
+      ],
+      "answer": 1,
+      "why": "Y = iXZ — a bit flip and a phase flip together. That is why a Y error triggers both X-type and Z-type stabilizers."
+    }
   ],
   "quantum-gates-circuits": [
-    { "q": "An X error hits the control qubit just before a CNOT. What comes out?", "options": ["X on the control only", "X on the target only", "X on both control and target", "Nothing — CNOT absorbs it"], "answer": 2, "why": "CNOT copies X errors from control to target (and Z errors from target to control). Error propagation through CNOTs is why circuit design matters for fault tolerance." },
-    { "q": "What does the Hadamard gate do to |0⟩?", "options": ["Maps it to |1⟩", "Maps it to |+⟩ = (|0⟩+|1⟩)/√2", "Leaves it unchanged", "Maps it to |−⟩"], "answer": 1, "why": "H exchanges the Z and X bases: |0⟩ ↔ |+⟩, |1⟩ ↔ |−⟩. It is how circuits switch between measuring Z-type and X-type information." }
+    {
+      "q": "An X error hits the control qubit just before a CNOT. What comes out?",
+      "options": [
+        "X on the control only",
+        "X on the target only",
+        "X on both control and target",
+        "Nothing — CNOT absorbs it"
+      ],
+      "answer": 2,
+      "why": "CNOT copies X errors from control to target (and Z errors from target to control). Error propagation through CNOTs is why circuit design matters for fault tolerance."
+    },
+    {
+      "q": "What does the Hadamard gate do to |0⟩?",
+      "options": [
+        "Maps it to |1⟩",
+        "Maps it to |+⟩ = (|0⟩+|1⟩)/√2",
+        "Leaves it unchanged",
+        "Maps it to |−⟩"
+      ],
+      "answer": 1,
+      "why": "H exchanges the Z and X bases: |0⟩ ↔ |+⟩, |1⟩ ↔ |−⟩. It is how circuits switch between measuring Z-type and X-type information."
+    }
   ],
   "classical-error-correction": [
-    { "q": "The 3-bit repetition code (0→000, 1→111) can correct how many bit flips?", "options": ["None", "One", "Two", "Three"], "answer": 1, "why": "Majority vote fixes any single flip. Two flips fool the vote — the codewords are distance 3 apart, and a distance-d code corrects ⌊(d−1)/2⌋ errors." },
-    { "q": "What does a parity check on a set of bits reveal?", "options": ["The value of each bit", "Whether an even or odd number of those bits flipped", "Which single bit flipped", "The total number of flips"], "answer": 1, "why": "A parity check exposes only the XOR of the set — error information without reading the data. Stabilizer measurements are the quantum version of exactly this idea." }
+    {
+      "q": "The 3-bit repetition code (0→000, 1→111) can correct how many bit flips?",
+      "options": [
+        "None",
+        "One",
+        "Two",
+        "Three"
+      ],
+      "answer": 1,
+      "why": "Majority vote fixes any single flip. Two flips fool the vote — the codewords are distance 3 apart, and a distance-d code corrects ⌊(d−1)/2⌋ errors."
+    },
+    {
+      "q": "What does a parity check on a set of bits reveal?",
+      "options": [
+        "The value of each bit",
+        "Whether an even or odd number of those bits flipped",
+        "Which single bit flipped",
+        "The total number of flips"
+      ],
+      "answer": 1,
+      "why": "A parity check exposes only the XOR of the set — error information without reading the data. Stabilizer measurements are the quantum version of exactly this idea."
+    }
   ],
   "stabilizer-formalism": [
-    { "q": "S is a stabilizer of |ψ⟩. What equation holds?", "options": ["S|ψ⟩ = 0", "S|ψ⟩ = +|ψ⟩", "S|ψ⟩ = −|ψ⟩", "⟨ψ|S|ψ⟩ = 0"], "answer": 1, "why": "A stabilizer leaves the state exactly unchanged, eigenvalue +1. An error that anticommutes with S flips the measured value to −1 — that flip is the syndrome." },
-    { "q": "A stabilizer code on n physical qubits encoding k logical qubits has how many independent stabilizer generators?", "options": ["n", "k", "n − k", "n + k"], "answer": 2, "why": "Each independent generator halves the space; n − k generators leave 2^k dimensions — the logical subspace. The surface code: n = d², k = 1, so d²−1 stabilizers." }
+    {
+      "q": "S is a stabilizer of |ψ⟩. What equation holds?",
+      "options": [
+        "S|ψ⟩ = 0",
+        "S|ψ⟩ = +|ψ⟩",
+        "S|ψ⟩ = −|ψ⟩",
+        "⟨ψ|S|ψ⟩ = 0"
+      ],
+      "answer": 1,
+      "why": "A stabilizer leaves the state exactly unchanged, eigenvalue +1. An error that anticommutes with S flips the measured value to −1 — that flip is the syndrome."
+    },
+    {
+      "q": "A stabilizer code on n physical qubits encoding k logical qubits has how many independent stabilizer generators?",
+      "options": [
+        "n",
+        "k",
+        "n − k",
+        "n + k"
+      ],
+      "answer": 2,
+      "why": "Each independent generator halves the space; n − k generators leave 2^k dimensions — the logical subspace. The surface code: n = d², k = 1, so d²−1 stabilizers."
+    }
   ],
   "quantum-codes-basics": [
-    { "q": "In the [[n, k, d]] notation, what is d?", "options": ["The number of data qubits", "The circuit depth", "The minimum weight of an undetectable logical error", "The number of stabilizers"], "answer": 2, "why": "d (code distance) is the smallest number of physical errors that can silently implement a logical operation. It sets how many errors are correctable: ⌊(d−1)/2⌋." },
-    { "q": "A CSS code is built from…", "options": ["Two classical linear codes, one for X checks and one for Z checks", "A single quantum code repeated twice", "Random stabilizers", "Continuous-variable modes"], "answer": 0, "why": "Calderbank–Shor–Steane codes import classical coding theory twice over: one classical code handles bit flips, another handles phase flips. The surface code is CSS." }
+    {
+      "q": "In the [[n, k, d]] notation, what is d?",
+      "options": [
+        "The number of data qubits",
+        "The circuit depth",
+        "The minimum weight of an undetectable logical error",
+        "The number of stabilizers"
+      ],
+      "answer": 2,
+      "why": "d (code distance) is the smallest number of physical errors that can silently implement a logical operation. It sets how many errors are correctable: ⌊(d−1)/2⌋."
+    },
+    {
+      "q": "A CSS code is built from…",
+      "options": [
+        "Two classical linear codes, one for X checks and one for Z checks",
+        "A single quantum code repeated twice",
+        "Random stabilizers",
+        "Continuous-variable modes"
+      ],
+      "answer": 0,
+      "why": "Calderbank–Shor–Steane codes import classical coding theory twice over: one classical code handles bit flips, another handles phase flips. The surface code is CSS."
+    }
   ],
   "fault-tolerance-thresholds": [
-    { "q": "Under a threshold theorem's stated noise, locality, and gadget assumptions, what follows below p_th?", "options": ["Errors stop happening", "Logical error can be suppressed arbitrarily by increasing encoded overhead", "The computer runs faster", "No ancillas are needed"], "answer": 1, "why": "A threshold theorem is conditional: for the declared fault model and construction, sufficiently low fault strength permits arbitrary target accuracy with growing overhead. Above the fitted crossover, increasing distance no longer guarantees suppression; it is not a universal claim that every larger instance must be worse." },
-    { "q": "A circuit is fault-tolerant when…", "options": ["It contains no noisy gates", "A single component fault can cause at most a correctable amount of damage", "It runs without measurements", "Every gate is transversal"], "answer": 1, "why": "The circuits that extract syndromes are themselves noisy, so they must be designed to keep one fault from spreading into an uncorrectable error — via gate ordering, flags, and repetition." }
+    {
+      "q": "Under a threshold theorem's stated noise, locality, and gadget assumptions, what follows below p_th?",
+      "options": [
+        "Errors stop happening",
+        "Logical error can be suppressed arbitrarily by increasing encoded overhead",
+        "The computer runs faster",
+        "No ancillas are needed"
+      ],
+      "answer": 1,
+      "why": "A threshold theorem is conditional: for the declared fault model and construction, sufficiently low fault strength permits arbitrary target accuracy with growing overhead. Above the fitted crossover, increasing distance no longer guarantees suppression; it is not a universal claim that every larger instance must be worse."
+    },
+    {
+      "q": "A circuit is fault-tolerant when…",
+      "options": [
+        "It contains no noisy gates",
+        "A single component fault can cause at most a correctable amount of damage",
+        "It runs without measurements",
+        "Every gate is transversal"
+      ],
+      "answer": 1,
+      "why": "The circuits that extract syndromes are themselves noisy, so they must be designed to keep one fault from spreading into an uncorrectable error — via gate ordering, flags, and repetition."
+    }
   ],
   "topological-order-anyons": [
-    { "q": "In the ideal anyon model, what fixes the encoded action of an adiabatic braid?", "options": ["Every microscopic wiggle of a homotopic path", "The braid class of the world-lines, provided separation and the gap are maintained", "The final distance alone", "The decoder clock speed"], "answer": 1, "why": "The ideal logical representation depends on braid class. A physical code-deformation schedule must still preserve distance and control faults; timing, geometry, and decoding determine its error rate and overhead." },
-    { "q": "For the ideal toric-code Hamiltonian on a closed orientable surface, what controls the ground-space degeneracy?", "options": ["Only the lattice spacing", "A local impurity count", "The topology, such as genus", "The measurement basis"], "answer": 2, "why": "The ideal toric code has one ground state on a sphere and four on a torus. Ground states are locally indistinguishable in the ideal model, but a finite 2D code is not immune to noise and still needs active correction." }
+    {
+      "q": "In the ideal anyon model, what fixes the encoded action of an adiabatic braid?",
+      "options": [
+        "Every microscopic wiggle of a homotopic path",
+        "The braid class of the world-lines, provided separation and the gap are maintained",
+        "The final distance alone",
+        "The decoder clock speed"
+      ],
+      "answer": 1,
+      "why": "The ideal logical representation depends on braid class. A physical code-deformation schedule must still preserve distance and control faults; timing, geometry, and decoding determine its error rate and overhead."
+    },
+    {
+      "q": "For the ideal toric-code Hamiltonian on a closed orientable surface, what controls the ground-space degeneracy?",
+      "options": [
+        "Only the lattice spacing",
+        "A local impurity count",
+        "The topology, such as genus",
+        "The measurement basis"
+      ],
+      "answer": 2,
+      "why": "The ideal toric code has one ground state on a sphere and four on a torus. Ground states are locally indistinguishable in the ideal model, but a finite 2D code is not immune to noise and still needs active correction."
+    }
   ],
   "toric-code": [
-    { "q": "How many logical qubits does the toric code on a torus encode?", "options": ["One", "Two", "Four", "d²"], "answer": 1, "why": "A torus has two independent non-contractible loops, giving two anticommuting logical operator pairs — two logical qubits, regardless of lattice size." },
-    { "q": "The e and m excitations of the toric code appear at…", "options": ["Random positions unrelated to errors", "Violated vertex (star) and plaquette stabilizers — the endpoints of error strings", "The corners of the lattice only", "Every qubit an error touched"], "answer": 1, "why": "Z-error strings end on violated stars (e anyons), X-error strings on violated plaquettes (m anyons). Errors make particle pairs; decoding means re-annihilating them correctly." }
+    {
+      "q": "How many logical qubits does the toric code on a torus encode?",
+      "options": [
+        "One",
+        "Two",
+        "Four",
+        "d²"
+      ],
+      "answer": 1,
+      "why": "A torus has two independent non-contractible loops, giving two anticommuting logical operator pairs — two logical qubits, regardless of lattice size."
+    },
+    {
+      "q": "The e and m excitations of the toric code appear at…",
+      "options": [
+        "Random positions unrelated to errors",
+        "Violated vertex (star) and plaquette stabilizers — the endpoints of error strings",
+        "The corners of the lattice only",
+        "Every qubit an error touched"
+      ],
+      "answer": 1,
+      "why": "Z-error strings end on violated stars (e anyons), X-error strings on violated plaquettes (m anyons). Errors make particle pairs; decoding means re-annihilating them correctly."
+    }
   ],
   "surface-code": [
-    { "q": "Why is the surface code widely studied for hardware?", "options": ["It needs the fewest qubits of every code", "It combines local 2D checks with mature decoders and relatively high thresholds in common circuit models", "It requires no measurements", "It corrects unlimited errors at any rate"], "answer": 1, "why": "Local connectivity and a developed circuit/decoder toolbox fit several hardware platforms. Its threshold and overhead are model-dependent, and other codes can win on rate, connectivity, or noise matching." },
-    { "q": "A standard rotated surface-code patch of distance d uses how many data qubits?", "options": ["d", "2d", "d²", "2d² − 1"], "answer": 2, "why": "The common rotated one-logical-qubit layout uses d² data qubits, versus d²+(d−1)² in the corresponding unrotated layout—roughly half asymptotically. Ancilla counts and boundary check weights depend on the extraction layout." }
+    {
+      "q": "Why is the surface code widely studied for hardware?",
+      "options": [
+        "It needs the fewest qubits of every code",
+        "It combines local 2D checks with mature decoders and relatively high thresholds in common circuit models",
+        "It requires no measurements",
+        "It corrects unlimited errors at any rate"
+      ],
+      "answer": 1,
+      "why": "Local connectivity and a developed circuit/decoder toolbox fit several hardware platforms. Its threshold and overhead are model-dependent, and other codes can win on rate, connectivity, or noise matching."
+    },
+    {
+      "q": "A standard rotated surface-code patch of distance d uses how many data qubits?",
+      "options": [
+        "d",
+        "2d",
+        "d²",
+        "2d² − 1"
+      ],
+      "answer": 2,
+      "why": "The common rotated one-logical-qubit layout uses d² data qubits, versus d²+(d−1)² in the corresponding unrotated layout—roughly half asymptotically. Ancilla counts and boundary check weights depend on the extraction layout."
+    }
   ],
   "syndrome-extraction-circuits": [
-    { "q": "How does an ancilla measure a commuting stabilizer without resolving the logical amplitudes?", "options": ["It swaps with a data qubit", "An ordered entangling circuit maps the check parity to the ancilla, which is then measured", "It measures every data qubit separately", "It guesses from calibration data"], "answer": 1, "why": "For example, a Z check uses |0⟩ with data-to-ancilla CNOTs and Z readout; an X check uses |+⟩ with ancilla-to-data CNOTs and X readout. The circuit measures the joint eigenspace rather than each data value." },
-    { "q": "Why does the ordering of entangling gates in a stabilizer measurement matter?", "options": ["It always changes the intended check", "Wrong orders are merely slower", "It controls how ancilla faults propagate into hook errors and therefore can change circuit distance", "It never matters"], "answer": 2, "why": "A mid-circuit ancilla fault can spread to multiple data qubits. Whether that pattern is dangerous depends on patch geometry and logical orientation; a validated schedule preserves the intended distance, rather than being universally 'harmless' or exactly halving it." }
+    {
+      "q": "How does an ancilla measure a commuting stabilizer without resolving the logical amplitudes?",
+      "options": [
+        "It swaps with a data qubit",
+        "An ordered entangling circuit maps the check parity to the ancilla, which is then measured",
+        "It measures every data qubit separately",
+        "It guesses from calibration data"
+      ],
+      "answer": 1,
+      "why": "For example, a Z check uses |0⟩ with data-to-ancilla CNOTs and Z readout; an X check uses |+⟩ with ancilla-to-data CNOTs and X readout. The circuit measures the joint eigenspace rather than each data value."
+    },
+    {
+      "q": "Why does the ordering of entangling gates in a stabilizer measurement matter?",
+      "options": [
+        "It always changes the intended check",
+        "Wrong orders are merely slower",
+        "It controls how ancilla faults propagate into hook errors and therefore can change circuit distance",
+        "It never matters"
+      ],
+      "answer": 2,
+      "why": "A mid-circuit ancilla fault can spread to multiple data qubits. Whether that pattern is dangerous depends on patch geometry and logical orientation; a validated schedule preserves the intended distance, rather than being universally 'harmless' or exactly halving it."
+    }
   ],
   "decoding-mwpm": [
-    { "q": "In a graphlike repeated-measurement model, what does MWPM pair?", "options": ["Data qubits with ancillas", "Detection events or permitted boundaries, minimizing a specified total edge weight", "Logical operators with stabilizers", "Physical qubits with their neighbors"], "answer": 1, "why": "With noisy repeated checks, appropriate parity changes define space-time detection events. MWPM exactly minimizes its graph objective; this is only a proxy for full maximum likelihood when degeneracy, correlations, leakage, or hypergraph faults matter." },
-    { "q": "When does a chosen correction cause a logical failure in an ideal topological decoding picture?", "options": ["Whenever any correction is applied", "When error plus correction belongs to a nontrivial logical homology class", "Whenever the syndrome is non-empty", "Whenever more than one defect appears"], "answer": 1, "why": "A correction can return the state to the codespace yet differ from the true error by a silent logical operator. Zero syndrome therefore does not certify success, and with noisy extraction unresolved detector events also depend on protocol boundaries." }
+    {
+      "q": "In a graphlike repeated-measurement model, what does MWPM pair?",
+      "options": [
+        "Data qubits with ancillas",
+        "Detection events or permitted boundaries, minimizing a specified total edge weight",
+        "Logical operators with stabilizers",
+        "Physical qubits with their neighbors"
+      ],
+      "answer": 1,
+      "why": "With noisy repeated checks, appropriate parity changes define space-time detection events. MWPM exactly minimizes its graph objective; this is only a proxy for full maximum likelihood when degeneracy, correlations, leakage, or hypergraph faults matter."
+    },
+    {
+      "q": "When does a chosen correction cause a logical failure in an ideal topological decoding picture?",
+      "options": [
+        "Whenever any correction is applied",
+        "When error plus correction belongs to a nontrivial logical homology class",
+        "Whenever the syndrome is non-empty",
+        "Whenever more than one defect appears"
+      ],
+      "answer": 1,
+      "why": "A correction can return the state to the codespace yet differ from the true error by a silent logical operator. Zero syndrome therefore does not certify success, and with noisy extraction unresolved detector events also depend on protocol boundaries."
+    }
   ],
   "defects-braiding": [
-    { "q": "In defect-based computation, what is a 'hole'?", "options": ["A manufacturing defect in the chip", "A region where stabilizer measurements are switched off, creating a movable logical qubit", "A missing data qubit", "A decoder failure"], "answer": 1, "why": "Disabling stabilizers punches a hole whose boundary hosts a new logical degree of freedom. Moving and braiding holes around each other enacts logical gates." },
-    { "q": "Why do many planar surface-code studies prefer lattice surgery to defect braiding?", "options": ["Braiding is mathematically wrong", "For the analyzed layouts, compact patch-parity measurements reduce routing or space-time cost", "Surgery works without stabilizers", "Braiding always requires curved 3D hardware"], "answer": 1, "why": "Large separated defects and long deformation schedules can be expensive. Lattice surgery lowers cost in many planar architectures, but the comparison depends on connectivity, logical operation, code distance, and routing assumptions." }
+    {
+      "q": "In defect-based computation, what is a 'hole'?",
+      "options": [
+        "A manufacturing defect in the chip",
+        "A region where stabilizer measurements are switched off, creating a movable logical qubit",
+        "A missing data qubit",
+        "A decoder failure"
+      ],
+      "answer": 1,
+      "why": "Disabling stabilizers punches a hole whose boundary hosts a new logical degree of freedom. Moving and braiding holes around each other enacts logical gates."
+    },
+    {
+      "q": "Why do many planar surface-code studies prefer lattice surgery to defect braiding?",
+      "options": [
+        "Braiding is mathematically wrong",
+        "For the analyzed layouts, compact patch-parity measurements reduce routing or space-time cost",
+        "Surgery works without stabilizers",
+        "Braiding always requires curved 3D hardware"
+      ],
+      "answer": 1,
+      "why": "Large separated defects and long deformation schedules can be expensive. Lattice surgery lowers cost in many planar architectures, but the comparison depends on connectivity, logical operation, code distance, and routing assumptions."
+    }
   ],
   "lattice-surgery": [
-    { "q": "What does merging two surface-code patches along a boundary do?", "options": ["Destroys both logical qubits", "Measures a joint logical operator (e.g. Z⊗Z)", "Copies one qubit onto the other", "Doubles the code distance"], "answer": 1, "why": "The merged patch's new stabilizers multiply up to the joint logical Z⊗Z (or X⊗X), measuring it fault-tolerantly. Merge–split sequences build CNOTs and any Pauli-product measurement." },
-    { "q": "Why is lattice surgery widely used in surface-code architecture studies?", "options": ["It needs no ancilla patches", "It expresses joint logical-Pauli measurements with local planar boundary checks and exposes routing/scheduling tradeoffs", "It avoids magic states entirely", "It works above threshold"], "answer": 1, "why": "Local planar checks fit common layouts and make occupancy and timing explicit. A full CNOT still needs an ancilla, two joint parities, final readout, and frame updates; relative cost remains architecture-dependent." }
+    {
+      "q": "What does merging two surface-code patches along a boundary do?",
+      "options": [
+        "Destroys both logical qubits",
+        "Measures a joint logical operator (e.g. Z⊗Z)",
+        "Copies one qubit onto the other",
+        "Doubles the code distance"
+      ],
+      "answer": 1,
+      "why": "The merged patch's new stabilizers multiply up to the joint logical Z⊗Z (or X⊗X), measuring it fault-tolerantly. Merge–split sequences build CNOTs and any Pauli-product measurement."
+    },
+    {
+      "q": "Why is lattice surgery widely used in surface-code architecture studies?",
+      "options": [
+        "It needs no ancilla patches",
+        "It expresses joint logical-Pauli measurements with local planar boundary checks and exposes routing/scheduling tradeoffs",
+        "It avoids magic states entirely",
+        "It works above threshold"
+      ],
+      "answer": 1,
+      "why": "Local planar checks fit common layouts and make occupancy and timing explicit. A full CNOT still needs an ancilla, two joint parities, final readout, and frame updates; relative cost remains architecture-dependent."
+    }
   ],
   "cluster-states-mbqc": [
-    { "q": "How does measurement-based quantum computation compute?", "options": ["By unitary gates applied in sequence", "By adaptive single-qubit measurements consuming a pre-entangled cluster state", "By classical simulation", "By cooling to the ground state"], "answer": 1, "why": "All entanglement is prepared up front; each measurement steers the remaining state, with later bases adapted to earlier outcomes." },
-    { "q": "What is the precise connection between topological MBQC and surface-code histories?", "options": ["There is no connection", "Specific RHG and foliated cluster constructions encode correlation surfaces corresponding to scheduled topological-code histories", "Both avoid measurements", "MBQC removes the need for error correction"], "answer": 1, "why": "The correspondence is construction-specific, not an identity for every 3D cluster state. Universal MBQC also needs adaptive non-Pauli measurements or equivalent injected magic resources beyond a Pauli-only stabilizer layer." }
+    {
+      "q": "How does measurement-based quantum computation compute?",
+      "options": [
+        "By unitary gates applied in sequence",
+        "By adaptive single-qubit measurements consuming a pre-entangled cluster state",
+        "By classical simulation",
+        "By cooling to the ground state"
+      ],
+      "answer": 1,
+      "why": "All entanglement is prepared up front; each measurement steers the remaining state, with later bases adapted to earlier outcomes."
+    },
+    {
+      "q": "What is the precise connection between topological MBQC and surface-code histories?",
+      "options": [
+        "There is no connection",
+        "Specific RHG and foliated cluster constructions encode correlation surfaces corresponding to scheduled topological-code histories",
+        "Both avoid measurements",
+        "MBQC removes the need for error correction"
+      ],
+      "answer": 1,
+      "why": "The correspondence is construction-specific, not an identity for every 3D cluster state. Universal MBQC also needs adaptive non-Pauli measurements or equivalent injected magic resources beyond a Pauli-only stabilizer layer."
+    }
   ],
   "magic-states-distillation": [
-    { "q": "Why do standard surface-code architectures use magic resources for T?", "options": ["To store data more densely", "Because the surface code has no transversal T; consuming |A⟩ = T|+⟩ in a Clifford-and-measurement gadget can enact T", "To speed up every measurement", "To remove decoding"], "answer": 1, "why": "Eastin-Knill forbids a universal transversal set under its assumptions, while surface-code T is commonly supplied by injection. Logical Cliffords are realized by tracking, surgery, deformation, or related code-dependent methods—not simply declared free." },
-    { "q": "What is the leading accepted-output error of ideal 15-to-1 Bravyi-Kitaev distillation for independent small input error p?", "options": ["15p", "35p²", "35p³ + O(p⁴)", "Exactly zero"], "answer": 2, "why": "The ideal protocol's accepted marginal output error is cubic, 35p³ + O(p⁴). Acceptance probability, retries, output correlations, logical circuit faults, routing, and physical space-time cost are separate quantities." }
+    {
+      "q": "Why do standard surface-code architectures use magic resources for T?",
+      "options": [
+        "To store data more densely",
+        "Because the surface code has no transversal T; consuming |A⟩ = T|+⟩ in a Clifford-and-measurement gadget can enact T",
+        "To speed up every measurement",
+        "To remove decoding"
+      ],
+      "answer": 1,
+      "why": "Eastin-Knill forbids a universal transversal set under its assumptions, while surface-code T is commonly supplied by injection. Logical Cliffords are realized by tracking, surgery, deformation, or related code-dependent methods—not simply declared free."
+    },
+    {
+      "q": "What is the leading accepted-output error of ideal 15-to-1 Bravyi-Kitaev distillation for independent small input error p?",
+      "options": [
+        "15p",
+        "35p²",
+        "35p³ + O(p⁴)",
+        "Exactly zero"
+      ],
+      "answer": 2,
+      "why": "The ideal protocol's accepted marginal output error is cubic, 35p³ + O(p⁴). Acceptance probability, retries, output correlations, logical circuit faults, routing, and physical space-time cost are separate quantities."
+    }
   ],
   "flag-fault-tolerance": [
-    { "q": "What does a flag outcome report in a validated extraction circuit?", "options": ["The exact microscopic location of every fault", "That the outcome pattern is consistent with a fault class that may have propagated dangerously", "The end of any syndrome round", "A guaranteed successful decode"], "answer": 1, "why": "Under the circuit's stated fault model, dangerous faults must produce a flag or a distinguishing syndrome. A flag narrows the allowed correlated-error set; it does not precisely identify every physical fault." },
-    { "q": "What is a possible advantage of flag schemes?", "options": ["A universally higher threshold", "Lower ancilla overhead than some verified-block constructions for selected codes and checks", "Eliminating recovery", "Faster physical gates"], "answer": 1, "why": "Some flag circuits use one or a few extra ancillas while meeting a proven fault-tolerance condition. The qubit saving and guarantee depend on the code, ordered circuit, distance, fault count, and recovery procedure." }
+    {
+      "q": "What does a flag outcome report in a validated extraction circuit?",
+      "options": [
+        "The exact microscopic location of every fault",
+        "That the outcome pattern is consistent with a fault class that may have propagated dangerously",
+        "The end of any syndrome round",
+        "A guaranteed successful decode"
+      ],
+      "answer": 1,
+      "why": "Under the circuit's stated fault model, dangerous faults must produce a flag or a distinguishing syndrome. A flag narrows the allowed correlated-error set; it does not precisely identify every physical fault."
+    },
+    {
+      "q": "What is a possible advantage of flag schemes?",
+      "options": [
+        "A universally higher threshold",
+        "Lower ancilla overhead than some verified-block constructions for selected codes and checks",
+        "Eliminating recovery",
+        "Faster physical gates"
+      ],
+      "answer": 1,
+      "why": "Some flag circuits use one or a few extra ancillas while meeting a proven fault-tolerance condition. The qubit saving and guarantee depend on the code, ordered circuit, distance, fault count, and recovery procedure."
+    }
   ],
   "zx-calculus-basics": [
-    { "q": "A ZX-diagram represents…", "options": ["A chip floor plan", "A linear map, as a network of Z- and X-spiders that can be rewritten graphically", "A probability table", "Only Clifford circuits"], "answer": 1, "why": "ZX rules are sound diagrammatic equations. Completeness requires an appropriate axiom set for the chosen fragment; the small introductory rules alone are not complete for every arbitrary qubit map." },
-    { "q": "Why can TQEC compilers use ZX-calculus?", "options": ["It only draws prettier circuits", "Some lattice-surgery primitives have ZX representations, enabling semantics-preserving rewrites before layout", "It replaces decoding", "It guarantees removal of all non-Clifford gates"], "answer": 1, "why": "ZX is a useful intermediate representation linking logical maps to measurement structures. Rewrites preserve denotation, but whether they reduce T-count or space-time volume depends on the optimizer, input, and declared cost model." }
+    {
+      "q": "A ZX-diagram represents…",
+      "options": [
+        "A chip floor plan",
+        "A linear map, as a network of Z- and X-spiders that can be rewritten graphically",
+        "A probability table",
+        "Only Clifford circuits"
+      ],
+      "answer": 1,
+      "why": "ZX rules are sound diagrammatic equations. Completeness requires an appropriate axiom set for the chosen fragment; the small introductory rules alone are not complete for every arbitrary qubit map."
+    },
+    {
+      "q": "Why can TQEC compilers use ZX-calculus?",
+      "options": [
+        "It only draws prettier circuits",
+        "Some lattice-surgery primitives have ZX representations, enabling semantics-preserving rewrites before layout",
+        "It replaces decoding",
+        "It guarantees removal of all non-Clifford gates"
+      ],
+      "answer": 1,
+      "why": "ZX is a useful intermediate representation linking logical maps to measurement structures. Rewrites preserve denotation, but whether they reduce T-count or space-time volume depends on the optimizer, input, and declared cost model."
+    }
   ],
   "advanced-decoding": [
-    { "q": "What is a proved attraction of union-find decoding in its analyzed topological-code setting?", "options": ["It is universally maximum-likelihood", "It has almost-linear asymptotic complexity", "It needs no syndrome", "It only works at d=3"], "answer": 1, "why": "Its cluster-growth construction has favorable asymptotic complexity. Accuracy, threshold, latency, and practical speed relative to MWPM depend on the noise model, graph, implementation, and hardware." },
-    { "q": "Why do plain matching decoders lose accuracy on Y-type noise?", "options": ["Y errors are invisible", "They decode X and Z syndromes independently, ignoring that Y errors correlate the two", "Y errors have no syndrome endpoints", "Matching cannot run twice"], "answer": 1, "why": "A Y error is a correlated X-and-Z event. Decoders that exploit the correlation (reweighting one matching using the other) measurably outperform independent decoding." }
+    {
+      "q": "What is a proved attraction of union-find decoding in its analyzed topological-code setting?",
+      "options": [
+        "It is universally maximum-likelihood",
+        "It has almost-linear asymptotic complexity",
+        "It needs no syndrome",
+        "It only works at d=3"
+      ],
+      "answer": 1,
+      "why": "Its cluster-growth construction has favorable asymptotic complexity. Accuracy, threshold, latency, and practical speed relative to MWPM depend on the noise model, graph, implementation, and hardware."
+    },
+    {
+      "q": "Why do plain matching decoders lose accuracy on Y-type noise?",
+      "options": [
+        "Y errors are invisible",
+        "They decode X and Z syndromes independently, ignoring that Y errors correlate the two",
+        "Y errors have no syndrome endpoints",
+        "Matching cannot run twice"
+      ],
+      "answer": 1,
+      "why": "A Y error is a correlated X-and-Z event. Decoders that exploit the correlation (reweighting one matching using the other) measurably outperform independent decoding."
+    }
   ],
   "real-time-decoding-control": [
-    { "q": "In a fixed-rate fluid queue, what happens when detector batches arrive at rate λ but the decoder serves at μ < λ?", "options": ["The backlog repeatedly doubles despite fixed rates", "The backlog grows approximately linearly at rate λ−μ while the deficit persists", "The arrival rate automatically accelerates", "Nothing if average latency is finite"], "answer": 1, "why": "A steady throughput deficit adds roughly the same unfinished work per unit time. Bursts and variable service can change queue statistics, but exponential growth does not follow from fixed arrival and service rates." },
-    { "q": "Why must a real-time decoder report both throughput and latency?", "options": ["They are synonyms", "Throughput controls backlog, while some feed-forward decisions have separate deadlines", "Only latency matters", "Only throughput matters"], "answer": 1, "why": "A pipeline can sustain a fast cycle stream while each result takes many cycles. Willow, for example, reported 63 μs average decoder latency while sustaining a 1.1 μs cycle stream; these are distinct measurements." }
+    {
+      "q": "In a fixed-rate fluid queue, what happens when detector batches arrive at rate λ but the decoder serves at μ < λ?",
+      "options": [
+        "The backlog repeatedly doubles despite fixed rates",
+        "The backlog grows approximately linearly at rate λ−μ while the deficit persists",
+        "The arrival rate automatically accelerates",
+        "Nothing if average latency is finite"
+      ],
+      "answer": 1,
+      "why": "A steady throughput deficit adds roughly the same unfinished work per unit time. Bursts and variable service can change queue statistics, but exponential growth does not follow from fixed arrival and service rates."
+    },
+    {
+      "q": "Why must a real-time decoder report both throughput and latency?",
+      "options": [
+        "They are synonyms",
+        "Throughput controls backlog, while some feed-forward decisions have separate deadlines",
+        "Only latency matters",
+        "Only throughput matters"
+      ],
+      "answer": 1,
+      "why": "A pipeline can sustain a fast cycle stream while each result takes many cycles. Willow, for example, reported 63 μs average decoder latency while sustaining a 1.1 μs cycle stream; these are distinct measurements."
+    }
   ],
   "magic-state-cultivation": [
-    { "q": "What sequence describes the original cultivation proposal?", "options": ["Apply a universal fixed-yield recurrence", "Inject into a distance-3 triangular color code, cross-check/grow with postselection, then escape into a larger matchable encoding", "Eliminate the T gate", "Run only a 15-to-1 block"], "answer": 1, "why": "The rough injected state initially has fault distance 1. Accepted cross-checks and growth raise protection; the escape/grafting circuit can add errors and must be included in full rejection and cost estimates." },
-    { "q": "How broad is the published resource evidence for cultivation?", "options": ["It proves universal asymptotic superiority", "It shows roughly order-of-magnitude qubit-round savings for selected baselines, intermediate target errors, and a specified depolarizing circuit model", "It measures a hardware-independent fixed yield", "It removes decoding"], "answer": 1, "why": "The numerical advantage is scoped to the simulated pipeline, noise model, target regime, and comparison methods. It is not a universal recurrence, fixed yield, or hardware qubit count." }
+    {
+      "q": "What sequence describes the original cultivation proposal?",
+      "options": [
+        "Apply a universal fixed-yield recurrence",
+        "Inject into a distance-3 triangular color code, cross-check/grow with postselection, then escape into a larger matchable encoding",
+        "Eliminate the T gate",
+        "Run only a 15-to-1 block"
+      ],
+      "answer": 1,
+      "why": "The rough injected state initially has fault distance 1. Accepted cross-checks and growth raise protection; the escape/grafting circuit can add errors and must be included in full rejection and cost estimates."
+    },
+    {
+      "q": "How broad is the published resource evidence for cultivation?",
+      "options": [
+        "It proves universal asymptotic superiority",
+        "It shows roughly order-of-magnitude qubit-round savings for selected baselines, intermediate target errors, and a specified depolarizing circuit model",
+        "It measures a hardware-independent fixed yield",
+        "It removes decoding"
+      ],
+      "answer": 1,
+      "why": "The numerical advantage is scoped to the simulated pipeline, noise model, target regime, and comparison methods. It is not a universal recurrence, fixed yield, or hardware qubit count."
+    }
   ],
   "tqec-compilers-automation": [
-    { "q": "What can a lattice-surgery compiler stage output?", "options": ["A chip-ready pulse program by definition", "A logical space-time layout or schedule candidate for patches, measurements, routing, and resources", "Only physical qubit frequencies", "A proof of hardware correctness"], "answer": 1, "why": "The candidate still needs architecture mapping, timing, decoder/control integration, distance validation, and an error budget before execution. A conceptual walkthrough or layout tool is not automatically a production compiler endpoint." },
-    { "q": "In one Litinski-style representation, what happens to many Clifford operations?", "options": ["They are deleted from the computation", "They are propagated into a tracked frame, changing later Pauli-product measurements", "They become physical T gates", "They become hardware errors"], "answer": 1, "why": "The logical effect remains accounted for through frame and measurement updates. This does not mean every architecture physically executes zero-cost Cliffords or that only T-count determines total space-time cost." }
+    {
+      "q": "What can a lattice-surgery compiler stage output?",
+      "options": [
+        "A chip-ready pulse program by definition",
+        "A logical space-time layout or schedule candidate for patches, measurements, routing, and resources",
+        "Only physical qubit frequencies",
+        "A proof of hardware correctness"
+      ],
+      "answer": 1,
+      "why": "The candidate still needs architecture mapping, timing, decoder/control integration, distance validation, and an error budget before execution. A conceptual walkthrough or layout tool is not automatically a production compiler endpoint."
+    },
+    {
+      "q": "In one Litinski-style representation, what happens to many Clifford operations?",
+      "options": [
+        "They are deleted from the computation",
+        "They are propagated into a tracked frame, changing later Pauli-product measurements",
+        "They become physical T gates",
+        "They become hardware errors"
+      ],
+      "answer": 1,
+      "why": "The logical effect remains accounted for through frame and measurement updates. This does not mean every architecture physically executes zero-cost Cliffords or that only T-count determines total space-time cost."
+    }
   ],
   "clifford-simulation-hybrid": [
-    { "q": "What does the Gottesman–Knill theorem efficiently cover?", "options": ["All circuits whose gates happen to be Clifford, with arbitrary input states", "Stabilizer-state preparations, Clifford evolution, and Pauli measurements with classical feed-forward", "Universal T-gate circuits", "Only circuits without measurement"], "answer": 1, "why": "Efficient tableau tracking relies on stabilizer inputs and operations. Arbitrary non-stabilizer inputs fall outside the guarantee even if subsequent gates are Clifford." },
-    { "q": "What does a hybrid quantum-circuit simulation establish?", "options": ["The exact behavior of omitted hardware physics", "Behavior of the represented circuit and noise model, with cost and uncertainty determined by the chosen method", "A hardware-independent certification", "That T-count alone fixes runtime"], "answer": 1, "why": "Stabilizer frames, decompositions, and factorization can enlarge the tractable regime. Finite sampling has uncertainty, exact trajectories are exact only for the modeled process, and leakage, drift, crosstalk, or other omitted effects remain outside the claim." }
+    {
+      "q": "What does the Gottesman–Knill theorem efficiently cover?",
+      "options": [
+        "All circuits whose gates happen to be Clifford, with arbitrary input states",
+        "Stabilizer-state preparations, Clifford evolution, and Pauli measurements with classical feed-forward",
+        "Universal T-gate circuits",
+        "Only circuits without measurement"
+      ],
+      "answer": 1,
+      "why": "Efficient tableau tracking relies on stabilizer inputs and operations. Arbitrary non-stabilizer inputs fall outside the guarantee even if subsequent gates are Clifford."
+    },
+    {
+      "q": "What does a hybrid quantum-circuit simulation establish?",
+      "options": [
+        "The exact behavior of omitted hardware physics",
+        "Behavior of the represented circuit and noise model, with cost and uncertainty determined by the chosen method",
+        "A hardware-independent certification",
+        "That T-count alone fixes runtime"
+      ],
+      "answer": 1,
+      "why": "Stabilizer frames, decompositions, and factorization can enlarge the tractable regime. Finite sampling has uncertainty, exact trajectories are exact only for the modeled process, and leakage, drift, crosstalk, or other omitted effects remain outside the claim."
+    }
   ],
   "below-threshold-experiments": [
-    { "q": "What did Google's 2024 Willow surface-code memory experiment establish?", "options": ["A universal fault-tolerant algorithm", "Clear logical-error suppression across tested distances 3, 5, and 7 for its memory circuit and decoder", "Room-temperature operation", "A hardware-independent threshold"], "answer": 1, "why": "The 2022 work made a first larger-code comparison with modest average d=5 improvement over d=3. Willow added d=7 and reported a clear memory-scaling trend; it did not by itself demonstrate universal gates or an algorithm." },
-    { "q": "What convention did Willow use for the suppression factor Λ?", "options": ["Λ = ε_L(d+2)/ε_L(d), so smaller is better", "Λ = ε_L(d)/ε_L(d+2), so Λ > 1 means suppression", "Λ is the physical-qubit lifetime ratio", "Λ is decoder latency"], "answer": 1, "why": "Willow reported Λ = 2.14 ± 0.02 for the tested memories. The separate 2.4 ± 0.3 number compared encoded lifetime with the best constituent physical qubit; it was not Λ." }
+    {
+      "q": "What did Google's 2024 Willow surface-code memory experiment establish?",
+      "options": [
+        "A universal fault-tolerant algorithm",
+        "Clear logical-error suppression across tested distances 3, 5, and 7 for its memory circuit and decoder",
+        "Room-temperature operation",
+        "A hardware-independent threshold"
+      ],
+      "answer": 1,
+      "why": "The 2022 work made a first larger-code comparison with modest average d=5 improvement over d=3. Willow added d=7 and reported a clear memory-scaling trend; it did not by itself demonstrate universal gates or an algorithm."
+    },
+    {
+      "q": "What convention did Willow use for the suppression factor Λ?",
+      "options": [
+        "Λ = ε_L(d+2)/ε_L(d), so smaller is better",
+        "Λ = ε_L(d)/ε_L(d+2), so Λ > 1 means suppression",
+        "Λ is the physical-qubit lifetime ratio",
+        "Λ is decoder latency"
+      ],
+      "answer": 1,
+      "why": "Willow reported Λ = 2.14 ± 0.02 for the tested memories. The separate 2.4 ± 0.3 number compared encoded lifetime with the best constituent physical qubit; it was not Λ."
+    }
+  ],
+  "qldpc-codes": [
+    {
+      "q": "What is the primary advantage of qLDPC codes over surface codes?",
+      "options": [
+        "They only require linear nearest-neighbor connectivity.",
+        "They achieve a higher encoding rate (k/n) as distance increases.",
+        "They do not require syndrome extraction.",
+        "They can be decoded in polynomial time."
+      ],
+      "answer": 1,
+      "why": "Surface codes have a vanishing rate (k/n) because n scales with d^2 for a single logical qubit, whereas qLDPC codes can maintain a constant or better rate due to their non-local connections."
+    },
+    {
+      "q": "What is a Tanner graph?",
+      "options": [
+        "A plot of logical error vs physical error.",
+        "A bipartite graph representing qubits and checks in a code.",
+        "The lattice of boundaries in a surface code.",
+        "The 3D space-time diagram of syndrome extraction."
+      ],
+      "answer": 1,
+      "why": "A Tanner graph connects data qubits to the parity checks they participate in, and LDPC codes are defined by having sparse Tanner graphs."
+    }
   ]
 }

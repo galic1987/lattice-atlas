@@ -17,6 +17,7 @@ const DecoderDuel = lazy(() => import('@/pages/DecoderDuel'));
 const FoundationsLab = lazy(() => import('@/pages/FoundationsLab'));
 const Altitudes = lazy(() => import('@/pages/Altitudes'));
 const Capstone = lazy(() => import('@/pages/Capstone'));
+const LatticeSurgeryLab = lazy(() => import('@/pages/LatticeSurgeryLab'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 function PageFallback() {
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="foundations" element={lazyPage(<FoundationsLab />)} />
           <Route path="altitudes" element={lazyPage(<Altitudes />)} />
           <Route path="capstone" element={lazyPage(<Capstone />)} />
+          <Route path="lattice-surgery" element={lazyPage(<LatticeSurgeryLab />)} />
           <Route path="*" element={lazyPage(<NotFound />)} />
         </Route>
       </Routes>

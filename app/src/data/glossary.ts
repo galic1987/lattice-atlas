@@ -14,7 +14,40 @@ export function matchGlossaryTerm(text: string): GlossaryTerm | undefined {
   const q = normalizeGlossaryName(text);
   if (!q) return undefined;
   return TERMS.find((t) => {
-    const names = [t.term, ...(t.aliases ?? [])];
+    const names = [t.term, ...(t.aliases ?? [])  {
+    term: 'qLDPC code',
+    slug: 'qldpc-code',
+    category: 'code theory',
+    aliases: ['qLDPC', 'qLDPC codes', 'quantum Low-Density Parity-Check code'],
+    short: 'Quantum Low-Density Parity-Check codes: a broad family of codes with bounded-weight stabilizers that can achieve much better encoding rates than surface codes.',
+    long: 'Unlike surface codes which are constrained to a 2D local lattice and have a vanishing rate k/n, qLDPC codes use non-local connections. This allows them to encode many more logical qubits into the same number of physical qubits while maintaining bounded parity-check weights.',
+    related_terms: ['bivariate-bicycle', 'tanner-graph', 'surface-code'],
+    related_topics: ['qldpc-codes'],
+    related_papers: ['2308.07915'],
+  },
+  {
+    term: 'Bivariate Bicycle code',
+    slug: 'bivariate-bicycle',
+    category: 'code theory',
+    aliases: ['Bivariate Bicycle codes', 'bivariate bicycle', 'BB code'],
+    short: 'A specific, highly efficient family of qLDPC codes constructed from polynomials over finite fields.',
+    long: 'Bivariate Bicycle codes offer an excellent trade-off between hardware connectivity requirements and encoding efficiency. They have recently been the focus of proposals for near-term qLDPC hardware implementations because they map relatively well to devices with limited long-range connections.',
+    related_terms: ['qldpc-code', 'tanner-graph'],
+    related_topics: ['qldpc-codes'],
+    related_papers: ['2308.07915'],
+  },
+  {
+    term: 'Tanner graph',
+    slug: 'tanner-graph',
+    category: 'code theory',
+    aliases: ['Tanner graphs'],
+    short: 'A bipartite graph representing an error-correcting code, with nodes for data qubits and nodes for parity checks.',
+    long: 'In a Tanner graph, an edge connects a parity-check node to a data-qubit node if that qubit is part of that check. The degree of the nodes corresponds to the weight of the checks and the number of checks a qubit participates in. Low-density parity-check (LDPC) codes are defined by having sparse Tanner graphs.',
+    related_terms: ['qldpc-code', 'parity'],
+    related_topics: ['qldpc-codes', 'classical-error-correction'],
+    related_papers: [],
+  },
+];
     const paren = t.term.match(/\(([^)]+)\)/);
     if (paren) names.push(paren[1]);
     names.push(t.term.replace(/\s*\([^)]*\)/, '').trim());
