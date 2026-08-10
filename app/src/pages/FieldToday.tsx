@@ -693,7 +693,9 @@ const PROTOCOLS: Record<ProtocolKey, ProtocolMeta> = {
     caveat: 'The four outputs can be correlated; treating them as independent inputs to another level is an extra approximation.',
     sourceLabel: 'Bravyi–Haah triorthogonal codes',
     sourceHref: 'https://arxiv.org/abs/1209.2426',
-    color: '#8B5CF6',
+    // Lighter violet than #8B5CF6 so the colored label clears AA contrast (4.5:1)
+    // on the dark card background; still clearly the "violet" protocol.
+    color: '#A78BFA',
   },
   '8-2': {
     name: 'Catalyzed 8-to-2 (Gidney–Fowler)',
@@ -902,7 +904,7 @@ function MagicStateCalculatorWidget() {
                     <p className="font-mono text-xs font-semibold" style={{ color: p.color }}>
                       {p.shortName}
                     </p>
-                    <p className="mt-1 text-[11px] leading-snug text-text-low">{p.name}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-text-mid">{p.name}</p>
                   </button>
                 );
               })}
