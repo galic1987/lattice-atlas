@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import ConceptClip from '@/components/ConceptClip';
+import { TOPIC_CLIPS } from '@/lib/topicClips';
 import { Link } from 'react-router-dom';
 import {
   AnimatePresence,
@@ -324,6 +326,21 @@ function TopicDrawer({
 
             <div className="flex-1 space-y-8 p-6">
               <Intuition topicId={topic.id} />
+
+              {TOPIC_CLIPS[topic.id] && (
+                <div>
+                  <p className="eyebrow mb-3">// CONCEPT CLIP — AI VISUALIZATION, DECORATIVE</p>
+                  <div className="flex flex-col gap-3">
+                    {TOPIC_CLIPS[topic.id].map((clip) => (
+                      <ConceptClip
+                        key={clip}
+                        name={clip}
+                        className="w-full rounded-xl border border-ink-600 object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <p className="leading-relaxed text-text-mid">
                 <GlossaryText text={topic.detail} />

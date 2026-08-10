@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Video, BookOpen, Film, Copy, Check } from 'lucide-react';
+import ConceptClip from '@/components/ConceptClip';
 import { sound } from '@/lib/sound';
 
 interface PaperVideoMeta {
@@ -106,12 +107,12 @@ export default function PaperVeoVideoGallery() {
             </h3>
           </div>
           <p className="mt-1 text-sm text-text-mid">
-            Cinematic AI video generation prompts &amp; visual breakdowns for seminal quantum error correction papers.
+            AI-generated cinematic clips &amp; the prompts behind them for seminal quantum error correction papers.
           </p>
         </div>
 
         <span className="rounded-full border border-plaquette/40 bg-plaquette/10 px-3 py-1 font-mono text-xs font-bold text-plaquette">
-          Google Veo 3 AI Prompts
+          Veo 3.1 clips + prompts
         </span>
       </div>
 
@@ -146,15 +147,19 @@ export default function PaperVeoVideoGallery() {
           </div>
 
           <div className="relative w-full max-w-[380px] aspect-[4/3] my-4 flex flex-col items-center justify-center bg-ink-950 rounded-xl border border-ink-700 p-5">
-            <div className="relative w-40 h-40 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl border-2 border-plaquette/40 animate-pulse" />
-              <div className="absolute inset-4 rounded-xl border-2 border-magic/40 animate-spin" />
-              <div className="relative z-10 font-mono text-xs font-bold text-text-hi text-center bg-ink-900/90 p-3 rounded-lg border border-ink-600">
-                {paper.keyEquation}
-              </div>
+            <ConceptClip
+              name={paper.paperId}
+              className="w-full flex-1 rounded-lg border border-ink-700 object-cover"
+            />
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-text-low">
+              AI visualization (Veo 3.1) — decorative, not a simulation
+            </p>
+
+            <div className="mt-2 font-mono text-xs font-bold text-text-hi text-center bg-ink-900/90 px-3 py-2 rounded-lg border border-ink-600">
+              {paper.keyEquation}
             </div>
 
-            <div className="mt-4 font-mono text-[11px] text-stabilizer text-center font-bold">
+            <div className="mt-2 font-mono text-[11px] text-stabilizer text-center font-bold">
               {paper.arxivOrDoi}
             </div>
           </div>

@@ -1,5 +1,7 @@
 import { asset } from '@/lib/asset';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import ConceptClip from '@/components/ConceptClip';
+import { TOPIC_CLIPS } from '@/lib/topicClips';
 import {
   useCallback,
   useEffect,
@@ -988,6 +990,23 @@ function TopicDrawer({
                 </motion.span>
                 {understood ? 'Explored — click to unmark' : 'Mark as explored'}
               </button>
+
+              {TOPIC_CLIPS[topic.id] && (
+                <div className="mt-5">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-low">
+                    // Concept clip — AI visualization, decorative
+                  </span>
+                  <div className="mt-2 flex flex-col gap-3">
+                    {TOPIC_CLIPS[topic.id].map((clip) => (
+                      <ConceptClip
+                        key={clip}
+                        name={clip}
+                        className="w-full rounded-xl border border-ink-600 object-cover"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-8 flex flex-col gap-8">
                 <TopicLensInsight topicId={topic.id} />

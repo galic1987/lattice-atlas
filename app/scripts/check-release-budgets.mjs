@@ -8,6 +8,11 @@ const KIB = 1024;
 // These limits leave roughly 12–20% headroom over the 2026-08-07 production
 // baseline. Keep them explicit: raising a limit should be a reviewed decision,
 // not an automatic response to a larger build.
+//
+// 2026-08-09 (video wiring PR): decorative concept clips live in dist/clips/.
+// They load lazily (preload="none", poster-first), so they are NOT part of the
+// page-load budget — totalDistributionGzip excludes .mp4 and videos get their
+// own explicit caps instead: 4 MiB raw per clip, 40 MiB gzip for the whole set.
 const LIMITS = Object.freeze({
   entryJavaScriptGzip: 160 * KIB,
   initialJavaScriptGraphGzip: 230 * KIB,
@@ -15,6 +20,8 @@ const LIMITS = Object.freeze({
   totalJavaScriptGzip: 640 * KIB,
   totalDistributionGzip: 70000 * KIB,
   rasterAssetRaw: 300 * KIB,
+  videoClipRaw: 4 * 1024 * KIB,
+  totalVideoClipsGzip: 45000 * KIB,
 });
 
 if (!existsSync(DIST_DIR)) {
@@ -48,6 +55,8 @@ function format(bytes) {
 const files = walk(DIST_DIR).map(measure);
 const javascript = files.filter(({ file }) => extname(file.pathname) === '.js');
 const rasters = files.filter(({ file }) => /\.(?:avif|gif|jpe?g|png|webp)$/i.test(file.pathname));
+const videos = files.filter(({ file }) => extname(file.pathname) === '.mp4');
+const nonVideo = files.filter(({ file }) => extname(file.pathname) !== '.mp4');
 const indexHtml = readFileSync(new URL('index.html', DIST_DIR), 'utf8');
 const entryMatch = indexHtml.match(/<script\b[^>]*\bsrc=["']([^"']+\.js)["'][^>]*>/i);
 
@@ -82,8 +91,10 @@ while (pending.length > 0) {
 
 const totalJavaScriptGzip = javascript.reduce((sum, file) => sum + file.gzip, 0);
 const initialJavaScriptGraphGzip = [...initialGraph.values()].reduce((sum, file) => sum + file.gzip, 0);
-const totalDistributionGzip = files.reduce((sum, file) => sum + file.gzip, 0);
+const totalDistributionGzip = nonVideo.reduce((sum, file) => sum + file.gzip, 0);
+const totalVideoClipsGzip = videos.reduce((sum, file) => sum + file.gzip, 0);
 const oversizedRasters = rasters.filter(({ raw }) => raw > LIMITS.rasterAssetRaw);
+const oversizedVideos = videos.filter(({ raw }) => raw > LIMITS.videoClipRaw);
 const failures = [];
 
 function check(label, actual, limit) {
@@ -96,7 +107,8 @@ check('entry JavaScript (gzip)', entry.gzip, LIMITS.entryJavaScriptGzip);
 check('initial static JavaScript graph (gzip)', initialJavaScriptGraphGzip, LIMITS.initialJavaScriptGraphGzip);
 check('Surface Code Lab chunk (gzip)', surfaceLab.gzip, LIMITS.surfaceLabJavaScriptGzip);
 check('all JavaScript (gzip)', totalJavaScriptGzip, LIMITS.totalJavaScriptGzip);
-check('complete distribution (gzip)', totalDistributionGzip, LIMITS.totalDistributionGzip);
+check('complete distribution excl. video (gzip)', totalDistributionGzip, LIMITS.totalDistributionGzip);
+check('video clips total (gzip)', totalVideoClipsGzip, LIMITS.totalVideoClipsGzip);
 
 console.log(
   `${oversizedRasters.length === 0 ? '✓' : '✗'} raster assets: ${rasters.length} checked, `
@@ -104,6 +116,14 @@ console.log(
 );
 for (const raster of oversizedRasters) {
   failures.push(`${raster.path} is ${format(raster.raw)} raw`);
+}
+
+console.log(
+  `${oversizedVideos.length === 0 ? '✓' : '✗'} video clips: ${videos.length} checked, `
+  + `limit ${format(LIMITS.videoClipRaw)} each`,
+);
+for (const video of oversizedVideos) {
+  failures.push(`${video.path} is ${format(video.raw)} raw`);
 }
 
 if (failures.length > 0) {
