@@ -13,7 +13,7 @@ export const TOPIC_CLIPS: Record<string, string[]> = {
   'quantum-gates-circuits': ['concept-gate-pulses'],
   'classical-error-correction': ['concept-redundancy-restore'],
   'fault-tolerance-thresholds': ['concept-decoherence', 'concept-threshold-seawall'],
-  'topological-order-anyons': ['metaphor-topology-deformation-v2'],
+  'topological-order-anyons': ['metaphor-topology-deformation-v2', 'anyon-braiding-flow'],
   'toric-code': ['concept-toric-loops-v3'],
   'surface-code': ['metaphor-snag-fabric-v2'],
   'syndrome-extraction-circuits': ['metaphor-watchers-box'],
