@@ -105,7 +105,6 @@ export default function LatticeSurgeryComposerStudio() {
     setSelectedPatchId((prev) => (prev === id ? null : id));
   };
 
-<<<<<<< HEAD
   // A composition is previewable only when there is an actual weld joining at
   // least two patches — otherwise there is no operation to describe.
   const hasValidWeld = welds.length > 0 && patches.length >= 2;
@@ -115,11 +114,6 @@ export default function LatticeSurgeryComposerStudio() {
   //    reports no measured value, because none is computed.
   const handlePreview = () => {
     if (!hasValidWeld) return;
-=======
-  // 2. Execute Lattice Surgery
-  const handleExecuteSurgery = () => {
-    if (welds.length === 0) return;
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
     sound.playDecoderLock();
     setExecutingSurgery(true);
     setSurgeryResult(null);
@@ -128,17 +122,10 @@ export default function LatticeSurgeryComposerStudio() {
       setExecutingSurgery(false);
       setSurgeryResult(
         activeWeldType === 'Z-Weld'
-<<<<<<< HEAD
           ? 'A Z-weld merges the two smooth Z-boundaries, measures the joint Z_L1·Z_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
           : 'An X-weld merges the two rough X-boundaries, measures the joint X_L1·X_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
       );
     }, 400);
-=======
-          ? `Joint Z_L1 · Z_L2 parity check (+1) executed across ${patches.length} distance-${distance} surface patches.`
-          : `Joint X_L1 · X_L2 parity check (+1) executed across ${patches.length} distance-${distance} surface patches.`
-      );
-    }, 600);
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
   };
 
   // 3. Dynamic Auto-Generated Stim Circuit
@@ -290,7 +277,6 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
 
         {/* Execute Surgery Button */}
         <div className="rounded-xl border border-ink-700 bg-ink-900 p-3 flex flex-col justify-between">
-<<<<<<< HEAD
           <span className="text-text-low text-[10px] uppercase block mb-1">Preview Operation:</span>
           <button
             type="button"
@@ -304,34 +290,10 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
             }`}
           >
             <Play className="h-3.5 w-3.5" /> Preview illustrative operation
-=======
-          <span className="text-text-low text-[10px] uppercase block mb-1">Simulate Sequence:</span>
-          <button
-            type="button"
-            disabled={welds.length === 0}
-            onClick={handleExecuteSurgery}
-            className={`flex items-center justify-center gap-1.5 rounded py-1 font-bold transition-colors ${
-              welds.length > 0
-                ? 'bg-plaquette text-ink-950 hover:bg-plaquette/90'
-                : 'bg-ink-800 text-text-low cursor-not-allowed'
-            }`}
-          >
-            <Play className="h-3.5 w-3.5" /> Preview Surgery Check
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </button>
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* 2D Canvas Workspace */}
-      <div className="mt-5 relative rounded-xl border border-ink-700 bg-ink-950 p-6 flex flex-col justify-center items-center overflow-hidden min-h-[380px]">
-        {/* viewBox fits two rows of patches (4th patch sits at y≈240 + 140 tall),
-            so adding all four no longer clips off the bottom of the canvas. */}
-        <svg width="480" height="400" viewBox="0 0 420 400" className="max-w-full">
-          {/* Surface Patches */}
-          {patches.map((p) => (
-            <g key={p.id} transform={`translate(${p.x}, ${p.y})`}>
-=======
       {/* 2D Canvas Workspace with Dynamic Height & Playwright Data Attributes */}
       <div
         data-lab-workspace="true"
@@ -347,7 +309,6 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
           {/* Active Surgery Weld Boundary Connecting Patches */}
           {welds.map((w) => (
             <g key={w.id} className="animate-pulse">
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
               <rect
                 x={w.x}
                 y={w.y}
@@ -420,28 +381,18 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
 
         {/* Execution Loading Overlay */}
         {executingSurgery && (
-<<<<<<< HEAD
           <div className="absolute inset-0 bg-ink-950/80 backdrop-blur flex items-center justify-center font-mono text-sm font-bold text-plaquette animate-fade-in">
             <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Sketching {activeWeldType} sequence…
-=======
-          <div className="absolute inset-0 bg-ink-950/85 backdrop-blur flex items-center justify-center font-mono text-sm font-bold text-plaquette animate-fade-in">
-            <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Simulating {activeWeldType} Boundary Parity Check...
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </div>
         )}
 
         {/* Execution Output Status with Live Region */}
         {surgeryResult && (
-<<<<<<< HEAD
           <div className="mt-2 rounded-lg border border-star/40 bg-star/10 p-3 font-mono text-xs text-text-mid">
             <span className="mb-1 block font-bold uppercase tracking-wide text-star text-[10px]">
               Illustrative sequence — no stabilizer simulation or circuit execution
             </span>
             {surgeryResult}
-=======
-          <div role="region" aria-live="polite" className="mt-3 rounded-lg border border-stabilizer/40 bg-stabilizer/10 p-3 font-mono text-xs text-stabilizer text-center">
-            ✓ {surgeryResult}
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </div>
         )}
       </div>
@@ -450,11 +401,7 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
       <div className="mt-5 rounded-xl border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-plaquette font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-<<<<<<< HEAD
             <Code className="h-3.5 w-3.5" /> Representative Stim snippet — illustrative, not executed or validated
-=======
-            <Code className="h-3.5 w-3.5" /> Dynamic Stim Fault-Tolerant Circuit Definition
->>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </span>
           <button
             type="button"
