@@ -124,7 +124,7 @@ export default function AnyonBraidingSandbox() {
                 Encirclements: <span className="font-bold text-text-hi">{loops}</span> · mutual monodromy
                 phase e^(i·{exponent}π) = <span className="font-bold text-text-hi">{sign}</span>
                 {units === 1 && (
-                  <span className="text-text-low"> — {anyonA} around {anyonB} are mutual semions (−1 per loop)</span>
+                  <span className="text-text-low"> — {anyonA} around {anyonB} pick up mutual π statistics (−1 per loop)</span>
                 )}
               </div>
             );
