@@ -70,6 +70,14 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
       'Direct arXiv links and prerequisite topic mappings for deep academic research.',
     ],
   },
+  '/field-today': {
+    summary: 'The current research frontier: magic state cultivation, compilers, real-time decoding, and below-threshold hardware.',
+    takeaways: [
+      'The bottleneck moved from making qubits work to making computation cheap and fast.',
+      'Magic state cultivation, lattice-surgery compilers, and real-time decoders are the active fronts.',
+      'Below-threshold experiments (Google 2024) show logical error falling as distance grows.',
+    ],
+  },
   '/experiments': {
     summary: 'Interactive experiment bench: turn a knob and watch a real invariant emerge from genuine computation.',
     takeaways: [
@@ -131,6 +139,7 @@ export default function SuperTLDR({ summary: propsSummary, takeaways: propsTakea
         <button
           type="button"
           onClick={toggleOpen}
+          aria-expanded={isOpen}
           className="flex items-center gap-2 text-left group cursor-pointer focus:outline-none"
         >
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-plaquette/20 text-plaquette group-hover:scale-105 transition-transform">
@@ -154,6 +163,7 @@ export default function SuperTLDR({ summary: propsSummary, takeaways: propsTakea
           onClick={toggleOpen}
           className="ml-3 rounded-lg border border-ink-700 bg-ink-950/80 p-1.5 text-text-low hover:text-text-hi transition-colors shrink-0"
           aria-label={isOpen ? 'Collapse Super TL;DR' : 'Expand Super TL;DR'}
+          aria-expanded={isOpen}
         >
           <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown className="h-4 w-4" />

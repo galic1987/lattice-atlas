@@ -50,6 +50,16 @@ const coveredRoutes = new Set(
 for (const route of appRoutes)
   if (!coveredRoutes.has(route)) err(`route "/${route}" is missing from the mobile-overflow suite`);
 
+/* ---------------- topic↔tool registry integrity ---------------- */
+
+const topicToolsSrc = read('src/lib/topicTools.ts');
+const treeSrc = read('src/data/knowledge_tree.json');
+const treeIds = new Set(JSON.parse(treeSrc).map((t) => t.id));
+for (const m of topicToolsSrc.matchAll(/'([a-z0-9-]+)':\s*\[/g))
+  if (!treeIds.has(m[1])) err(`TOPIC_TOOLS key "${m[1]}" is not a knowledge-tree topic id`);
+for (const m of topicToolsSrc.matchAll(/tool: '([a-z0-9-]+)'/g))
+  if (!hubIds.has(m[1])) err(`TOPIC_TOOLS tool "${m[1]}" is not in WORKBENCH_TOOLS`);
+
 /* ---------------- report ---------------- */
 
 if (errors.length) {

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useProgress } from '@/store/progress';
 import { Binary, Zap, RotateCcw, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import {
   hammingEncode,
@@ -395,7 +396,13 @@ function MixedStabRow({ stab, violated }: { stab: QuantumCode['stabilizers'][num
   );
 }
 
-function QuantumLab({ code }: { code: QuantumCode }) {
+function QuantumLab({
+  code,
+  onTaskProgress,
+}: {
+  code: QuantumCode;
+  onTaskProgress?: (codeId: string, done: boolean) => void;
+}) {
   const [letters, setLetters] = useState<PauliLetter[]>(() => Array(code.n).fill('I'));
 
   const error: PauliError = useMemo(
@@ -410,6 +417,12 @@ function QuantumLab({ code }: { code: QuantumCode }) {
   const correction = code.decode(syn);
   const injected = letters.filter((l) => l !== 'I').length;
   const cls = injected === 0 ? null : correction ? code.classify(error, correction) : 'uncorrected';
+
+  // Lab-task signal: exactly one injected error, and the decoder corrected it.
+  const taskDone = injected === 1 && cls === 'clean';
+  useEffect(() => {
+    onTaskProgress?.(code.id, taskDone);
+  }, [onTaskProgress, code.id, taskDone]);
 
   const cycle = (q: number) => {
     const next = letters.slice();
@@ -508,6 +521,35 @@ function QuantumLab({ code }: { code: QuantumCode }) {
 /* ---------------- the explorer ---------------- */
 
 export default function ErrorCodeExplorer() {
+  const { recordEvidence } = useProgress();
+  const [labsDone, setLabsDone] = useState<ReadonlySet<string>>(new Set());
+  const recordedRef = useRef(false);
+
+  const handleTaskProgress = (codeId: string, done: boolean) => {
+    setLabsDone((prev) => {
+      if (prev.has(codeId) === done) return prev; // no change → no re-render
+      const next = new Set(prev);
+      if (done) next.add(codeId);
+      else next.delete(codeId);
+      return next;
+    });
+  };
+
+  // Pilot lab-task (TOPIC_TOOLS taskId 'correct-single-pauli' for
+  // quantum-codes-basics): all three quantum labs decode one injected error.
+  const taskComplete = labsDone.size >= QUANTUM_CODES.length;
+  useEffect(() => {
+    if (!taskComplete || recordedRef.current) return;
+    recordedRef.current = true;
+    recordEvidence({
+      kind: 'lab-task',
+      topicId: 'quantum-codes-basics',
+      toolId: 'code-zoo',
+      taskId: 'correct-single-pauli',
+      completed: true,
+    });
+  }, [taskComplete, recordEvidence]);
+
   return (
     <div className="rounded-2xl border border-plaquette/40 bg-ink-900 p-6 shadow-glow-cyan">
       <div className="flex flex-col gap-2 border-b border-ink-700 pb-4">
@@ -582,9 +624,17 @@ export default function ErrorCodeExplorer() {
           (<span className="font-mono text-[11px] text-plaquette">npm run check-codes</span>) verifies that
           every single-qubit error on every code decodes with zero logical damage.
         </p>
+        <p
+          className={`mt-2 font-mono text-[11px] ${taskComplete ? 'text-stabilizer' : 'text-text-low'}`}
+          aria-live="polite"
+        >
+          {taskComplete
+            ? '✓ Lab task complete: one Pauli error corrected in every lab (recorded to your learning record).'
+            : `Lab task: fix one Pauli error in each quantum lab — ${labsDone.size}/${QUANTUM_CODES.length}`}
+        </p>
         <div className="mt-3 grid gap-5 lg:grid-cols-3">
           {QUANTUM_CODES.map((c) => (
-            <QuantumLab key={c.id} code={c} />
+            <QuantumLab key={c.id} code={c} onTaskProgress={handleTaskProgress} />
           ))}
         </div>
       </div>
