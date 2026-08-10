@@ -150,7 +150,7 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     title: 'Multi-Qubit Surface Code Lattice Surgery Composer Studio',
     category: 'Simulation',
     icon: Move,
-    description: 'Drag-and-drop surface code patches, draw Z-weld & X-weld surgery boundaries, & auto-compile Stim circuits.',
+    description: 'Arrange surface-code patches, toggle Z/X weld boundaries, & inspect an illustrative Stim template (patches auto-placed; not a real compiler).',
   },
   {
     id: 'veo-prompt-refiner',

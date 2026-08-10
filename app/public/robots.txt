@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /lattice-atlas/
+
+Sitemap: https://galic1987.github.io/lattice-atlas/sitemap.xml

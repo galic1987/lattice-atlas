@@ -951,25 +951,6 @@ export default function SurfaceCodeLab() {
     currentStepRef.current = currentStep;
   }, [currentStep]);
 
-  /** Playback auto-stepping interval effect. The step-driven side effects
-   *  (halt at the end, decode once the correction is revealed) run in the
-   *  async interval callback, never inside a setState updater. */
-  useEffect(() => {
-    if (!isPlaying) return;
-    const speedMs = 1400 / playbackSpeed;
-    const timer = setInterval(() => {
-      const prev = currentStepRef.current;
-      if (prev >= 5) {
-        setIsPlaying(false);
-        return;
-      }
-      const next = prev + 1;
-      setCurrentStep(next);
-      if (next >= 4 && !result) setResult(decode(lat, errors));
-    }, speedMs);
-    return () => clearInterval(timer);
-  }, [isPlaying, playbackSpeed, lat, errors, result]);
-
   /** Called from the event handlers with the freshly-computed state. */
   const checkChallenge = (nextErrors: Pauli[], nextResult: DecodeResult | null) => {
     const ch = activeChallenge;
@@ -992,6 +973,36 @@ export default function SurfaceCodeLab() {
       return next;
     });
   };
+
+  /** Ref mirror so the playback interval always calls the latest closure
+   *  without restarting the timer on every challenge-state change. */
+  const checkChallengeRef = useRef(checkChallenge);
+  useEffect(() => {
+    checkChallengeRef.current = checkChallenge;
+  });
+
+  /** Playback auto-stepping interval effect. The step-driven side effects
+   *  (halt at the end, decode once the correction is revealed) run in the
+   *  async interval callback, never inside a setState updater. */
+  useEffect(() => {
+    if (!isPlaying) return;
+    const speedMs = 1400 / playbackSpeed;
+    const timer = setInterval(() => {
+      const prev = currentStepRef.current;
+      if (prev >= 5) {
+        setIsPlaying(false);
+        return;
+      }
+      const next = prev + 1;
+      setCurrentStep(next);
+      if (next >= 4 && !result) {
+        const res = decode(lat, errors);
+        setResult(res);
+        checkChallengeRef.current(errors, res);
+      }
+    }, speedMs);
+    return () => clearInterval(timer);
+  }, [isPlaying, playbackSpeed, lat, errors, result]);
 
   const changeD = (next: number) => {
     setD(next);
@@ -1024,7 +1035,10 @@ export default function SurfaceCodeLab() {
     sound.playDecoderLock();
     const res = decode(lat, errors);
     setResult(res);
-    setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
+    // Only count trials that actually decoded something — a zero-fault
+    // decode is a sanity check, not a recovery.
+    const hasErrors = errors.some((e) => e !== 0);
+    if (hasErrors) setScore((s) => ({ trials: s.trials + 1, fails: s.fails + (res.success ? 0 : 1) }));
     setCurrentStep(4);
     checkChallenge(errors, res);
   };
@@ -1040,6 +1054,7 @@ export default function SurfaceCodeLab() {
     if (s >= 4 && !result) {
       const res = decode(lat, errors);
       setResult(res);
+      checkChallenge(errors, res);
     }
     setCurrentStep(s);
   };
@@ -1595,6 +1610,11 @@ export default function SurfaceCodeLab() {
                 not execute the file: inspect it in Crumble or run it separately
                 with Stim and a decoder such as PyMatching. Its circuit-level
                 noise model is different from the ideal-measurement browser sweep above.
+                Watch the sign: above p ≈ 0.01 this circuit sits above the
+                circuit-level threshold, so larger codes get WORSE there — the
+                browser sweep uses ideal measurements, which is why its curve
+                points the other way. For sub-threshold behavior, set p below 0.01
+                before exporting.
               </p>
               <button type="button" onClick={downloadStim} className="btn-secondary mt-4 w-full !border-star/50 !text-star hover:!bg-star/10">
                 <Download className="h-4 w-4" /> Download .stim circuit

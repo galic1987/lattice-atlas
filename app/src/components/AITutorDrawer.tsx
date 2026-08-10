@@ -63,6 +63,8 @@ export default function AITutorDrawer({
       replyText = 'Minimum-Weight Perfect Matching pairs detection events (checks that flipped to −1) on the syndrome graph with minimum total edge weight — classically via Edmonds’ Blossom algorithm (1965).';
     } else if (qLower.includes('qubit') || qLower.includes('49')) {
       replyText = 'A distance-d rotated surface code uses N = d² + (d²−1) = 2d²−1 physical qubits — d² data qubits plus d²−1 syndrome ancillas. For d=5 that is 25 + 24 = 49.';
+    } else if (qLower.includes('topological quantum error correction') || qLower.includes('tqec')) {
+      replyText = 'Topological quantum error correction (TQEC) protects quantum information in the topology of a qubit lattice: local errors create detectable defects, and only an error chain that spans the whole lattice can damage the stored logical qubit. The surface code is its practical flagship — this atlas teaches it from linear algebra to current research.';
     } else {
       replyText = 'I don’t have a reference entry matching that phrasing. This panel only looks up the atlas’s own topics and glossary terms — it doesn’t generate answers — so try one of the suggested questions below, or browse the Glossary and Knowledge Map from the top nav.';
     }
