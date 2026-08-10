@@ -397,10 +397,11 @@ function Stat({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-15% 0px' });
+  const reduce = useReducedMotion();
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || reduce) return;
     const controls = animate(0, value, {
       duration: 1.2,
       delay,
@@ -408,11 +409,17 @@ function Stat({
       onUpdate: (v) => setDisplay(Math.round(v)),
     });
     return () => controls.stop();
-  }, [inView, value, delay]);
+  }, [inView, value, delay, reduce]);
+
+  // Under reduced motion always show the final value — no count-up, and never a
+  // transient intermediate number (e.g. "13" mid-animation when the real count is
+  // 23). Deriving it (rather than seeding state) is robust to useReducedMotion
+  // resolving after mount.
+  const shown = reduce ? value : display;
 
   return (
     <div ref={ref} className="px-6 py-10 text-center md:py-14">
-      <p className={`font-display text-5xl font-bold ${colorClass}`}>{display}</p>
+      <p className={`font-display text-5xl font-bold ${colorClass}`}>{shown}</p>
       <motion.p
         className="mt-3 font-mono text-[13px] uppercase tracking-[0.18em] text-text-mid"
         initial={{ opacity: 0 }}

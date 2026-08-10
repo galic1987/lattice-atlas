@@ -27,7 +27,7 @@ const NAV_ITEMS: ReadonlyArray<{ to: string; label: string; ariaLabel?: string }
   { to: '/experiments', label: 'Bench', ariaLabel: 'Experiment bench — interactive visual experiments' },
   { to: '/duel', label: 'Duel', ariaLabel: 'Decoder Duel game' },
   { to: '/papers', label: 'Papers' },
-  { to: '/field-today', label: 'Frontier', ariaLabel: 'Field today' },
+  { to: '/field-today', label: 'Frontier', ariaLabel: 'Frontier — where the field stands today' },
   { to: '/glossary', label: 'Glossary' },
   { to: '/review', label: 'Review', ariaLabel: 'Daily spaced review' },
 ];
@@ -107,6 +107,7 @@ function DesktopNav() {
           to={to}
           end={(to as string) === '/'}
           aria-label={'ariaLabel' in item ? item.ariaLabel : undefined}
+          title={'ariaLabel' in item ? item.ariaLabel : undefined}
           className={({ isActive }) =>
             `relative px-1.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
               isActive ? 'text-plaquette' : 'text-text-mid hover:text-text-hi'
