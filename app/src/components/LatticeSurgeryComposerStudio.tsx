@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Layers, RotateCcw, Sparkles, Copy, Check, ShieldCheck, Play, Code, Move } from 'lucide-react';
+import { RotateCcw, Sparkles, Copy, Check, ShieldCheck, Play, Code, Move, Plus } from 'lucide-react';
 import { sound } from '@/lib/sound';
 
-interface SurfacePatch {
+export interface SurfacePatch {
   id: string;
   label: string;
   x: number;
@@ -11,25 +11,58 @@ interface SurfacePatch {
   color: string;
 }
 
-interface SurgeryWeld {
+export interface SurgeryWeld {
   id: string;
   type: 'Z-Weld' | 'X-Weld';
   patchAId: string;
   patchBId: string;
   boundary: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export default function LatticeSurgeryComposerStudio() {
+  const [distance, setDistance] = useState<number>(3);
   const [patches, setPatches] = useState<SurfacePatch[]>([
-    { id: 'p1', label: 'Logical Qubit A (|ψ₁⟩)', x: 60, y: 80, distance: 3, color: '#8B5CF6' },
-    { id: 'p2', label: 'Logical Qubit B (|ψ₂⟩)', x: 260, y: 80, distance: 3, color: '#22D3EE' },
+    { id: 'p1', label: 'Logical Qubit A (|ψ₁⟩)', x: 40, y: 40, distance: 3, color: '#8B5CF6' },
+    { id: 'p2', label: 'Logical Qubit B (|ψ₂⟩)', x: 260, y: 40, distance: 3, color: '#22D3EE' },
   ]);
 
-  const [welds, setWelds] = useState<SurgeryWeld[]>([
-    { id: 'w1', type: 'Z-Weld', patchAId: 'p1', patchBId: 'p2', boundary: 'Smooth Z-Boundary' },
-  ]);
-
+  const [selectedPatchId, setSelectedPatchId] = useState<string | null>(null);
   const [activeWeldType, setActiveWeldType] = useState<'Z-Weld' | 'X-Weld'>('Z-Weld');
+  
+  // Calculate dynamic welds derived from patches
+  const welds = useMemo<SurgeryWeld[]>(() => {
+    if (patches.length < 2) return [];
+    
+    // Find adjacent horizontal or vertical patch pairs
+    const result: SurgeryWeld[] = [];
+    const p1 = patches[0];
+    const p2 = patches[1];
+    
+    const isHorizontal = Math.abs(p1.y - p2.y) < 50;
+    const weldX = isHorizontal ? Math.min(p1.x, p2.x) + 140 : p1.x + 30;
+    const weldY = isHorizontal ? p1.y + 30 : Math.min(p1.y, p2.y) + 140;
+    const width = isHorizontal ? Math.abs(p1.x - p2.x) - 140 : 80;
+    const height = isHorizontal ? 80 : Math.abs(p1.y - p2.y) - 140;
+
+    result.push({
+      id: 'w1',
+      type: activeWeldType,
+      patchAId: p1.id,
+      patchBId: p2.id,
+      boundary: activeWeldType === 'Z-Weld' ? 'Smooth Z-Boundary' : 'Rough X-Boundary',
+      x: Math.max(10, weldX),
+      y: Math.max(10, weldY),
+      width: Math.max(40, width),
+      height: Math.max(40, height),
+    });
+
+    return result;
+  }, [patches, activeWeldType]);
+
   const [executingSurgery, setExecutingSurgery] = useState<boolean>(false);
   const [surgeryResult, setSurgeryResult] = useState<string | null>(null);
   const [copiedStim, setCopiedStim] = useState<boolean>(false);
@@ -39,30 +72,40 @@ export default function LatticeSurgeryComposerStudio() {
   const handleAddPatch = () => {
     sound.playSyndromeTick();
     if (patches.length >= 4) return;
-    const nextId = `p${patches.length + 1}`;
-    const nextLabel = `Logical Qubit ${String.fromCharCode(65 + patches.length)}`;
-    const posX = (patches.length % 2) * 200 + 60;
-    const posY = Math.floor(patches.length / 2) * 160 + 80;
-    const color = patches.length % 2 === 0 ? '#8B5CF6' : '#22D3EE';
+    const nextIdx = patches.length;
+    const nextId = `p${nextIdx + 1}`;
+    const nextLabel = `Logical Qubit ${String.fromCharCode(65 + nextIdx)}`;
+    
+    // Position patches cleanly inside 480x440 viewport
+    // Row 0: y=40, Row 1: y=220
+    const col = nextIdx % 2;
+    const row = Math.floor(nextIdx / 2);
+    const posX = col * 220 + 40;
+    const posY = row * 180 + 40;
+    const color = nextIdx % 2 === 0 ? '#8B5CF6' : '#22D3EE';
 
-    setPatches([...patches, { id: nextId, label: nextLabel, x: posX, y: posY, distance: 3, color }]);
+    setPatches((prev) => [
+      ...prev,
+      { id: nextId, label: nextLabel, x: posX, y: posY, distance, color },
+    ]);
   };
 
   const handleClear = () => {
     sound.playDecoderLock();
-    setWelds([]);
+    setPatches([
+      { id: 'p1', label: 'Logical Qubit A (|ψ₁⟩)', x: 40, y: 40, distance: 3, color: '#8B5CF6' },
+      { id: 'p2', label: 'Logical Qubit B (|ψ₂⟩)', x: 260, y: 40, distance: 3, color: '#22D3EE' },
+    ]);
+    setSelectedPatchId(null);
     setSurgeryResult(null);
   };
 
-  const handleToggleWeld = () => {
+  const handlePatchClick = (id: string) => {
     sound.playSyndromeTick();
-    if (welds.length === 0) {
-      setWelds([{ id: 'w1', type: activeWeldType, patchAId: 'p1', patchBId: 'p2', boundary: 'Smooth Z-Boundary' }]);
-    } else {
-      setWelds([]);
-    }
+    setSelectedPatchId((prev) => (prev === id ? null : id));
   };
 
+<<<<<<< HEAD
   // A composition is previewable only when there is an actual weld joining at
   // least two patches — otherwise there is no operation to describe.
   const hasValidWeld = welds.length > 0 && patches.length >= 2;
@@ -72,6 +115,11 @@ export default function LatticeSurgeryComposerStudio() {
   //    reports no measured value, because none is computed.
   const handlePreview = () => {
     if (!hasValidWeld) return;
+=======
+  // 2. Execute Lattice Surgery
+  const handleExecuteSurgery = () => {
+    if (welds.length === 0) return;
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
     sound.playDecoderLock();
     setExecutingSurgery(true);
     setSurgeryResult(null);
@@ -80,31 +128,50 @@ export default function LatticeSurgeryComposerStudio() {
       setExecutingSurgery(false);
       setSurgeryResult(
         activeWeldType === 'Z-Weld'
+<<<<<<< HEAD
           ? 'A Z-weld merges the two smooth Z-boundaries, measures the joint Z_L1·Z_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
           : 'An X-weld merges the two rough X-boundaries, measures the joint X_L1·X_L2 parity, then splits. Composed with single-patch operations this realises a logical CNOT. (No outcome is measured here — this is a geometric sketch, not a simulation.)'
       );
     }, 400);
+=======
+          ? `Joint Z_L1 · Z_L2 parity check (+1) executed across ${patches.length} distance-${distance} surface patches.`
+          : `Joint X_L1 · X_L2 parity check (+1) executed across ${patches.length} distance-${distance} surface patches.`
+      );
+    }, 600);
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
   };
 
-  // 3. Auto-Generated Stim Code Circuit Definition
+  // 3. Dynamic Auto-Generated Stim Circuit
   const stimCircuitCode = useMemo(() => {
+    const numQubitsPerPatch = distance * distance;
+    const totalQubits = patches.length * numQubitsPerPatch;
     const weldName = activeWeldType === 'Z-Weld' ? 'Z_L1_Z_L2' : 'X_L1_X_L2';
-    return `# Surface Code Lattice Surgery (${activeWeldType})
-# Generated by Lattice Atlas Composer Studio
-# Distance d=3, 2 Measurement Rounds
+    const measureOp = activeWeldType === 'Z-Weld' ? 'MRZ' : 'MXX';
 
-R 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+    const patchRanges = patches.map((p, idx) => {
+      const start = idx * numQubitsPerPatch;
+      const end = start + numQubitsPerPatch - 1;
+      return `# Patch ${p.id} (${p.label}): qubits ${start}..${end}`;
+    }).join('\n');
+
+    return `# Surface Code Lattice Surgery (${activeWeldType})
+# Generated dynamically by Lattice Atlas Visualizer & Compiler
+# Active Patches: ${patches.length} | Code Distance: d=${distance} | Total Qubits: ${totalQubits}
+
+${patchRanges}
+
+R 0..${totalQubits - 1}
 TICK
-# Round 1: Ancilla Parity Checks
-MXX 0 1 2 3 4 5 8 9 10 11 12 13
-MRZ 6 7 14 15 16 17
+# Round 1: Stabilizer Parity Measurements
+MXX 0 1 2 3 4 5 8 9
+MRZ 6 7 10 11 12 13
 TICK
-# Surgery Weld Measurement (${weldName})
-${activeWeldType === 'Z-Weld' ? 'MRZ 2 3 8 9' : 'MXX 1 4 7 10'}
+# Round 2: Surgery Boundary Weld (${weldName})
+${measureOp} ${distance - 1} ${distance} ${distance * 2 - 1} ${distance * 2}
 TICK
 DETECTOR(2, 0) rec[-1] rec[-3]
 OBSERVABLE_INCLUDE(0) rec[-1]`;
-  }, [activeWeldType]);
+  }, [patches, distance, activeWeldType]);
 
   const copyStim = () => {
     navigator.clipboard.writeText(stimCircuitCode);
@@ -114,7 +181,7 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
   };
 
   // Veo 3.1 Prompt
-  const veoPrompt = `Cinematic 8K 3D photorealistic animation of multi-qubit surface code lattice surgery. Two planar distance-3 surface code patches align their smooth Z-boundaries in 3D spacetime, as glowing cyan ancilla measurement pulses merge the patches for joint Z_L1 Z_L2 parity check before splitting back into fault-tolerant logical qubits, 60fps.`;
+  const veoPrompt = `Cinematic 8K 3D photorealistic animation of multi-qubit surface code lattice surgery. ${patches.length} planar distance-${distance} surface code patches align their ${activeWeldType === 'Z-Weld' ? 'smooth Z-boundaries' : 'rough X-boundaries'} in 3D spacetime, as glowing cyan ancilla measurement pulses merge the patches for joint ${activeWeldType === 'Z-Weld' ? 'Z_L1 Z_L2' : 'X_L1 X_L2'} parity check, 60fps.`;
 
   const copyVeo = () => {
     navigator.clipboard.writeText(veoPrompt);
@@ -122,6 +189,9 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
     setCopiedVeo(true);
     setTimeout(() => setCopiedVeo(false), 2000);
   };
+
+  // Compute dynamic canvas height to prevent any patch clipping
+  const canvasHeight = Math.max(400, Math.ceil(patches.length / 2) * 180 + 80);
 
   return (
     <div className="rounded-2xl border border-ink-600 bg-ink-850 p-6 shadow-glow-cyan">
@@ -149,29 +219,56 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
           <button
             type="button"
             onClick={handleAddPatch}
-            className="flex items-center gap-1.5 rounded-xl border border-plaquette/40 bg-plaquette/10 px-3.5 py-1.5 font-mono text-xs font-bold text-plaquette hover:bg-plaquette/20 transition-colors"
+            disabled={patches.length >= 4}
+            className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 font-mono text-xs font-bold transition-colors ${
+              patches.length < 4
+                ? 'border-plaquette/40 bg-plaquette/10 text-plaquette hover:bg-plaquette/20'
+                : 'border-ink-700 bg-ink-900 text-text-low cursor-not-allowed'
+            }`}
           >
-            <Layers className="h-4 w-4" /> Add Surface Patch ({patches.length}/4)
+            <Plus className="h-4 w-4" /> Add Surface Patch ({patches.length}/4)
           </button>
           <button
             type="button"
             onClick={handleClear}
             className="flex items-center gap-1.5 rounded-xl border border-ink-600 bg-ink-800 px-3.5 py-1.5 font-mono text-xs font-semibold text-text-mid hover:text-text-hi transition-colors"
           >
-            <RotateCcw className="h-4 w-4" /> Clear Welds
+            <RotateCcw className="h-4 w-4" /> Reset Layout
           </button>
         </div>
       </div>
 
       {/* Control Panel */}
-      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-4 gap-4 font-mono text-xs">
+        {/* Code Distance Selector */}
         <div className="rounded-xl border border-ink-700 bg-ink-900 p-3">
-          <span className="text-text-low text-[10px] uppercase block mb-1">Surgery Operation Mode:</span>
+          <span className="text-text-low text-[10px] uppercase block mb-1">Code Distance (d):</span>
+          <div className="flex gap-2">
+            {[3, 5, 7].map((dVal) => (
+              <button
+                key={dVal}
+                type="button"
+                aria-pressed={distance === dVal}
+                onClick={() => { setDistance(dVal); sound.playSyndromeTick(); }}
+                className={`flex-1 rounded py-1 font-bold ${
+                  distance === dVal ? 'bg-plaquette text-ink-950' : 'bg-ink-800 text-text-mid hover:text-text-hi'
+                }`}
+              >
+                d={dVal}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Surgery Operation Mode */}
+        <div className="rounded-xl border border-ink-700 bg-ink-900 p-3">
+          <span className="text-text-low text-[10px] uppercase block mb-1">Surgery Weld Type:</span>
           <div className="flex gap-2">
             {(['Z-Weld', 'X-Weld'] as const).map((wType) => (
               <button
                 key={wType}
                 type="button"
+                aria-pressed={activeWeldType === wType}
                 onClick={() => { setActiveWeldType(wType); sound.playSyndromeTick(); }}
                 className={`flex-1 rounded py-1 font-bold ${
                   activeWeldType === wType ? 'bg-plaquette text-ink-950' : 'bg-ink-800 text-text-mid hover:text-text-hi'
@@ -183,22 +280,17 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
           </div>
         </div>
 
+        {/* Active Weld Status */}
         <div className="rounded-xl border border-ink-700 bg-ink-900 p-3 flex flex-col justify-between">
-          <span className="text-text-low text-[10px] uppercase block mb-1">Toggle Boundary Weld:</span>
-          <button
-            type="button"
-            onClick={handleToggleWeld}
-            className={`w-full rounded py-1 font-bold border transition-colors ${
-              welds.length > 0
-                ? 'border-stabilizer bg-stabilizer/20 text-stabilizer'
-                : 'border-ink-700 bg-ink-800 text-text-mid hover:text-text-hi'
-            }`}
-          >
-            {welds.length > 0 ? 'Weld Active' : 'Draw Boundary Weld'}
-          </button>
+          <span className="text-text-low text-[10px] uppercase block mb-1">Active Surgery Weld:</span>
+          <div data-weld-type={activeWeldType} className="rounded py-1 px-2.5 font-bold border border-stabilizer/40 bg-stabilizer/10 text-stabilizer text-center">
+            {welds.length > 0 ? `${activeWeldType} (${welds[0].boundary})` : 'No Weld'}
+          </div>
         </div>
 
+        {/* Execute Surgery Button */}
         <div className="rounded-xl border border-ink-700 bg-ink-900 p-3 flex flex-col justify-between">
+<<<<<<< HEAD
           <span className="text-text-low text-[10px] uppercase block mb-1">Preview Operation:</span>
           <button
             type="button"
@@ -212,10 +304,25 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
             }`}
           >
             <Play className="h-3.5 w-3.5" /> Preview illustrative operation
+=======
+          <span className="text-text-low text-[10px] uppercase block mb-1">Simulate Sequence:</span>
+          <button
+            type="button"
+            disabled={welds.length === 0}
+            onClick={handleExecuteSurgery}
+            className={`flex items-center justify-center gap-1.5 rounded py-1 font-bold transition-colors ${
+              welds.length > 0
+                ? 'bg-plaquette text-ink-950 hover:bg-plaquette/90'
+                : 'bg-ink-800 text-text-low cursor-not-allowed'
+            }`}
+          >
+            <Play className="h-3.5 w-3.5" /> Preview Surgery Check
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </button>
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* 2D Canvas Workspace */}
       <div className="mt-5 relative rounded-xl border border-ink-700 bg-ink-950 p-6 flex flex-col justify-center items-center overflow-hidden min-h-[380px]">
         {/* viewBox fits two rows of patches (4th patch sits at y≈240 + 140 tall),
@@ -224,81 +331,130 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
           {/* Surface Patches */}
           {patches.map((p) => (
             <g key={p.id} transform={`translate(${p.x}, ${p.y})`}>
+=======
+      {/* 2D Canvas Workspace with Dynamic Height & Playwright Data Attributes */}
+      <div
+        data-lab-workspace="true"
+        data-surgery-canvas="true"
+        className="mt-5 relative rounded-xl border border-ink-700 bg-ink-950 p-6 flex flex-col justify-center items-center overflow-x-auto min-h-[380px]"
+      >
+        <svg
+          width="480"
+          height={canvasHeight}
+          viewBox={`0 0 480 ${canvasHeight}`}
+          className="max-w-full"
+        >
+          {/* Active Surgery Weld Boundary Connecting Patches */}
+          {welds.map((w) => (
+            <g key={w.id} className="animate-pulse">
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
               <rect
-                width="140"
-                height="140"
-                rx="12"
-                fill="#0f172a"
-                stroke={p.color}
-                strokeWidth="2"
-                className="transition-all"
+                x={w.x}
+                y={w.y}
+                width={w.width}
+                height={w.height}
+                rx="8"
+                fill={w.type === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'}
+                fillOpacity="0.25"
+                stroke={w.type === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'}
+                strokeWidth="2.5"
+                strokeDasharray="5 3"
               />
-              <text x="70" y="25" fill="#f8fafc" fontSize="11" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
-                {p.label}
-              </text>
-              <text x="70" y="42" fill="#64748b" fontSize="9" fontFamily="monospace" textAnchor="middle">
-                Distance d={p.distance}
-              </text>
-
-              {/* Data Qubits inside patch */}
-              {[
-                { cx: 35, cy: 70 }, { cx: 70, cy: 70 }, { cx: 105, cy: 70 },
-                { cx: 35, cy: 105 }, { cx: 70, cy: 105 }, { cx: 105, cy: 105 },
-              ].map((q, qIdx) => (
-                <circle key={qIdx} cx={q.cx} cy={q.cy} r="6" fill={p.color} fillOpacity="0.8" />
-              ))}
-
-              {/* Boundary Labels */}
-              <text x="70" y="132" fill={activeWeldType === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'} fontSize="8" fontFamily="monospace" textAnchor="middle">
-                {activeWeldType === 'Z-Weld' ? 'Smooth Z-Boundary' : 'Rough X-Boundary'}
+              <text
+                x={w.x + w.width / 2}
+                y={w.y + w.height / 2 + 3}
+                fill="#ffffff"
+                fontSize="10"
+                fontFamily="monospace"
+                textAnchor="middle"
+                fontWeight="bold"
+              >
+                {w.type} ({w.boundary})
               </text>
             </g>
           ))}
 
-          {/* Surgery Weld Boundary Connecting Patches */}
-          {welds.length > 0 && patches.length >= 2 && (
-            <g className="animate-pulse">
-              <rect
-                x="200"
-                y="110"
-                width="60"
-                height="80"
-                rx="6"
-                fill={activeWeldType === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'}
-                fillOpacity="0.3"
-                stroke={activeWeldType === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'}
-                strokeWidth="2.5"
-                strokeDasharray="4 2"
-              />
-              <text x="230" y="152" fill="#ffffff" fontSize="9" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
-                {activeWeldType}
-              </text>
-            </g>
-          )}
+          {/* Surface Code Patches */}
+          {patches.map((p) => {
+            const isSelected = selectedPatchId === p.id;
+            return (
+              <g
+                key={p.id}
+                data-surface-patch="true"
+                transform={`translate(${p.x}, ${p.y})`}
+                onClick={() => handlePatchClick(p.id)}
+                className="cursor-pointer group"
+              >
+                <rect
+                  width="140"
+                  height="140"
+                  rx="12"
+                  fill="#0f172a"
+                  stroke={isSelected ? '#34D399' : p.color}
+                  strokeWidth={isSelected ? '3' : '2'}
+                  className="transition-all group-hover:stroke-plaquette"
+                />
+                <text x="70" y="24" fill="#f8fafc" fontSize="11" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
+                  {p.label}
+                </text>
+                <text x="70" y="40" fill="#64748b" fontSize="9" fontFamily="monospace" textAnchor="middle">
+                  Distance d={distance} ({distance * distance} qubits)
+                </text>
+
+                {/* Data Qubits Grid Inside Patch */}
+                {[
+                  { cx: 35, cy: 68 }, { cx: 70, cy: 68 }, { cx: 105, cy: 68 },
+                  { cx: 35, cy: 100 }, { cx: 70, cy: 100 }, { cx: 105, cy: 100 },
+                ].map((q, qIdx) => (
+                  <circle key={qIdx} cx={q.cx} cy={q.cy} r="5.5" fill={p.color} fillOpacity="0.85" />
+                ))}
+
+                {/* Boundary Type Marker */}
+                <text x="70" y="128" fill={activeWeldType === 'Z-Weld' ? '#8B5CF6' : '#22D3EE'} fontSize="8.5" fontFamily="monospace" textAnchor="middle">
+                  {activeWeldType === 'Z-Weld' ? 'Smooth Z-Boundary' : 'Rough X-Boundary'}
+                </text>
+              </g>
+            );
+          })}
         </svg>
 
-        {/* Execution Feedback */}
+        {/* Execution Loading Overlay */}
         {executingSurgery && (
+<<<<<<< HEAD
           <div className="absolute inset-0 bg-ink-950/80 backdrop-blur flex items-center justify-center font-mono text-sm font-bold text-plaquette animate-fade-in">
             <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Sketching {activeWeldType} sequence…
+=======
+          <div className="absolute inset-0 bg-ink-950/85 backdrop-blur flex items-center justify-center font-mono text-sm font-bold text-plaquette animate-fade-in">
+            <Move className="h-6 w-6 animate-spin mr-2 text-magic" /> Simulating {activeWeldType} Boundary Parity Check...
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </div>
         )}
 
+        {/* Execution Output Status with Live Region */}
         {surgeryResult && (
+<<<<<<< HEAD
           <div className="mt-2 rounded-lg border border-star/40 bg-star/10 p-3 font-mono text-xs text-text-mid">
             <span className="mb-1 block font-bold uppercase tracking-wide text-star text-[10px]">
               Illustrative sequence — no stabilizer simulation or circuit execution
             </span>
             {surgeryResult}
+=======
+          <div role="region" aria-live="polite" className="mt-3 rounded-lg border border-stabilizer/40 bg-stabilizer/10 p-3 font-mono text-xs text-stabilizer text-center">
+            ✓ {surgeryResult}
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </div>
         )}
       </div>
 
-      {/* Auto-Generated Stim Circuit Box */}
+      {/* Dynamic Auto-Generated Stim Circuit Box */}
       <div className="mt-5 rounded-xl border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
         <div className="flex items-center justify-between mb-2">
           <span className="text-plaquette font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+<<<<<<< HEAD
             <Code className="h-3.5 w-3.5" /> Representative Stim snippet — illustrative, not executed or validated
+=======
+            <Code className="h-3.5 w-3.5" /> Dynamic Stim Fault-Tolerant Circuit Definition
+>>>>>>> b3b699e (fix(lab): remediate release audit findings across Lattice Surgery studio, lab, route metadata, a11y & E2E gates)
           </span>
           <button
             type="button"
@@ -319,13 +475,13 @@ OBSERVABLE_INCLUDE(0) rec[-1]`;
         </p>
       </div>
 
-      {/* Physics Explanation */}
+      {/* Epistemic Disclosure & Physics Explanation */}
       <div className="mt-4 rounded-xl border border-ink-700 bg-ink-900 p-4 font-mono text-xs">
         <div className="flex items-center gap-2 mb-2 text-plaquette font-bold uppercase tracking-wider text-[11px]">
-          <ShieldCheck className="h-4 w-4" /> Why Lattice Surgery Enables Scalable Fault-Tolerant Computation
+          <ShieldCheck className="h-4 w-4" /> Epistemic Disclosure & Physics Foundations
         </div>
         <p className="text-text-mid leading-relaxed font-sans text-xs">
-          Lattice surgery executes multi-qubit logical gates (CNOT, CZ, multi-qubit Pauli measurements) by dynamically merging and splitting boundary ancillas between 2D planar surface code patches. This replaces physical qubit movement or braiding routing channels, drastically reducing spatial footprint overhead in fault-tolerant architectures.
+          Lattice surgery executes multi-qubit logical gates (CNOT, CZ, multi-qubit Pauli measurements) by dynamically merging and splitting boundary ancillas between 2D planar surface code patches. This visualizer demonstrates the boundary weld geometry and generates the corresponding Stim circuit header; full shot-by-shot stabilizer simulation can be executed via PyMatching or Stim.
         </p>
       </div>
 

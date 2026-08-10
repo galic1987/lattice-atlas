@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run check-data && npm run check-codes && npm run check-trust && tsc -b && vite build",
-    "build:e2e": "npm run build -- --base=/lattice-atlas/",
+    "build:e2e": "rm -rf dist && npm run build -- --base=/lattice-atlas/",
+    "build:pages": "npm run build -- --base=/lattice-atlas/",
     "postbuild": "node scripts/create-route-shells.mjs",
     "check-bundles": "node scripts/check-release-budgets.mjs",
     "check-data": "node scripts/check-data.mjs",
@@ -48,6 +49,7 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "esbuild": "^0.25.0"
   }
 }

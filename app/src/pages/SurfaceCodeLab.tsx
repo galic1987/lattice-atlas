@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import LabWorkbenchHub from '@/components/LabWorkbenchHub';
 import SuperTLDR from '@/components/SuperTLDR';
@@ -988,7 +988,6 @@ export default function SurfaceCodeLab() {
     }, speedMs);
     return () => clearInterval(timer);
   }, [isPlaying, playbackSpeed, lat, errors, result]);
-
   /** Called from the event handlers with the freshly-computed state. */
   const checkChallenge = (nextErrors: Pauli[], nextResult: DecodeResult | null) => {
     const ch = activeChallenge;
@@ -1014,6 +1013,8 @@ export default function SurfaceCodeLab() {
   useEffect(() => {
     checkChallengeRef.current = checkChallenge;
   });
+
+
 
   const changeD = (next: number) => {
     setD(next);
@@ -1063,10 +1064,14 @@ export default function SurfaceCodeLab() {
   };
 
   const goToStep = (s: number) => {
-    if (s >= 4 && !result) {
-      const res = decode(lat, errors);
+    let res = result;
+    if (s >= 4 && !res) {
+      res = decode(lat, errors);
       setResult(res);
       // Stepping to the correction reveal scores challenges too (see runDecoder).
+      checkChallenge(errors, res);
+    }
+    if (s >= 4 && res) {
       checkChallenge(errors, res);
     }
     setCurrentStep(s);
@@ -1079,12 +1084,14 @@ export default function SurfaceCodeLab() {
   };
 
   const downloadStim = () => {
-    const text = toStimCircuit(lat, p);
+    // Export at sub-threshold error rate (p <= 0.005) so larger d suppresses error
+    const exportP = Math.min(p, 0.005);
+    const text = toStimCircuit(lat, exportP);
     if (stimUrl.current) URL.revokeObjectURL(stimUrl.current);
     stimUrl.current = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
     const a = document.createElement('a');
     a.href = stimUrl.current;
-    a.download = `surface_code_d${d}_p${p.toFixed(3)}.stim`;
+    a.download = `surface_code_d${d}_p${exportP.toFixed(3)}.stim`;
     a.click();
   };
 

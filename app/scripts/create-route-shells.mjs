@@ -128,13 +128,55 @@ function shellFor(html, routePath, meta) {
 
 const source_html = readFileSync(source, 'utf8');
 
-// Home page: rewrite dist/index.html in place with canonical/og:url for the root.
 writeFileSync(source, shellFor(source_html, '', ROUTE_META['']));
 
-for (const route of routes) {
+const BASE_URL = 'https://galic1987.github.io/lattice-atlas';
+
+const ROUTE_META = {
+  'altitudes': {
+    title: 'Altitude Levels — Lattice Atlas',
+    desc: 'Explore TQEC from high-level intuition down to physical transmon pulses.',
+  },
+  'capstone': {
+    title: 'TQEC Mastery Capstone — Lattice Atlas',
+    desc: 'Synthesize your quantum error correction knowledge in final capstone challenges.',
+  },
+  'duel': {
+    title: 'Decoder Duel Game — Lattice Atlas',
+    desc: 'Test your decoding speed against Minimum Weight Perfect Matching in daily QEC syndrome puzzles.',
+  },
+  'experiments': {
+    title: 'Interactive Visual Experiments — Lattice Atlas',
+    desc: 'Hands-on visual quantum physics and syndrome experiments.',
+  },
+  'field-today': {
+    title: 'State of the Field — Lattice Atlas',
+    desc: 'Current hardware benchmarks and frontier progress in fault-tolerant QEC.',
+  },
+  'foundations': {
+    title: 'Quantum Foundations — Lattice Atlas',
+    desc: 'Prerequisite quantum physics, linear algebra, and qubit mechanics.',
+  },
+  'glossary': {
+    title: 'TQEC Glossary — Lattice Atlas',
+    desc: 'Comprehensive definitions and formalisms for quantum error correction terms.',
+  },
+  'lab': {
+    title: 'Surface Code Lab & Exploration Workbench — Lattice Atlas',
+    desc: 'Interactive surface code quantum error correction simulator with 2D/3D syndrome decoding, noise injection, and Stim circuit export.',
+  },
+  'map': {
+    title: 'TQEC Knowledge Map — Lattice Atlas',
+    desc: 'Interactive topological quantum error correction roadmap and foundational concepts.',
+  },
+  'papers': {
+    title: 'TQEC Research Paper Guide — Lattice Atlas',
+    desc: 'Curated reading guides for milestone papers in quantum error correction.',
+  },
+for (const [route, meta] of Object.entries(ROUTE_META).filter(([r]) => r !== '')) {
   const directory = join(dist, route);
   mkdirSync(directory, { recursive: true });
-  writeFileSync(join(directory, 'index.html'), shellFor(source_html, route, ROUTE_META[route]));
+  writeFileSync(join(directory, 'index.html'), shellFor(source_html, route, meta));
 }
 
 // 404 fallback keeps the homepage head (it is not a canonical page).
