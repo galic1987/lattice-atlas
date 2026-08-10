@@ -114,9 +114,10 @@ const VIDEOS: VideoExplainer[] = [
 ];
 
 export default function ManimExplainerGallery() {
-  const [selectedId, setSelectedId] = useState<string>('stabilizer-check');
+  const [selectedId, setSelectedId] = useState<string>('google-willow');
+  const [playbackRate, setPlaybackRate] = useState<number>(1.0);
 
-  const video = VIDEOS.find((v) => v.id === selectedId) ?? VIDEOS[0];
+  const video = VIDEOS.find((v) => v.id === selectedId) || VIDEOS[0];
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
@@ -180,6 +181,9 @@ export default function ManimExplainerGallery() {
           )}
           <video
             key={video.id}
+            ref={(el) => {
+              if (el) el.playbackRate = playbackRate;
+            }}
             src={asset(video.filename)}
             autoPlay
             loop
@@ -187,6 +191,30 @@ export default function ManimExplainerGallery() {
             playsInline
             className="w-full h-auto aspect-video object-cover"
           />
+
+          {/* Speed & Controls Bar */}
+          <div className="flex items-center justify-between border-t border-ink-700 bg-ink-900 px-4 py-2 font-mono text-xs">
+            <span className="text-text-low text-[10px] uppercase font-bold">Playback Speed:</span>
+            <div className="flex gap-1.5">
+              {[0.5, 1.0, 1.5, 2.0].map((rate) => (
+                <button
+                  key={rate}
+                  type="button"
+                  onClick={() => {
+                    setPlaybackRate(rate);
+                    sound.playSyndromeTick();
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                    playbackRate === rate
+                      ? 'border-plaquette bg-plaquette/20 text-plaquette'
+                      : 'border-ink-700 bg-ink-950 text-text-mid hover:text-text-hi'
+                  }`}
+                >
+                  {rate}x
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Video Explanation & Physics Insights */}
