@@ -98,4 +98,25 @@ test.describe('Lattice Surgery Visualizer & Circuit Generator', () => {
     expect(circuit).toContain('MXX');
     expect(circuit).not.toContain('undefined');
   });
+
+  test('cannot add more than 4 surface patches and clear resets to 2', async ({ page }) => {
+    const patches = page.locator('[data-surface-patch]');
+    await expect(patches).toHaveCount(2);
+
+    const addBtn = page.getByRole('button', { name: /Add Surface Patch/ });
+    await expect(addBtn).toBeVisible();
+
+    await addBtn.click();
+    await expect(patches).toHaveCount(3);
+
+    await addBtn.click();
+    await expect(patches).toHaveCount(4);
+
+    await expect(addBtn).toBeDisabled();
+    
+    const clearBtn = page.getByRole('button', { name: /Reset Layout/i });
+    await clearBtn.click();
+    await expect(patches).toHaveCount(2);
+    await expect(addBtn).toBeEnabled();
+  });
 });

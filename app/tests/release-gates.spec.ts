@@ -411,3 +411,28 @@ test('key pages have no serious/critical WCAG A/AA violations (axe)', async ({ p
     expect(violations, `serious/critical axe violations on /${route || '(home)'}`).toEqual([]);
   }
 });
+
+test('drawer menu opens, traps focus, and closes via Escape on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(BASE_PATH);
+
+  const openMenuBtn = page.getByRole('button', { name: 'Open menu' });
+  await expect(openMenuBtn).toBeVisible();
+  await openMenuBtn.click();
+
+  const dialog = page.getByRole('dialog', { name: 'Site menu' });
+  await expect(dialog).toBeVisible();
+  
+  const closeMenuBtn = dialog.getByRole('button', { name: 'Close menu' });
+  await expect(closeMenuBtn).toBeFocused();
+
+  await page.keyboard.press('Tab');
+  const resumeLink = dialog.getByRole('link', { name: /Resume course/i });
+  await expect(resumeLink).toBeFocused();
+
+  await page.keyboard.press('Shift+Tab');
+  await expect(closeMenuBtn).toBeFocused();
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+});
