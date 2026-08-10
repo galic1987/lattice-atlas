@@ -114,6 +114,10 @@ check(
   surgeryComposer.includes('not executed or validated'),
   'lattice-surgery composer no longer scopes its Stim snippet as unexecuted',
 );
+check(
+  !surgeryComposer.includes('R 0..'),
+  'lattice-surgery composer emits invalid Stim range pseudo-syntax (R 0..N) it tells users to run',
+);
 
 const tour = read('src/components/InteractiveTour.tsx');
 check(tour.includes('both adjacent Z checks'), 'guided toy lost the two-check X-error invariant');
