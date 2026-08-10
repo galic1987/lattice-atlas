@@ -44,8 +44,10 @@ const MultiAgeCognitivePrism = lazy(() => import('@/components/MultiAgeCognitive
 const QecPipelineStageWalkthrough = lazy(() => import('@/components/QecPipelineStageWalkthrough'));
 const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecoderSandbox3D'));
 const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTransversalStudio'));
+const VideoPromptRefinerStudio = lazy(() => import('@/components/VideoPromptRefinerStudio'));
 
 export type ToolTab =
+  | 'veo-prompt-refiner'
   | 'color-code-transversal'
   | 'spacetime-3d-decoder'
   | 'pipeline-walkthrough'
@@ -129,6 +131,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'veo-prompt-refiner',
+    title: 'Custom Google Veo 3.1 AI Prompt Refiner Studio',
+    category: 'Simulation',
+    icon: Sparkles,
+    description: 'Tune camera motion, cryogenic lighting, & physical topic parameters for custom Veo 3.1 AI video prompts.',
   },
   {
     id: 'color-code-transversal',
@@ -393,6 +402,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'veo-prompt-refiner' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Custom Google Veo 3.1 AI Prompt Refiner Studio...</div>}>
+              <VideoPromptRefinerStudio />
             </Suspense>
           </div>
         )}

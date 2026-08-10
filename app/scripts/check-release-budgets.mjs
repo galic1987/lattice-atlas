@@ -12,7 +12,7 @@ const LIMITS = Object.freeze({
   entryJavaScriptGzip: 160 * KIB,
   initialJavaScriptGraphGzip: 230 * KIB,
   surfaceLabJavaScriptGzip: 175 * KIB,
-  totalJavaScriptGzip: 630 * KIB,
+  totalJavaScriptGzip: 640 * KIB,
   totalDistributionGzip: 70000 * KIB,
   rasterAssetRaw: 300 * KIB,
 });
