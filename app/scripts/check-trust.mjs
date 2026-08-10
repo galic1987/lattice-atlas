@@ -114,10 +114,21 @@ check(
   surgeryComposer.includes('not executed or validated'),
   'lattice-surgery composer no longer scopes its Stim snippet as unexecuted',
 );
-check(
-  !surgeryComposer.includes('R 0..'),
-  'lattice-surgery composer emits invalid Stim range pseudo-syntax (R 0..N) it tells users to run',
-);
+// Global ban on the invalid Stim range pseudo-syntax "R 0..N" in ANY component —
+// Stim has no range notation, so a snippet users are told to run must not contain
+// it. (Was composer-only; a copy of the same bug then shipped in the FTQC estimator.)
+for (const { path, source } of sourceEntries) {
+  if (!['.ts', '.tsx'].includes(extname(path))) continue;
+  check(!source.includes('R 0..'), `invalid Stim range pseudo-syntax (R 0..N) in ${path.slice(appRoot.length + 1)}`);
+}
+
+// FTQC resource estimator: order-of-magnitude toy model, an illustrative (not
+// compiled/executed) Stim sketch, and no fabricated headline metrics.
+const ftqc = read('src/components/FtqcResourceEstimatorStudio.tsx');
+check(ftqc.includes('NOT compiled, NOT executed'), 'FTQC estimator Stim sketch lost its not-executed boundary');
+check(!ftqc.includes('Compiled Stim'), 'FTQC estimator reinstated a "Compiled Stim" overclaim');
+check(ftqc.includes('Rough order-of-magnitude model'), 'FTQC estimator lost its order-of-magnitude disclaimer');
+check(!ftqc.includes('2.8 : 2.14'), 'FTQC estimator reinstated the hardcoded two-value Lambda literal');
 
 const tour = read('src/components/InteractiveTour.tsx');
 check(tour.includes('both adjacent Z checks'), 'guided toy lost the two-check X-error invariant');
