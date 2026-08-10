@@ -8,6 +8,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { resolveTopic, shortName, topicById } from '@/data';
+import GlossaryText from '@/components/GlossaryText';
 import { matchGlossaryTerm } from '@/data/glossary';
 import { TOPIC_COGNITIVE_LENS } from '@/data/cognitive_lens';
 import { useProgress } from '@/store/progress';
@@ -461,8 +462,8 @@ export default function UniversalExplainer() {
                         </span>
                       )}
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-text-hi">{matchingGlossary.short}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-text-mid">{matchingGlossary.long}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-text-hi"><GlossaryText text={matchingGlossary.short} /></p>
+                    <p className="mt-2 text-xs leading-relaxed text-text-mid"><GlossaryText text={matchingGlossary.long} /></p>
                   </div>
                 ) : matchingTopic ? (
                   <div className="rounded-xl border border-ink-600 bg-ink-800 p-4">
@@ -472,8 +473,8 @@ export default function UniversalExplainer() {
                     <h3 className="mt-2 font-display text-lg font-semibold text-text-hi">
                       {matchingTopic.name}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-text-hi">{matchingTopic.short}</p>
-                    <p className="mt-2 text-xs leading-relaxed text-text-mid">{matchingTopic.detail}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-text-hi"><GlossaryText text={matchingTopic.short} /></p>
+                    <p className="mt-2 text-xs leading-relaxed text-text-mid"><GlossaryText text={matchingTopic.detail} /></p>
                   </div>
                 ) : (
                   <div className="rounded-xl border border-ink-700 bg-ink-800 p-4">
