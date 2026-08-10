@@ -37,16 +37,18 @@ export interface Paper {
   prerequisites: string[];
   /** 1 (accessible) to 5 (frontier). */
   difficulty: number;
-  /** One of the five era keys in {@link eraNames}. */
+  /** One of the era keys in {@link eraNames}. */
   era: string;
   /** Present on selected papers: a fact checked against the paper's PDF. */
   verified_note?: string;
+  /** Bibliographic resolution note for ids that are not plain arXiv numbers. */
+  resolved_from?: string;
 }
 
 /** All 26 prerequisite-tree topics. */
 export const topics: Topic[] = topicsJson as Topic[];
 
-/** All 23 seminal papers. */
+/** The full paper canon. */
 export const papers: Paper[] = papersJson as Paper[];
 
 /** Display name per knowledge tier (design.md §2 tier scale). */
@@ -76,6 +78,7 @@ export const eraNames: Record<string, string> = {
   'defect-based surface code': 'Defect-Based Surface Code',
   'lattice surgery era': 'Lattice Surgery Era',
   'experimental era': 'Experimental Era',
+  'design automation era': 'Design Automation Era',
 };
 
 /** Chronological era order (design.md §8). */
@@ -85,6 +88,7 @@ export const eraOrder = [
   'defect-based surface code',
   'lattice surgery era',
   'experimental era',
+  'design automation era',
 ] as const;
 
 /** Accent color per era key (design.md §2). */
@@ -94,6 +98,7 @@ export const eraColors: Record<string, string> = {
   'defect-based surface code': '#A78BFA',
   'lattice surgery era': '#F5B83D',
   'experimental era': '#FB7185',
+  'design automation era': '#34D399',
 };
 
 /** Year span of an era, e.g. "2008–2013"; the still-open experimental era uses "2014 → 2026". */
@@ -101,7 +106,7 @@ export function eraYearRange(era: string): string {
   const years = papers.filter((p) => p.era === era).map((p) => p.year);
   const lo = Math.min(...years);
   const hi = Math.max(...years);
-  return era === 'experimental era' ? `${lo} → ${hi}` : `${lo}–${hi}`;
+  return era === 'experimental era' || era === 'design automation era' ? `${lo} → ${hi}` : `${lo}–${hi}`;
 }
 
 /* ------------------------------------------------------------------ */

@@ -433,5 +433,501 @@
   ],
   "difficulty": 4,
   "era": "experimental era"
+ },
+ {
+  "arxiv_id": "1704.08670",
+  "title": "The ZX calculus is a language for surface code lattice surgery",
+  "authors": "Niel de Beaudrap and Dominic Horsman",
+  "year": 2017,
+  "one_sentence": "It shows that the merge-and-split operations of surface-code lattice surgery are exactly the 'spiders' of the ZX calculus, so whole fault-tolerant computations can be drawn and reasoned about as topological ZX diagrams.",
+  "contribution": "The paper gives a precise dictionary between lattice surgery operations (merges, splits, CNOTs, Hadamards, phase gates, state injection) and ZX-calculus generators, proving that every ZX diagram built from these operations has an operational reading as a lattice surgery procedure. It also shows how ZX rewrite rules such as spider fusion correspond to valid manipulations of surface-code computations, including the cancellation of a merge followed by a split.",
+  "why_it_matters": "This is the conceptual foundation of TQEC design automation: it turns fault-tolerant circuit compilation into diagrammatic rewriting on ZX graphs, the representation later used by compilers such as tqec and TopoLS.",
+  "prerequisites": [
+   "linear algebra",
+   "surface code",
+   "lattice surgery",
+   "ZX calculus"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "1904.04735",
+  "title": "PyZX: Large Scale Automated Diagrammatic Reasoning",
+  "authors": "Aleks Kissinger and John van de Wetering",
+  "year": 2019,
+  "one_sentence": "PyZX is a Python library that automatically simplifies, optimizes, and verifies quantum circuits by rewriting them as large ZX diagrams.",
+  "contribution": "The paper introduces PyZX, an open-source tool that converts quantum circuits to ZX diagrams, applies scalable rewrite strategies (spider fusion, local complementation and pivoting for Clifford simplification, phase gadget elimination for T-count reduction), and extracts optimized circuits back. It demonstrates circuit optimization and efficient equivalence validation on benchmark suites of tens of thousands of gates.",
+  "why_it_matters": "PyZX is the workhorse ZX-calculus engine that later TQEC compilers rely on for circuit-level optimization and for manipulating the diagrammatic intermediate representation of lattice surgery programs.",
+  "prerequisites": [
+   "linear algebra",
+   "qubits & gates",
+   "ZX calculus"
+  ],
+  "difficulty": 3,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2103.02202",
+  "title": "Stim: a fast stabilizer circuit simulator",
+  "authors": "Craig Gidney",
+  "year": 2021,
+  "one_sentence": "Stim is a very fast open-source simulator for noisy stabilizer circuits, able to analyze a distance-100 surface code circuit in seconds and then sample millions of shots.",
+  "contribution": "Stim improves the Aaronson-Gottesman stabilizer tableau simulation by separating the circuit into a bulk stabilizer part (applied via fast bit-packed operations with greatly improved asymptotic cost) and a non-stabilizer part (measurements), and by analyzing a circuit's error channels once to compute a detector/observable reference sample for frame-based sampling. It supports detector and logical observable annotations, making it a natural fit for QEC circuit experiments.",
+  "why_it_matters": "Stim became the de facto file format and simulation backend for the whole TQEC toolchain: compilers like tqec emit Stim circuits, and decoders and resource estimators consume them.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "syndrome extraction circuits",
+   "surface code"
+  ],
+  "difficulty": 3,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2209.08552",
+  "title": "Parallel window decoding enables scalable fault tolerant quantum computation",
+  "authors": "Luka Skoric et al.",
+  "year": 2022,
+  "one_sentence": "It shows that decoding can be split into overlapping spacetime 'windows' that are decoded in parallel and merged at the end, so a single logical qubit can be decoded in real time at any code distance.",
+  "contribution": "The authors prove that the decoding graph of a surface code memory experiment can be partitioned into overlapping windows processed independently, with only a small buffer region around each window, without loss of logical fidelity. They show this removes the backlog problem of streaming decoders, and extend the scheme to logical measurements and lattice surgery operations.",
+  "why_it_matters": "Parallel window decoding is the key algorithmic idea that makes real-time decoding scale with code distance and with the number of logical qubits; later real-time decoder architectures, including Google's, build on it.",
+  "prerequisites": [
+   "surface code",
+   "decoding / matching algorithms",
+   "fault tolerance & thresholds",
+   "real-time decoding"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2302.02459",
+  "title": "A High Performance Compiler for Very Large Scale Surface Code Computations",
+  "authors": "George Watkins et al.",
+  "year": 2023,
+  "one_sentence": "liblsqecc is an open-source compiler that turns arbitrary logical quantum circuits into lattice surgery instructions on a surface-code architecture, handling layout, routing, and magic state distillation automatically.",
+  "contribution": "The paper presents a complete compilation pipeline: scheduling of lattice surgery operations, qubit layout synthesis with routing-aware heuristics, integration of Litinski-style multi-body measurement decomposition, and automatic inclusion of magic state factories. It compiles large benchmark algorithms in minutes to hours and reports space-time volumes, enabling quantitative architecture studies.",
+  "why_it_matters": "It was the first practical open-source end-to-end compiler for large-scale lattice surgery, setting the baseline against which later compilers (DASCOT, TopoLS) measure space-time volume improvements.",
+  "prerequisites": [
+   "qubits & gates",
+   "surface code",
+   "lattice surgery",
+   "magic states"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2303.15933",
+  "title": "Sparse Blossom: correcting a million errors per core second with minimum-weight matching",
+  "authors": "Oscar Higgott and Craig Gidney",
+  "year": 2023,
+  "one_sentence": "Sparse Blossom is a dramatically faster implementation of the minimum-weight perfect matching decoder, correcting over a million surface-code errors per second on one CPU core.",
+  "contribution": "The authors reformulate the blossom algorithm to operate directly on the sparse syndrome graph rather than a dense graph of detection events, using an adaptive Dijkstra-style search and local data structures so the cost scales with the number of detection events, not the code size. The implementation (PyMatching 2) achieves orders-of-magnitude speedups over previous MWPM decoders and approaches linear average-case runtime.",
+  "why_it_matters": "Sparse Blossom made accurate MWPM decoding fast enough for the large-scale simulations that drive TQEC design-space exploration, and is the accuracy baseline for nearly every decoder and compiler study since.",
+  "prerequisites": [
+   "surface code",
+   "syndrome extraction circuits",
+   "decoding / matching algorithms"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2305.08307",
+  "title": "Fusion Blossom: Fast MWPM Decoders for QEC",
+  "authors": "Yue Wu and Lin Zhong",
+  "year": 2023,
+  "one_sentence": "Fusion Blossom parallelizes minimum-weight perfect matching decoding by recursively splitting the decoding problem, solving the parts independently, and fusing their solutions along a precomputed tree.",
+  "contribution": "The paper introduces two ideas: Parity Blossom, a fast sequential MWPM variant that exploits the sparse syndrome-graph construction, and a divide-and-fuse scheme that partitions the decoding graph using an offline-computed tree structure so sub-problems can be solved in parallel and their boundary solutions merged. It reports near-linear scaling of throughput with the number of parallel units and decoding of a distance-33 surface code in under a microsecond per round in parallel configurations.",
+  "why_it_matters": "Fusion Blossom demonstrates that high-accuracy matching decoders can be parallelized across hardware, a blueprint followed by FPGA and networked real-time decoding systems such as Helios and DECONET.",
+  "prerequisites": [
+   "surface code",
+   "decoding / matching algorithms",
+   "real-time decoding"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2311.18042",
+  "title": "Dependency-Aware Compilation for Surface Code Quantum Architectures",
+  "authors": "Abtin Molavi et al.",
+  "year": 2023,
+  "one_sentence": "DASCOT compiles circuits to lattice surgery by extracting the dependency graph of multi-qubit measurements and searching over layouts and schedules, rather than compiling gate-by-gate.",
+  "contribution": "The authors formulate lattice surgery compilation around the dependency structure of Pauli product measurements, enabling reordering and parallelization that gate-centric compilers miss, and combine this with search-based techniques for qubit placement and routing on a 2D grid. They show significant reductions in space-time volume and compilation improvements over liblsqecc-style pipelines.",
+  "why_it_matters": "It shifts TQEC compilation from circuit transcription to optimization over the program's intrinsic dependency structure, an intermediate step toward fully topology-centric compilers like TopoLS.",
+  "prerequisites": [
+   "qubits & gates",
+   "surface code",
+   "lattice surgery",
+   "magic states"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2403.01353",
+  "title": "Spatially parallel decoding for multi-qubit lattice surgery",
+  "authors": "Sophia Fuhui Lin et al.",
+  "year": 2024,
+  "one_sentence": "It extends parallel window decoding into space, so that the decoding graph of many logical qubits undergoing lattice surgery can be split into spatial regions decoded in parallel with bounded inter-region communication.",
+  "contribution": "The paper generalizes time-wise parallel windows to spatial windows that partition a multi-logical-qubit decoding problem, analyzing how windows overlap and how intermediate solutions are passed between adjacent windows. It shows analytically that inter-window communication latency does not create a scalability bottleneck and evaluates accuracy-latency tradeoffs for lattice surgery decoding workloads.",
+  "why_it_matters": "Spatial parallelization is what lets real-time decoding follow an actual computation rather than a single memory experiment, and it underpins distributed decoder systems such as DECONET.",
+  "prerequisites": [
+   "surface code",
+   "lattice surgery",
+   "decoding / matching algorithms",
+   "real-time decoding"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2404.18369",
+  "title": "A SAT Scalpel for Lattice Surgery: Representation and Synthesis of Subroutines for Surface-Code Fault-Tolerant Quantum Computing",
+  "authors": "Daniel Bochen Tan, Murphy Yuezhen Niu, and Craig Gidney",
+  "year": 2024,
+  "one_sentence": "LaSsynth encodes the design of lattice surgery subroutines as SAT problems and solves for space-time-optimal, provably fault-tolerant constructions that humans had not found.",
+  "contribution": "The authors develop a compact SAT encoding of lattice surgery operations as 3D space-time volumes subject to topological and fault-tolerance constraints, and use a SAT solver to synthesize optimal subroutine layouts such as multi-qubit measurements and state initialization. They verify fault tolerance of the synthesized constructions and report designs that are smaller in space-time volume than previously known hand-designed ones.",
+  "why_it_matters": "It demonstrates that core TQEC building blocks can be discovered and proven correct by automated formal synthesis, replacing manual engineering of lattice surgery subroutines.",
+  "prerequisites": [
+   "surface code",
+   "lattice surgery",
+   "fault tolerance & thresholds"
+  ],
+  "difficulty": 5,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2406.08491",
+  "title": "FPGA-based Distributed Union-Find Decoder for Surface Codes",
+  "authors": "Namitha Liyanage et al.",
+  "year": 2024,
+  "one_sentence": "Helios distributes the Union-Find decoder across a graph of processing elements on an FPGA, achieving decoding times that actually get faster per round as the surface code distance grows.",
+  "contribution": "The paper presents a distributed implementation of the Union-Find decoder in which the decoding graph is mapped onto a grid of simple processing units that grow and merge clusters locally, achieving sublinear average decoding latency per measurement round in the code distance. On a Xilinx FPGA it decodes a distance-21 surface code in about 11.5 ns per round on average, far below the ~1 microsecond syndrome cycle time of superconducting hardware.",
+  "why_it_matters": "Helios shows real-time decoding can be both fast and hardware-scalable with lightweight algorithm-hardware co-design, and it serves as the per-qubit decoder engine inside the networked DECONET system.",
+  "prerequisites": [
+   "surface code",
+   "decoding / matching algorithms",
+   "real-time decoding"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2409.17595",
+  "title": "Magic state cultivation: growing T states as cheap as CNOT gates",
+  "authors": "Craig Gidney, Noah Shutty, and Cody Jones",
+  "year": 2024,
+  "one_sentence": "Magic state cultivation prepares high-fidelity T states by injecting a noisy state into a small color code and gradually growing and postselecting it, at a cost comparable to a single lattice surgery CNOT.",
+  "contribution": "The paper introduces a complete cultivation protocol: unitary injection into a distance-3 color code, fault-tolerant measurement of the logical Hadamard-basis observable to postselect on state quality, staged code growth with escape to the surface code, and careful error accounting via a mix of state-vector, stabilizer, and enumerative simulation. It estimates T-state infidelities around 1e-9 with spacetime cost similar to a same-distance lattice surgery CNOT, orders of magnitude cheaper than traditional distillation factories.",
+  "why_it_matters": "Cultivation collapses the cost of magic states, historically the dominant resource in surface-code architectures, and has become a central benchmark and design target for TQEC simulators and compilers.",
+  "prerequisites": [
+   "surface code",
+   "magic states",
+   "fault tolerance & thresholds",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 5,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2502.01743",
+  "title": "High Rate Magic State Cultivation on the Surface Code",
+  "authors": "Yotam Vaknin et al.",
+  "year": 2025,
+  "one_sentence": "It adapts magic state cultivation to run directly on the surface code, using non-local connectivity to boost the success probability of growing high-fidelity T states.",
+  "contribution": "The authors present a cultivation protocol that avoids the detour through the color code, performing injection, verification, and growth natively on surface code patches and exploiting flexible, non-local connectivity (as available in neutral atoms or shuttling architectures) to increase postselection acceptance rates. They analyze the fidelity-rate tradeoff and show higher effective magic state production rates than color-code cultivation at comparable fidelity.",
+  "why_it_matters": "By cultivating directly in the surface code, it simplifies integration of cheap magic states into mainstream surface-code architectures, tightening the link between magic state factories and lattice surgery compilation.",
+  "prerequisites": [
+   "surface code",
+   "magic states",
+   "fault tolerance & thresholds"
+  ],
+  "difficulty": 5,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2504.11805",
+  "title": "Network-Integrated Decoding System for Real-Time Quantum Error Correction with Lattice Surgery",
+  "authors": "Namitha Liyanage et al.",
+  "year": 2025,
+  "one_sentence": "DECONET networks multiple FPGAs into a hybrid tree-grid system that decodes hundreds of interacting logical qubits, including lattice surgery operations, in real time.",
+  "contribution": "DECONET partitions the global decoding graph into per-logical-qubit blocks decoded by separate instances (e.g., Helios), then combines them using fusion within a node and window-based methods across a network-integrated hybrid tree-grid topology, scaling to l logical qubits with O(l log l) compute and only O(log l) latency growth. A five-FPGA prototype decodes 100 distance-5 logical qubits with lattice surgery at 2.4 microseconds average latency and 0.84 microseconds inverse throughput per round.",
+  "why_it_matters": "It is the first real-time decoding system demonstrated for full multi-logical-qubit computations rather than isolated memories, closing the loop between lattice surgery compilation and decoding hardware.",
+  "prerequisites": [
+   "surface code",
+   "lattice surgery",
+   "decoding / matching algorithms",
+   "real-time decoding"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2509.05232",
+  "title": "Cultivating T states on the surface code with only two-qubit gates",
+  "authors": "Jahan Claes",
+  "year": 2025,
+  "one_sentence": "It shows how to cultivate high-fidelity T states directly on the ordinary planar surface code using only two-qubit gates and rigid qubit-array translations, with no mid-circuit measurement, suiting neutral-atom hardware.",
+  "contribution": "The protocol combines RP2-cultivation ideas with a mid-cycle trick that deforms the surface code mid-syndrome-round into a self-dual code, enabling fault-tolerant measurement of the Hadamard-basis logical operator for postselection, then escapes to larger distances. Under depolarizing noise, d=3/4/5 cultivation reaches error rates of 1e-6/1e-8/2e-9 with acceptance rates of 34%/6%/1%, competitive with or better than color and RP2 cultivation, and works at any distance parity.",
+  "why_it_matters": "It brings cultivation's magic-state cost savings to the plain surface code under restrictive hardware primitives, widening the architectural design space that TQEC compilers must target.",
+  "prerequisites": [
+   "surface code",
+   "magic states",
+   "fault tolerance & thresholds",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 5,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2509.08658",
+  "title": "Simulating magic state cultivation with few Clifford terms",
+  "authors": "Kwok Ho Wan, Zhenghao Zhong, and Ainhoa Zapirain",
+  "year": 2025,
+  "one_sentence": "It shows that the non-Clifford d=5 cultivation circuit can be simulated exactly with only about 8 Clifford ZX-diagram terms on average, instead of millions of stabilizer terms.",
+  "contribution": "Building on ZX-calculus cutting techniques, the authors construct compact stabilizer-rank decompositions of the 53 non-Clifford spiders in the d=5 magic state cultivation circuit, reducing a naive 6.4-million-term decomposition to about 8 Clifford terms on average at 0.1% noise. Combined with the tsim simulator, they achieve near-Stim sampling speeds for the true non-Clifford circuits, enabling exact simulation of the cultivation circuit itself, with the decomposition designed to remain tractable when the state is ported into the escape stage.",
+  "why_it_matters": "It demonstrates that ZX-based decomposition can make exact classical verification of operationally important non-Clifford QEC circuits tractable, a key validation tool for automated fault-tolerant design.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "magic states",
+   "ZX calculus"
+  ],
+  "difficulty": 5,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2512.07737",
+  "title": "A scalable and real-time neural decoder for topological quantum codes",
+  "authors": "Andrew W. Senior et al. (Google DeepMind and Google Quantum AI)",
+  "year": 2025,
+  "one_sentence": "AlphaQubit 2 is a recurrent-transformer neural decoder that achieves near-optimal accuracy on surface and colour codes up to distance 23 while a compact variant decodes in under 1 microsecond per cycle on commercial TPUs.",
+  "contribution": "AQ2 uses a streaming architecture of interleaved per-stabilizer recurrent layers and attention-based spatial mixing layers with temporal compression, giving constant cost per cycle and stable performance on million-cycle experiments. It reaches logical error rates near 1e-10 per cycle at large distance, orders of magnitude faster than other high-accuracy decoders for the colour code, and its real-time variant AQ2-RT beats leading real-time decoders on accuracy while meeting the 1 microsecond superconducting cycle budget up to distance 11.",
+  "why_it_matters": "It establishes machine-learned decoding as a credible component of the real-time TQEC stack, simultaneously satisfying the accuracy, speed, and scalability requirements that had previously been met only separately.",
+  "prerequisites": [
+   "surface code",
+   "syndrome extraction circuits",
+   "decoding / matching algorithms",
+   "real-time decoding",
+   "fault tolerance & thresholds"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2512.23037",
+  "title": "SOFT: a high-performance simulator for universal fault-tolerant quantum circuits",
+  "authors": "Riling Li et al.",
+  "year": 2025,
+  "one_sentence": "SOFT is a GPU simulator that runs noisy Clifford+T fault-tolerant circuits with mid-circuit measurements billions of shots at a time, delivering the first ground-truth simulation of d=5 magic state cultivation.",
+  "contribution": "SOFT integrates the generalized stabilizer formalism with a fully device-resident, shot-parallel GPU design that updates generalized stabilizer tableaux via lightweight staged kernels, achieving orders-of-magnitude speedups over existing simulators for noisy non-Clifford circuits. Simulating the d=5 cultivation circuit (42 qubits, 72 T gates) over 200+ billion shots, it confirmed cultivation's effectiveness while revealing discrepancies of up to ~8x between the true logical error rate and earlier Clifford-proxy estimates.",
+  "why_it_matters": "It moves TQEC verification from simulating quantum memory to simulating full non-Clifford logical protocols, and its cultivation results shows that proxy-based estimates can misestimate logical error rates by up to ~8x, making the case that resource estimates need ground-truth simulation checks proxy-based resource estimates.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "magic states",
+   "fault tolerance & thresholds",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2601.23109",
+  "title": "TopoLS: Lattice Surgery Compilation via Topological Program Transformations",
+  "authors": "Junyu Zhou et al.",
+  "year": 2026,
+  "one_sentence": "TopoLS compiles lattice surgery programs topology-first: it rewrites the circuit as a ZX diagram and uses Monte Carlo tree search to embed it into 3D space-time, cutting space-time volume by 46% on average over prior compilers.",
+  "contribution": "TopoLS uses ZX diagrams as the compilation IR, applying semantics-preserving transformations (spider fusion, topology-aware slicing) to expose merge-split parallelism invisible to gate-centric compilers, then synthesizes pipe-diagram layouts with MCTS that jointly optimizes placement and routing in 3D space-time, with topology-aware partitioning for scalability. Across benchmarks it reduces space-time volume by 25-90% over liblsqecc and DASCOT with near-linear compilation-time scaling, and it is integrated into the tqec ecosystem.",
+  "why_it_matters": "It realizes the ZX-calculus vision of lattice surgery as a topology-centric compilation target and connects search-based synthesis directly into the tqec design-automation pipeline.",
+  "prerequisites": [
+   "surface code",
+   "lattice surgery",
+   "ZX calculus"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2604.01059",
+  "title": "Tsim: Fast Universal Simulator for Quantum Error Correction",
+  "authors": "Rafael Haenel, Xiuzhe Luo, and Chen Zhao",
+  "year": 2026,
+  "one_sentence": "Tsim is QuEra's open-source simulator that compiles noisy universal circuits, written as ZX diagrams with parameterized Pauli-noise vertices, into a vectorized GPU sampler that extends the Stim format with T gates and rotations.",
+  "contribution": "Tsim represents circuits as ZX diagrams, simplifies them with parameterized ZX rewrite rules, and compiles once for vectorized sampling whose cost is linear in Clifford gates and exponential only in non-Clifford gates. It implements the Stim API and circuit format with non-Clifford extensions, enabling high-throughput exact simulation of low-magic QEC workloads such as magic state cultivation.",
+  "why_it_matters": "It is a key member of the post-cultivation generation of simulators that let designers verify true non-Clifford fault-tolerant circuits at scale inside a Stim-compatible toolchain.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "ZX calculus",
+   "magic states",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2604.27058",
+  "title": "Clifft: Fast Exact Simulation of Near-Clifford Quantum Circuits",
+  "authors": "Bradley Chase and Farrokh Labib (Unitary Foundation)",
+  "year": 2026,
+  "one_sentence": "Clifft exactly simulates near-Clifford fault-tolerant circuits on ordinary CPUs by tracking the Clifford structure symbolically and keeping a dense state vector only for the dynamically active non-Clifford degrees of freedom.",
+  "contribution": "Clifft factors the quantum state into an offline Clifford frame, an online Pauli frame, and a dynamically sized active state vector, generalizing Stim's compile-once-sample-many model to circuits with non-Clifford operations; the dominant exponential cost scales with the peak active dimension rather than the qubit count. It achieves up to orders-of-magnitude throughput gains over GPU near-Clifford simulators and performed, to the authors' knowledge, the first exact end-to-end simulation of magic state cultivation including the escape stage, over hundreds of billions of shots.",
+  "why_it_matters": "It makes exact verification of low-magic fault-tolerant protocols practical on commodity hardware, turning ground-truth checking of compiler outputs into a routine design-automation step.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "magic states",
+   "fault tolerance & thresholds",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2607.28600",
+  "title": "SymFT: Universal Fault-Tolerant Quantum Circuit Simulation via Symbolic Clifford-Pauli Frames and Stabilizer Coordinates",
+  "authors": "Wang Fang, Huazhe Lou, and Riling Li",
+  "year": 2026,
+  "one_sentence": "SymFT combines symbolic Clifford-Pauli frame factorization with adaptive stabilizer-coordinate planning to sample Clifford-dominated fault-tolerant circuits faster than Stim and Clifft on a single CPU core.",
+  "contribution": "SymFT reduces branch-probability sampling to Pauli rotations and measurement projectors by pushing residual Clifford and Pauli frames into symbolic signs that need not be applied per shot, and plans a shared stabilizer-destabilizer coordinate basis once, emitting direct multi-coordinate sampling instructions that avoid per-shot tableau updates. It reports 2.5x speedups over Stim on surface-code circuits and 1.9-3.5x over Clifft on cultivation and distillation circuits, and over 100x over its predecessor SOFT.",
+  "why_it_matters": "It represents the leading edge of simulator co-design, where frame-based symbolic techniques collapse the per-shot cost of verifying universal fault-tolerant circuits for TQEC design iteration.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "magic states",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 4,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "joss-tqec",
+  "title": "tqec: A Python package for topological quantum error correction",
+  "authors": "Adrien Suau et al. (15 authors, incl. Austin Fowler)",
+  "year": 2026,
+  "one_sentence": "tqec (DOI: 10.21105/joss.09142, JOSS 11(120), 9142) is an open-source Python compiler that translates a logical computation drawn as connected 3D primitive blocks into a detailed fault-tolerant Stim circuit ready for simulation and decoding.",
+  "contribution": "The tqec package automates compilation of surface-code and lattice-surgery computations: users specify them as block graphs of 3D topological primitives (its native BlockGraph structure), and the tool instantiates each block with syndrome-extraction circuits using multiple spatial junction types and stretched stabilizers for hook-error handling, emitting Stim circuits with the detector and observable information needed for simulation and decoding, including automated correlation-surface finding.",
+  "why_it_matters": "It is the reference open-source toolchain of TQEC design automation, with a growing ecosystem around it — including the PyZX interface Topologiq — and it defines the block-graph representation that newer compilers build on.",
+  "prerequisites": [
+   "qubits & gates",
+   "surface code",
+   "lattice surgery",
+   "syndrome extraction circuits"
+  ],
+  "difficulty": 3,
+  "era": "design automation era"
+ },
+ {
+  "arxiv_id": "2503.18657",
+  "title": "Efficient Magic State Cultivation on RP^2",
+  "authors": "Zi-Han Chen, Ming-Cheng Chen, Chao-Yang Lu, Jian-Wei Pan",
+  "year": 2025,
+  "one_sentence": "Grows high-fidelity logical T states on a surface code wrapped around the real projective plane (RP^2), cutting the space-time cost of magic state cultivation by about an order of magnitude.",
+  "contribution": "Introduces the RP^2 code family (rotated surface codes placed on the real projective plane) together with two self-dual CSS codes, SRP-3 and SRP-5, plus fast 'morphing' circuits that switch between them so the logical T state can be double-checked efficiently. A one-round, easy-to-decode expansion stage grows the small RP^2 code directly into a large rotated surface code, avoiding the costly grafting step of the original cultivation protocol. Monte Carlo sampling shows roughly 10x lower space-time volume than the original magic state cultivation protocol at target logical error rates of ~1e-6 to 1e-9, using non-local connectivity available on neutral-atom and ion-trap platforms.",
+  "why_it_matters": "It is the first cultivation variant shown to beat the original protocol's space-time cost, showing that clever code geometry (RP2 plus non-local connectivity) can remove the grafting bottleneck and that clever code geometry can remove the grafting bottleneck. Published as PRX Quantum 7, 010315 (2026), it anchors the cultivation-variant literature.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "quantum error correction basics",
+   "surface code",
+   "syndrome extraction circuits",
+   "fault tolerance & thresholds",
+   "magic states"
+  ],
+  "difficulty": 5,
+  "era": "lattice surgery era",
+  "resolved_from": "prxq-7-010315"
+ },
+ {
+  "arxiv_id": "2504.02935",
+  "title": "Magic State Injection with Erasure Qubits",
+  "authors": "Shoham Jacoby, Yotam Vaknin, Alex Retzker, Arne L. Grimsmo",
+  "year": 2025,
+  "one_sentence": "Shows that qubits whose errors are heralded as erasures make magic state injection and cultivation dramatically cleaner at almost no extra cost.",
+  "contribution": "Extends magic state injection protocols on the surface code, and injection-plus-cultivation on the color code, to erasure qubits, proving that after postselecting on erasures the logical error rate is set only by the much smaller residual Pauli error while the acceptance rate barely drops. For surface-code injection, just three strategically placed erasure qubits capture almost all of the benefit, independent of patch size; for color-code cultivation, making the whole patch erasure qubits yields about a thousandfold logical-error-rate improvement in simulated regimes. The analysis suggests algorithmically relevant logical error rates without distillation for erasure rates below ~4e-3 and residual Pauli errors ~1e-4.",
+  "why_it_matters": "It ties the cultivation pipeline to erasure-qubit hardware (e.g., neutral atoms with erasure conversion), showing cultivation can reach distillation-grade fidelities on near-term platforms. It reframes injection—the first stage of every cultivation protocol—as the highest-leverage place to spend heralded-erasure resources.",
+  "prerequisites": [
+   "quantum error correction basics",
+   "surface code",
+   "syndrome extraction circuits",
+   "fault tolerance & thresholds",
+   "magic states"
+  ],
+  "difficulty": 3,
+  "era": "lattice surgery era"
+ },
+ {
+  "arxiv_id": "2510.24615",
+  "title": "Efficient magic state cultivation with lattice surgery",
+  "authors": "Yutaka Hirano, Riki Toshio, Tomohiro Itogawa, Keisuke Fujii",
+  "year": 2025,
+  "one_sentence": "Replaces the awkward grafting step of magic state cultivation with ordinary lattice surgery, halving the space-time overhead while staying on a square grid.",
+  "contribution": "Proposes MSC-LS, a cultivation protocol that keeps the injection and cultivation stages of the original color-code scheme but teleports the cultivated magic state onto a rotated surface code via a zero-level-distillation-style lattice-surgery merge, avoiding the grafted code entirely. Three ideas drive the efficiency: using the space-efficient rotated surface code as the final code, performing the transfer at an intermediate code distance to shrink early-stage spatial overhead, and a lookup table of error syndromes enabling early rejection of bad shots. Numerics at color-code distance 3 and physical error rate 1e-3 match the original protocol's logical error rate (~3e-6) at about half the space-time cost.",
+  "why_it_matters": "It makes cultivation compatible with standard lattice-surgery toolchains and the rotated surface code, simplifying integration into full fault-tolerant architectures. It is the lattice-surgery-native cultivation variant, directly connecting the cultivation story to the lattice surgery canon.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "quantum error correction basics",
+   "surface code",
+   "syndrome extraction circuits",
+   "decoding / matching algorithms",
+   "lattice surgery",
+   "magic states"
+  ],
+  "difficulty": 4,
+  "era": "lattice surgery era"
+ },
+ {
+  "arxiv_id": "2603.05429",
+  "title": "Constant depth magic state cultivation with Clifford measurements by gauging",
+  "authors": "Bence Hetényi, Benjamin J. Brown, Dominic J. Williamson",
+  "year": 2026,
+  "one_sentence": "Uses gauging of a transversal Clifford gate to measure the color code's logical Clifford operator in constant circuit depth, making cultivation practical beyond distance 5.",
+  "contribution": "Replaces the O(d)-depth logical Clifford measurement of standard magic state cultivation with a constant-depth measurement obtained by gauging the color code's transversal Clifford gate, which temporarily produces an emergent Clifford stabilizer code. Rather than error-correcting that emergent code, the protocol repeats gauging measurements with post-selection, trading scalability for simplicity, and works on a regular square-grid connectivity. The d=7 version reaches the 1e-12 logical-error-rate regime at 0.05% physical error rate while keeping more than 1% of shots after the cultivation-equivalent stage—territory inaccessible to the original d<=5-limited protocol.",
+  "why_it_matters": "It removes the depth bottleneck that capped cultivation at distance 5, opening the route to the ultra-low logical error rates needed for large-scale algorithms. It demonstrates how the gauging-based logical-measurement toolkit feeds directly into cheaper magic state preparation.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "quantum error correction basics",
+   "surface code",
+   "syndrome extraction circuits",
+   "fault tolerance & thresholds",
+   "magic states"
+  ],
+  "difficulty": 5,
+  "era": "lattice surgery era"
+ },
+ {
+  "arxiv_id": "2605.21867",
+  "title": "Zero-level CCZ Distillation",
+  "authors": "Tomohiro Itogawa, Yutaka Hirano, Yutaro Akahoshi, Keisuke Fujii",
+  "year": 2026,
+  "one_sentence": "Distills a high-fidelity CCZ magic state directly from physical qubits using the transversal T of the [[8,3,2]] code and lattice surgery, with no logical-level distillation overhead.",
+  "contribution": "Extends the zero-level distillation paradigm from T states to CCZ states: the transversal T/T-dagger of the [[8,3,2]] code fault-tolerantly encodes CCZ|+++, which is then teleported onto three surface-code logical qubits via lattice surgery. A new 'adaptively initialized teleportation' (AIT) procedure handles teleportation between codes of different distances. The full circuit needs only 22 physical qubits, 3 logical qubits, and depth 24, achieving p_L ~ 300 p^2—one to two orders of magnitude better than seven-T-gate constructions at p = 1e-3 to 1e-4 and a 5-10x space-time reduction over prior methods.",
+  "why_it_matters": "It shows the cultivation/zero-level philosophy extends beyond T states to the CCZ states that power Toffoli-heavy algorithms, sharpening the physical-level alternative to logical-level distillation factories. Together with its companion cultivation work, it maps out a cheap magic-state menu for early fault-tolerant machines.",
+  "prerequisites": [
+   "stabilizer formalism",
+   "quantum error correction basics",
+   "surface code",
+   "fault tolerance & thresholds",
+   "lattice surgery",
+   "magic states"
+  ],
+  "difficulty": 4,
+  "era": "lattice surgery era"
+ },
+ {
+  "arxiv_id": "1808.02892",
+  "title": "A Game of Surface Codes: Large-Scale Quantum Computing with Lattice Surgery",
+  "authors": "Daniel Litinski",
+  "year": 2018,
+  "one_sentence": "A tile-based rulebook for compiling arbitrary quantum circuits onto surface-code patches with lattice surgery, quantifying space-time trade-offs from small to huge machines.",
+  "contribution": "Systematizes large-patch lattice surgery compilation: surface-code patches are treated as tiles with a small set of merge/split and measurement rules, and circuits are executed as sequences of multi-qubit Pauli measurements consuming distilled magic states. It gives explicit space-time volume estimates across regimes—e.g., a classically intractable 100-qubit, 1e8-T-count computation in 4 hours on 55,000 qubits or 22 minutes on 120,000 qubits at 1e-4 physical error rate. The framework popularized fast data blocks, compact blocks, and the space-time-cost accounting that all later resource estimates build on.",
+  "why_it_matters": "It is the canonical large-patch lattice surgery compilation reference: the cost model in which magic state factories—including cultivation and zero-level distillation—are ultimately judged. Every cultivation variant's space-time-overhead claims are measured against the factory footprint this paper defines. Published as Quantum 3, 128 (2019).",
+  "prerequisites": [
+   "qubits & gates",
+   "quantum error correction basics",
+   "surface code",
+   "lattice surgery",
+   "magic states"
+  ],
+  "difficulty": 3,
+  "era": "lattice surgery era"
  }
 ]

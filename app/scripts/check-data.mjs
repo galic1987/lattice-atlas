@@ -39,6 +39,7 @@ const ERAS = [
   'defect-based surface code',
   'lattice surgery era',
   'experimental era',
+  'design automation era',
 ];
 
 /* ---------------- topics ---------------- */
@@ -92,7 +93,7 @@ const resolve = (n) => {
 };
 
 const paperIds = new Set();
-const ARXIV_ID = /^([a-z-]+\/\d{7}|\d{4}\.\d{4,5})$/;
+const ARXIV_ID = /^([a-z-]+\/\d{7}|\d{4}\.\d{4,5}|joss-[a-z0-9-]+)$/;
 papers.forEach((p) => {
   if (!ARXIV_ID.test(p.arxiv_id)) err(`paper arxiv_id "${p.arxiv_id}" has unexpected format`);
   if (paperIds.has(p.arxiv_id)) err(`duplicate paper "${p.arxiv_id}"`);
