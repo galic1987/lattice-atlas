@@ -69,6 +69,14 @@ const PAGE_TLDR: Record<string, { summary: string; takeaways: string[] }> = {
       'Direct arXiv links and prerequisite topic mappings for deep academic research.',
     ],
   },
+  '/experiments': {
+    summary: 'Interactive experiment bench: turn a knob and watch a real invariant emerge from genuine computation.',
+    takeaways: [
+      'Every card runs real math — union-find, exact statevectors, GF(2) parity — nothing is drawn by hand.',
+      'Percolation, Bloch-sphere evolution, commutation, and code-distance experiments included.',
+      'Each result is tagged "computed, not drawn" as proof of honesty.',
+    ],
+  },
   '/glossary': {
     summary: 'Comprehensive dictionary of 61 fundamental QEC terms, mathematical definitions, and physical concepts.',
     takeaways: [
