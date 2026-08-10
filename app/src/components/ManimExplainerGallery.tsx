@@ -10,6 +10,13 @@ interface VideoExplainer {
   filename: string;
   description: string;
   keyTakeaways: string[];
+  /**
+   * Path (repo-relative) to the committed Manim scene this clip was rendered from.
+   * Only clips with a real, in-repo source may carry the strong "rendered from the
+   * real code" provenance badge; clips without one are labelled as a plain vector
+   * animation whose source isn't in the repo — we don't claim provenance we can't show.
+   */
+  sourceScene?: string;
 }
 
 const VIDEOS: VideoExplainer[] = [
@@ -17,23 +24,25 @@ const VIDEOS: VideoExplainer[] = [
     id: 'stabilizer-check',
     title: 'Stabilizer Check Mechanics (ZZZZ Parity)',
     filename: 'animations/stabilizer_check.mp4',
-    description: 'Manim vector animation demonstrating 4-qubit stabilizer check entangling pulses (CNOT) projecting ancilla measurements to +1 (pass) or -1 (error fire).',
+    description: 'Manim vector animation demonstrating a 4-qubit Z-stabilizer (ZZZZ) check: CNOTs from the data qubits into the ancilla record their parity, measured to +1 (pass) or -1 (error fire).',
     keyTakeaways: [
-      'Entangling CNOT gates pulse from ancilla qubit to data qubits.',
+      'CNOTs run from the data qubits into the ancilla (data = control), so the ancilla accumulates their Z-parity.',
       'Measures 4-qubit parity without collapsing individual superposition amplitudes.',
       'Anticommuting Pauli errors flip ancilla measurement outcome to -1.',
     ],
+    sourceScene: 'manim/tqec_scenes.py :: StabilizerCheck',
   },
   {
     id: 'mwpm-matching',
     title: 'Minimum Weight Perfect Matching (MWPM) Decoder',
     filename: 'animations/mwpm_matching.mp4',
-    description: 'Manim vector animation displaying 2D syndrome detector graph matching, edge weight evaluation, and Blossom V minimum-weight pairing lines.',
+    description: 'Manim vector animation displaying 2D syndrome detector graph matching, edge weight evaluation, and minimum-weight pairing lines.',
     keyTakeaways: [
       'Detector fires form nodes on a 2D/3D syndrome graph.',
       'Edge weights represent logarithmic error probability paths.',
       'MWPM pairs detector fires to find the most likely error chain.',
     ],
+    sourceScene: 'manim/tqec_scenes.py :: SyndromeMatching',
   },
   {
     id: 'lattice-surgery',
@@ -48,11 +57,11 @@ const VIDEOS: VideoExplainer[] = [
   },
   {
     id: 'topological-braiding',
-    title: 'Fibonacci Anyon Non-Abelian Braiding',
+    title: 'Fibonacci Anyon Non-Abelian Braiding (beyond the core codes)',
     filename: 'animations/topological_braiding.mp4',
-    description: 'Manim vector animation displaying Fibonacci anyon world-line trajectories in (2+1)D spacetime and non-Abelian braid matrix B1 B2 ≠ B2 B1 logic.',
+    description: 'Vector animation of Fibonacci anyon world-lines in (2+1)D spacetime and non-Abelian braiding (B1 B2 ≠ B2 B1). NOTE: this is an adjacent topic — the surface/toric codes this atlas teaches use ABELIAN (e, m) anyons; Fibonacci/non-abelian anyons are a different, universal-by-braiding model shown here for contrast.',
     keyTakeaways: [
-      'Braiding world-lines in 2+1D spacetime applies non-Abelian quantum logic.',
+      'Braiding world-lines in 2+1D spacetime applies non-Abelian quantum logic — unlike the abelian surface-code anyons.',
       'Topological protection renders logic gates immune to local geometric perturbations.',
       'Fibonacci anyons exhibit golden ratio quantum dimension d_τ = ϕ ≈ 1.618.',
     ],
@@ -67,6 +76,7 @@ const VIDEOS: VideoExplainer[] = [
       '3-colorable red, green, and blue faces act as both X and Z parity checks.',
       '3D color codes extend transversality to non-Clifford T-gates.',
     ],
+    sourceScene: 'manim/gallery/color_code_transversal_scene.py :: ColorCodeTransversalScene',
   },
   {
     id: 'quantum-ldpc-bipartite',
@@ -179,9 +189,13 @@ export default function ManimExplainerGallery() {
             <div className="border-b border-syndrome/40 bg-syndrome/15 px-3 py-1.5 font-mono text-[10px] font-bold text-syndrome">
               ⚠ ILLUSTRATIVE · AI-GENERATED (Veo 3.1) — atmospheric mood only, NOT an accurate depiction
             </div>
-          ) : (
+          ) : video.sourceScene ? (
             <div className="border-b border-stabilizer/30 bg-stabilizer/10 px-3 py-1.5 font-mono text-[10px] font-bold text-stabilizer">
-              ✓ MANIM · vector animation rendered from the real code
+              ✓ MANIM · rendered from the real code ({video.sourceScene})
+            </div>
+          ) : (
+            <div className="border-b border-star/30 bg-star/10 px-3 py-1.5 font-mono text-[10px] font-bold text-star">
+              ◆ VECTOR ANIMATION · concept illustration — source scene not in this repo (provenance unverified)
             </div>
           )}
           <video
