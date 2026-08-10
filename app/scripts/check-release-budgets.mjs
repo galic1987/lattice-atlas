@@ -12,7 +12,7 @@ const KIB = 1024;
 // 2026-08-09 (video wiring PR): decorative concept clips live in dist/clips/.
 // They load lazily (preload="none", poster-first), so they are NOT part of the
 // page-load budget — totalDistributionGzip excludes .mp4 and videos get their
-// own explicit caps instead: 4 MiB raw per clip, 40 MiB gzip for the whole set.
+// own explicit caps instead: 4 MiB raw per clip, 45,000 KiB gzip for the whole set.
 const LIMITS = Object.freeze({
   entryJavaScriptGzip: 160 * KIB,
   initialJavaScriptGraphGzip: 230 * KIB,

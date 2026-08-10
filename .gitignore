@@ -15,9 +15,18 @@ tqec/extracted/
 
 # stale early scaffold superseded by app/ (delete the folder when ready)
 quantum-knowledge-map/
+quantum-knowledge-map
 
 # drop zone for generated decorative art (processed by app/scripts/prepare-images.mjs)
 asset-inbox/
 
 # manim render output (large binaries)
 manim/media/
+
+# worktree symlink form (trailing-slash pattern only matches real dirs)
+app/node_modules
+
+# generated video staging (symlink to external drive)
+video-inbox/
+video-inbox
+tools/*/node_modules/

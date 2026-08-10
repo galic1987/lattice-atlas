@@ -638,7 +638,7 @@ export default function DecoderDuel() {
             takeaways={[
               'Identify rose-ringed syndrome detector fires on a d=3 surface code lattice.',
               'Apply exact data qubit correction chains (X, Z) to prevent logical Pauli flips.',
-              'Earn verified Stim checksum badges and track your daily high score leaderboard.',
+              'Paint the correction, beat the built-in matching decoder, and share your (local, unverified) daily score.',
             ]}
           />
           <motion.p initial={reduce ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduce ? 0 : 0.5, ease: [...EASE] }} className="eyebrow !text-syndrome">

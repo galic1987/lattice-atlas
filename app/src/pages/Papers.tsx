@@ -259,6 +259,12 @@ function PaperCard({ paper, firstOfYear, side, highlighted, onPlan }: PaperCardP
                   </p>
                   <p className="text-[15px] leading-relaxed text-text-mid">{paper.why_it_matters}</p>
                 </div>
+                {paper.verified_note && (
+                  <div className="rounded-lg border border-stabilizer/40 bg-stabilizer/10 p-3">
+                    <p className="eyebrow mb-1 text-stabilizer">{'// PDF-VERIFIED'}</p>
+                    <p className="text-[13px] leading-relaxed text-text-mid">{paper.verified_note}</p>
+                  </div>
+                )}
                 {(READING_PROMPTS[paper.arxiv_id] ?? []).length > 0 && (
                   <div>
                     <p className="eyebrow mb-1.5" style={{ color: eraColor }}>
@@ -716,8 +722,8 @@ export default function Papers() {
           <SuperTLDR
             summary="Annotated bibliography of 23 seminal quantum error correction papers with PDF-verified reading prompts."
             takeaways={[
-              'Chronological timeline from Shor 1995 & Kitaev 1997 to Willow 2024 & TopoLS 2025.',
-              'Each paper includes key contributions, why it matters, and PDF-verified technical notes.',
+              'Chronological timeline from Bravyi–Kitaev 1998 to Willow 2024 and 2026 scheduling research.',
+              'Each paper includes key contributions and why it matters; selected papers carry PDF-verified notes.',
               'Direct arXiv links and prerequisite topic mappings for deep academic research.',
             ]}
           />

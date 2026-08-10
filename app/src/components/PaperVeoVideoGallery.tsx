@@ -43,7 +43,7 @@ const PAPER_VIDEOS: PaperVideoMeta[] = [
     arxivOrDoi: 'arXiv:quant-ph/9811052',
     conceptSummary: 'Transforms the Toric code torus into a practical 2D planar Surface Code with rough (X) and smooth (Z) boundaries, removing the requirement for periodic boundary conditions.',
     veoPrompt: 'Cinematic 3D animation of planar surface code grid with rough and smooth boundaries, glowing red and blue plaquettes measuring stabilizer parities, photorealistic 8K render.',
-    keyEquation: 'd = \\min(\\text{dist}_X, \\text{dist}_Z)',
+    keyEquation: 'd = min(dist_X, dist_Z)',
   },
   {
     paperId: 'bravyi-kitaev-2005',
@@ -63,7 +63,7 @@ const PAPER_VIDEOS: PaperVideoMeta[] = [
     arxivOrDoi: 'Phys. Rev. A 86, 032324',
     conceptSummary: 'The canonical blueprint for surface-code architecture, establishing MWPM threshold p_th ≈ 1.0% under realistic circuit noise and lattice surgery routing.',
     veoPrompt: '3D architectural visualization of a 2D superconducting quantum processor grid executing surface-code cycles, glowing pulse pipelines and MWPM syndrome matching.',
-    keyEquation: 'P_L \\approx 0.03 (p / p_{th})^{(d+1)/2}',
+    keyEquation: 'P_L ≈ 0.03 (p/p_th)^((d+1)/2)',
   },
   {
     paperId: 'google-willow-2024',
@@ -89,7 +89,7 @@ export default function PaperVeoVideoGallery() {
   };
 
   const copyPrompt = (prompt: string, id: string) => {
-    navigator.clipboard.writeText(prompt);
+    navigator.clipboard.writeText(prompt).catch(() => undefined);
     setCopiedId(id);
     sound.playDecoderLock();
     setTimeout(() => setCopiedId(null), 2000);
@@ -103,7 +103,7 @@ export default function PaperVeoVideoGallery() {
           <div className="flex items-center gap-2">
             <Film className="h-5 w-5 text-plaquette" />
             <h3 className="font-display text-xl font-bold text-text-hi">
-              Landmark Research Paper Google Veo 3 Video Studio
+              Landmark Research Paper Veo 3.1 Video Studio
             </h3>
           </div>
           <p className="mt-1 text-sm text-text-mid">
@@ -148,6 +148,7 @@ export default function PaperVeoVideoGallery() {
 
           <div className="relative w-full max-w-[380px] aspect-[4/3] my-4 flex flex-col items-center justify-center bg-ink-950 rounded-xl border border-ink-700 p-5">
             <ConceptClip
+              key={paper.paperId}
               name={paper.paperId}
               className="w-full flex-1 rounded-lg border border-ink-700 object-cover"
             />
@@ -178,7 +179,7 @@ export default function PaperVeoVideoGallery() {
             <div className="border-t border-ink-700 pt-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-magic font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                  <Video className="h-3.5 w-3.5" /> Google Veo 3 AI Video Generation Prompt
+                  <Video className="h-3.5 w-3.5" /> Veo 3.1 Video Generation Prompt
                 </span>
                 <button
                   type="button"

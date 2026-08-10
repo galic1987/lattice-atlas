@@ -114,6 +114,22 @@ function SplitLine({
 function Hero() {
   const [tourOpen, setTourOpen] = useState(false);
   const reduce = useReducedMotion();
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Viewport-gated playback, same discipline as ConceptClip.
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video || reduce) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => undefined);
+        else video.pause();
+      },
+      { threshold: 0.1 },
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, [reduce]);
 
   return (
     <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
@@ -128,13 +144,12 @@ function Hero() {
           />
         ) : (
           <motion.video
+            ref={heroVideoRef}
             src={asset('clips/hero-torus-ambience.mp4')}
             poster={asset('hero_quantum_lattice.jpg')}
             muted
             loop
             playsInline
-            autoPlay
-            preload="none"
             className="h-full w-full object-cover opacity-60"
             initial={{ scale: 1.02 }}
             animate={{ scale: [1.02, 1.06, 1.02] }}

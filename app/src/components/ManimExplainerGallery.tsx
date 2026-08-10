@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { Video, Sparkles } from 'lucide-react';
 import { asset } from '@/lib/asset';
 import { sound } from '@/lib/sound';
@@ -116,6 +117,7 @@ const VIDEOS: VideoExplainer[] = [
 export default function ManimExplainerGallery() {
   const [selectedId, setSelectedId] = useState<string>('google-willow');
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
+  const reduce = useReducedMotion();
 
   const video = VIDEOS.find((v) => v.id === selectedId) || VIDEOS[0];
 
@@ -185,7 +187,7 @@ export default function ManimExplainerGallery() {
               if (el) el.playbackRate = playbackRate;
             }}
             src={asset(video.filename)}
-            autoPlay
+            autoPlay={!reduce}
             loop
             muted
             playsInline
