@@ -48,8 +48,10 @@ const SpacetimeDecoderSandbox3D = lazy(() => import('@/components/SpacetimeDecod
 const ColorCodeTransversalStudio = lazy(() => import('@/components/ColorCodeTransversalStudio'));
 const VideoPromptRefinerStudio = lazy(() => import('@/components/VideoPromptRefinerStudio'));
 const LatticeSurgeryComposerStudio = lazy(() => import('@/components/LatticeSurgeryComposerStudio'));
+const FtqcResourceEstimatorStudio = lazy(() => import('@/components/FtqcResourceEstimatorStudio'));
 
 export type ToolTab =
+  | 'ftqc-resource-estimator'
   | 'lattice-surgery-composer'
   | 'veo-prompt-refiner'
   | 'color-code-transversal'
@@ -135,6 +137,13 @@ const WORKBENCH_TOOLS: ToolMeta[] = [
     category: 'Simulation',
     icon: Shield,
     description: 'Interactive Fano plane, Shor 9-qubit, 5-qubit perfect code, & classical Hamming code visualizer.',
+  },
+  {
+    id: 'ftqc-resource-estimator',
+    title: 'Fault-Tolerant Quantum Resource Estimator Calculator',
+    category: 'Engineering',
+    icon: Cpu,
+    description: 'Calculate physical qubit counts, T-factory spatial footprint, execution latency, & cryo load for RSA-2048 & FeMoco.',
   },
   {
     id: 'lattice-surgery-composer',
@@ -433,6 +442,14 @@ export default function LabWorkbenchHub() {
           <div className="p-4">
             <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Stim DEM Graph Studio...</div>}>
               <StimDetectorGraphVisualizer />
+            </Suspense>
+          </div>
+        )}
+
+        {activeTab === 'ftqc-resource-estimator' && (
+          <div className="p-4">
+            <Suspense fallback={<div className="p-8 text-center font-mono text-sm text-text-low">Loading Fault-Tolerant Quantum Resource Estimator Calculator...</div>}>
+              <FtqcResourceEstimatorStudio />
             </Suspense>
           </div>
         )}
