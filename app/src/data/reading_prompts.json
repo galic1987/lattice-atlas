@@ -90,5 +90,9 @@
   "2602.09099": [
     "What is a hook error's orientation, and how does the diagonal schedule rotate it harmless?",
     "Which operations (junctions, Hadamards, rotations) does the uniform schedule simplify, and why does uniformity matter to hardware?"
+  ],
+  "2308.07915": [
+    "What is the difference between a surface code and a qLDPC code in terms of scaling?",
+    "How are bivariate bicycle codes constructed?"
   ]
 }

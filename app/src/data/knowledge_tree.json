@@ -578,5 +578,25 @@
       "Google Quantum AI, 'Suppressing quantum errors by scaling a surface code logical qubit', arXiv:2207.06431",
       "Bluvstein et al., 'Logical quantum processor based on reconfigurable atom arrays', arXiv:2312.03982"
     ]
+  },
+  {
+    "id": "qldpc-codes",
+    "name": "qLDPC & Bivariate Bicycle Codes",
+    "tier": 4,
+    "short": "Quantum Low-Density Parity-Check codes generalize surface codes, offering better encoding rates. Bivariate Bicycle codes are a prominent recent family.",
+    "detail": "While surface codes require physical qubits to scale quadratically with distance (yielding a vanishing rate k/n), qLDPC codes allow constant or higher rates by using non-local connectivity. The Tanner graph of a qLDPC code has bounded degree, meaning each qubit participates in a small number of checks. Bivariate Bicycle codes, a specific construction of qLDPC codes, have recently shown high performance and have been proposed for near-term implementation on architectures with suitable long-range connectivity, bridging the gap between hardware constraints and the asymptotic benefits of qLDPC.",
+    "key_points": [
+      "qLDPC codes generalize surface codes with bounded-weight checks but non-local connectivity",
+      "They can achieve constant encoding rates (k/n) as distance increases",
+      "Tanner graphs visualize the connections between data qubits and parity checks",
+      "Bivariate Bicycle codes are a high-performance family of qLDPC codes recently proposed for hardware"
+    ],
+    "depends_on": [
+      "quantum-codes-basics",
+      "classical-error-correction"
+    ],
+    "resources": [
+      "Bravyi et al., 'High-threshold and low-overhead fault-tolerant quantum memory', arXiv:2308.07915"
+    ]
   }
 ]

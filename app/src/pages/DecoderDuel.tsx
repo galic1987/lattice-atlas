@@ -18,6 +18,7 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
 import SuperTLDR from '@/components/SuperTLDR';
 import {
+  BIASED_PLAN,
   DAILY_PLAN,
   DAILY_MAX_SCORE,
   POINTS,
@@ -205,7 +206,7 @@ function DuelLattice({
 
 /* ---------------- page ---------------- */
 
-type Mode = 'daily' | 'practice';
+type Mode = 'daily' | 'practice' | 'biased';
 type Phase = 'menu' | 'play' | 'post' | 'end';
 
 function patternSummary(pattern: Pauli[], d: number): string {
@@ -392,7 +393,7 @@ export default function DecoderDuel() {
 
   const round = useMemo(() => {
     if (phase === 'menu') return null;
-    const plan = mode === 'daily' ? DAILY_PLAN[roundIdx] : practicePlan(roundIdx);
+    const plan = mode === 'daily' ? DAILY_PLAN[roundIdx] : mode === 'biased' ? BIASED_PLAN[roundIdx] : practicePlan(roundIdx);
     const seed = mode === 'daily'
       ? dailyRoundSeed(day, roundIdx)
       : (day + seedTick) * 31 + roundIdx * 977 + 13;
@@ -431,7 +432,7 @@ export default function DecoderDuel() {
       practiceRunId.current = `practice-${day}-${suffix}`;
       setSeedTick((t) => t + 1);
     }
-    setGuess(new Array<Pauli>((m === 'daily' ? DAILY_PLAN[0] : practicePlan(0)).d ** 2).fill(0));
+    setGuess(new Array<Pauli>((m === 'daily' ? DAILY_PLAN[0] : m === 'biased' ? BIASED_PLAN[0] : practicePlan(0)).d ** 2).fill(0));
   };
 
   const paint = (q: number) => {
@@ -581,7 +582,7 @@ export default function DecoderDuel() {
   };
 
   const nextRound = () => {
-    const dailyOver = mode === 'daily' && outcomes.length >= DAILY_PLAN.length;
+    const dailyOver = ((mode === 'daily' && outcomes.length >= DAILY_PLAN.length) || (mode === 'biased' && outcomes.length >= BIASED_PLAN.length)) || (mode === 'biased' && outcomes.length >= BIASED_PLAN.length);
     const practiceOver = mode === 'practice' && lives <= 0;
     if (dailyOver || practiceOver) {
       finishRun(outcomes, score);
@@ -592,7 +593,7 @@ export default function DecoderDuel() {
     setVerdict(null);
     setUsedHintThisRound(false);
     setPhase('play');
-    const plan = mode === 'daily' ? DAILY_PLAN[idx] : practicePlan(idx);
+    const plan = mode === 'daily' ? DAILY_PLAN[idx] : mode === 'biased' ? BIASED_PLAN[idx] : practicePlan(idx);
     setGuess(new Array<Pauli>(plan.d ** 2).fill(0));
     setGuessHistory([]);
     setHintQubit(null);
@@ -701,7 +702,19 @@ export default function DecoderDuel() {
               </button>
             )}
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-3">
+
+            <div className="rounded-xl border border-ink-600 bg-ink-800 p-6">
+              <p className="eyebrow !text-syndrome">{'// CHALLENGE'}</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold text-text-hi">Biased Noise</h2>
+              <p className="mt-2 text-sm leading-relaxed text-text-mid">
+                5 rounds of pure X errors (Z-type syndrome only). High bias means more clustered defects. Can you clear it?
+              </p>
+              <button type="button" onClick={() => start('biased')} className="btn-primary mt-4 bg-syndrome hover:bg-syndrome/80">
+                <Play className="h-4 w-4" /> Start Biased
+              </button>
+            </div>
+
             <div className="rounded-xl border border-ink-600 bg-ink-800 p-6">
               <p className="eyebrow !text-magic">{'// DAILY DUEL'}</p>
               <h2 className="mt-2 font-display text-2xl font-semibold text-text-hi">Puzzle {dailyPuzzleId(day)}</h2>

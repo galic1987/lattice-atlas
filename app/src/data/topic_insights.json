@@ -2,157 +2,244 @@
   "linear-algebra": {
     "intuition": "A quantum state is an arrow in a vast dark room. Everything that can happen to it is one of three physical acts: gates rotate the arrow, noise jostles it, and measurement slams it flat onto an axis. Learn to handle arrows and you can handle all three.",
     "misconceptions": [
-      { "myth": "Quantum computing math needs calculus and differential equations.", "truth": "The daily toolkit is linear algebra: vectors, matrices, inner products. If you can multiply a 2×2 matrix by a column vector, you can follow most of this field." }
+      {
+        "myth": "Quantum computing math needs calculus and differential equations.",
+        "truth": "The daily toolkit is linear algebra: vectors, matrices, inner products. If you can multiply a 2×2 matrix by a column vector, you can follow most of this field."
+      }
     ]
   },
   "complex-numbers-dirac-notation": {
     "intuition": "Two pendulums swinging in step reinforce; out of step, they cancel. The timing difference — the phase — is physically real, and Dirac notation is the ledger that tracks every pendulum's length and timing without drawing a single picture.",
     "misconceptions": [
-      { "myth": "The imaginary parts of amplitudes are a mathematical trick with no physical meaning.", "truth": "Relative phase between amplitudes is physically real — it decides how computational paths interfere. Only the global phase of the whole state is unobservable." }
+      {
+        "myth": "The imaginary parts of amplitudes are a mathematical trick with no physical meaning.",
+        "truth": "Relative phase between amplitudes is physically real — it decides how computational paths interfere. Only the global phase of the whole state is unobservable."
+      }
     ]
   },
   "quantum-mechanics-basics": {
     "intuition": "Measurement is a filter with labeled exits. An input state produces an outcome with the Born-rule probability for that exit, then updates into the corresponding subspace. A state already in that subspace can pass unchanged; a superposition is generally disturbed.",
     "misconceptions": [
-      { "myth": "Measurement merely reveals a value the qubit already carried—or always destroys the state.", "truth": "A projective measurement samples p_i = ⟨ψ|P_i|ψ⟩ and updates to P_i|ψ⟩/√p_i. Measuring encoded data in a basis that reveals logical information generally dephases it; measuring commuting stabilizers can reveal error parity without revealing the logical amplitudes." }
+      {
+        "myth": "Measurement merely reveals a value the qubit already carried—or always destroys the state.",
+        "truth": "A projective measurement samples p_i = ⟨ψ|P_i|ψ⟩ and updates to P_i|ψ⟩/√p_i. Measuring encoded data in a basis that reveals logical information generally dephases it; measuring commuting stabilizers can reveal error parity without revealing the logical amplitudes."
+      }
     ]
   },
   "qubits-pauli-operators": {
     "intuition": "I, X, Y, and Z are coordinate directions for single-qubit operators, like basis arrows for describing any small disturbance. A correctable code handles the whole linear span when its recovery conditions hold for those basis errors.",
     "misconceptions": [
-      { "myth": "Because Paulis form an error basis, every hardware noise channel is literally a random I, X, Y, or Z.", "truth": "Paulis span single-qubit operators, so Knill-Laflamme linearity lets correction of a basis extend to its span. Coherent, correlated, leakage, and non-Markovian noise need not be stochastic Pauli mixtures and can behave differently." }
+      {
+        "myth": "Because Paulis form an error basis, every hardware noise channel is literally a random I, X, Y, or Z.",
+        "truth": "Paulis span single-qubit operators, so Knill-Laflamme linearity lets correction of a basis extend to its span. Coherent, correlated, leakage, and non-Markovian noise need not be stochastic Pauli mixtures and can behave differently."
+      }
     ]
   },
   "quantum-gates-circuits": {
     "intuition": "A circuit diagram is sheet music: each wire a string, each gate a note, time flowing left to right. A quantum computer is the orchestra sight-reading it — and syndrome extraction is a four-bar riff the machine must play in perfect time, forever.",
     "misconceptions": [
-      { "myth": "Information in a CNOT flows one way, from control to target.", "truth": "X errors copy control→target, but Z errors copy target→control. Errors flow both directions through a CNOT — which is why gate ordering is a safety decision." }
+      {
+        "myth": "Information in a CNOT flows one way, from control to target.",
+        "truth": "X errors copy control→target, but Z errors copy target→control. Errors flow both directions through a CNOT — which is why gate ordering is a safety decision."
+      }
     ]
   },
   "classical-error-correction": {
     "intuition": "Shouting across a windy field, you say everything three times: the wind can steal one copy and the vote still carries your word. All of error correction is that one trick — redundancy plus a vote — refined into better and better geometry.",
     "misconceptions": [
-      { "myth": "Every quantum code is just two independent classical codes.", "truth": "CSS codes, including the surface code, use two compatible classical-code structures for X- and Z-type components. Classical coding is foundational, but general quantum codes need not have CSS form and correlated noise can couple the decoding problems." }
+      {
+        "myth": "Every quantum code is just two independent classical codes.",
+        "truth": "CSS codes, including the surface code, use two compatible classical-code structures for X- and Z-type components. Classical coding is foundational, but general quantum codes need not have CSS form and correlated noise can couple the decoding problems."
+      }
     ]
   },
   "stabilizer-formalism": {
     "intuition": "A drumhead held taut by rules: strike it anywhere and you don't see the dent — you hear exactly which tensions ring wrong. A stabilizer code defines its states by the checks that stay silent, so an error announces itself by the rules it breaks.",
     "misconceptions": [
-      { "myth": "Every error makes a stabilizer measurement return −1.", "truth": "A Pauli component flips only the generators it anticommutes with; commuting generators still return +1 on an ideal code state. The complete ±1 pattern is the syndrome, and it constrains an error class without revealing logical amplitudes." }
+      {
+        "myth": "Every error makes a stabilizer measurement return −1.",
+        "truth": "A Pauli component flips only the generators it anticommutes with; commuting generators still return +1 on an ideal code state. The complete ±1 pattern is the syndrome, and it constrains an error class without revealing logical amplitudes."
+      }
     ]
   },
   "quantum-codes-basics": {
     "intuition": "[[n, k, d]] is a rope's spec sheet: n physical strands carry k logical loads, and d is the smallest undetected pattern that can change a load. With ideal syndrome information, fewer than half that many adversarial breaks are correctable.",
     "misconceptions": [
-      { "myth": "A distance-d code corrects d errors in any operating circuit.", "truth": "Algebraically, d is the minimum weight of a nontrivial logical operator; with ideal syndrome information the code corrects up to ⌊(d−1)/2⌋ adversarial Pauli errors. Noisy extraction requires a space-time circuit-distance analysis." }
+      {
+        "myth": "A distance-d code corrects d errors in any operating circuit.",
+        "truth": "Algebraically, d is the minimum weight of a nontrivial logical operator; with ideal syndrome information the code corrects up to ⌊(d−1)/2⌋ adversarial Pauli errors. Noisy extraction requires a space-time circuit-distance analysis."
+      }
     ]
   },
   "fault-tolerance-thresholds": {
     "intuition": "Fighting a fire with crews who sometimes drop matches: under a specified noise model and recovery scheme, a sub-threshold regime is one where adding protection produces a sustained fall in logical failure. Above the crossover, extra distance no longer guarantees improvement.",
     "misconceptions": [
-      { "myth": "The threshold is a property of the code alone.", "truth": "It belongs to a code family plus syndrome circuit, decoder, observable, and noise model. Typical surface-code figures differ sharply: about 10.3% for a standard code-capacity model, order 3% phenomenological, and often 0.5–1% in specified circuit-level depolarizing studies." }
+      {
+        "myth": "The threshold is a property of the code alone.",
+        "truth": "It belongs to a code family plus syndrome circuit, decoder, observable, and noise model. Typical surface-code figures differ sharply: about 10.3% for a standard code-capacity model, order 3% phenomenological, and often 0.5–1% in specified circuit-level depolarizing studies."
+      }
     ]
   },
   "topological-order-anyons": {
     "intuition": "Store the secret in the shape of the whole, not in any piece — like the number of holes in a pretzel. No single bite changes it; only eating a path clear across the pretzel can. Local noise takes bites; topology counts holes.",
     "misconceptions": [
-      { "myth": "Anyons are exotic particles that must be discovered in nature.", "truth": "In these codes they are not fundamental particles at all — they are patterns of stabilizer violations, the endpoints of error strings. The lattice manufactures its own anyons." }
+      {
+        "myth": "Anyons are exotic particles that must be discovered in nature.",
+        "truth": "In these codes they are not fundamental particles at all — they are patterns of stabilizer violations, the endpoints of error strings. The lattice manufactures its own anyons."
+      }
     ]
   },
   "toric-code": {
     "intuition": "Stretch rubber bands around a donut: one can circle the hole, another the body, and no amount of local sliding turns one into the other or into nothing. The toric code stores its two qubits in exactly those two un-slidable windings.",
     "misconceptions": [
-      { "myth": "A toric code requires bending a chip into a literal donut.", "truth": "The torus is a connectivity condition: periodic couplings can be represented without a curved substrate. Most current surface-code experiments instead use planar boundaries because ordinary 2D connectivity makes them easier to implement; other code families use still different geometries." }
+      {
+        "myth": "A toric code requires bending a chip into a literal donut.",
+        "truth": "The torus is a connectivity condition: periodic couplings can be represented without a curved substrate. Most current surface-code experiments instead use planar boundaries because ordinary 2D connectivity makes them easier to implement; other code families use still different geometries."
+      }
     ]
   },
   "surface-code": {
     "intuition": "A quilt whose every square constantly asks its four corners 'do you agree?'. No square ever sees a stitch directly — yet from nothing but yes/no answers, the quilt locates every tear. That checkerboard of tiny referees is the most practical quantum memory ever designed.",
     "misconceptions": [
-      { "myth": "The surface code is universally best per qubit or has one hardware-independent threshold.", "truth": "Its appeal is a well-studied combination of local 2D checks, flexible boundaries, decoders, and relatively high thresholds in common circuit models. Other codes can have better rate, overhead, connectivity, or noise matching in different architectures." }
+      {
+        "myth": "The surface code is universally best per qubit or has one hardware-independent threshold.",
+        "truth": "Its appeal is a well-studied combination of local 2D checks, flexible boundaries, decoders, and relatively high thresholds in common circuit models. Other codes can have better rate, overhead, connectivity, or noise matching in different architectures."
+      }
     ]
   },
   "syndrome-extraction-circuits": {
     "intuition": "The stabilizer is measured like passing a collection plate down a pew: the ancilla visits its four neighbors, each adds its parity, and only the plate is inspected at the end. The danger is the passing itself — drop the plate mid-row and the damage spreads to whoever touched it next.",
     "misconceptions": [
-      { "myth": "Any CNOT ordering that computes the right parity is as good as any other.", "truth": "Orderings differ in how ancilla faults propagate. In a specified patch geometry, a bad orientation can reduce circuit distance; a verified schedule directs hooks so the intended distance is preserved. 'Harmless' and 'halves the distance' are not universal labels." }
+      {
+        "myth": "Any CNOT ordering that computes the right parity is as good as any other.",
+        "truth": "Orderings differ in how ancilla faults propagate. In a specified patch geometry, a bad orientation can reduce circuit distance; a verified schedule directs hooks so the intended distance is preserved. 'Harmless' and 'halves the distance' are not universal labels."
+      }
     ]
   },
   "decoding-mwpm": {
     "intuition": "Fresh snow, no cat in sight — only paw prints that start and stop. Decoding is reconstructing where the cat walked from the endpoints alone, and the matching decoder always bets on the laziest cat: the shortest total path consistent with every print.",
     "misconceptions": [
-      { "myth": "A zero final syndrome certifies that the logical state was recovered.", "truth": "Error plus correction may form a stabilizer-equivalent harmless cycle or a silent logical operator. A zero syndrome therefore does not certify logical success, and noisy measurements can also leave unresolved detector events depending on the protocol." }
+      {
+        "myth": "A zero final syndrome certifies that the logical state was recovered.",
+        "truth": "Error plus correction may form a stabilizer-equivalent harmless cycle or a silent logical operator. A zero syndrome therefore does not certify logical success, and noisy measurements can also leave unresolved detector events depending on the protocol."
+      }
     ]
   },
   "defects-braiding": {
     "intuition": "Maypole ribbons capture the ideal logical map: homotopic, distance-preserving defect motions can represent the same braid. On hardware, every step still matters because separation, timing, hook orientation, and decoding determine faults and overhead.",
     "misconceptions": [
-      { "myth": "A topological braid is physically independent of its path and timing.", "truth": "The ideal encoded action depends on braid class only after a verified distance-preserving deformation. Fault rates and resource cost depend on the actual schedule. Lattice surgery is cheaper in many analyzed planar layouts, not automatically for every gate and architecture." }
+      {
+        "myth": "A topological braid is physically independent of its path and timing.",
+        "truth": "The ideal encoded action depends on braid class only after a verified distance-preserving deformation. Fault rates and resource cost depend on the actual schedule. Lattice surgery is cheaper in many analyzed planar layouts, not automatically for every gate and architecture."
+      }
     ]
   },
   "lattice-surgery": {
     "intuition": "Logical qubits live on separate tiles of fabric. Computing is running a zipper between two tiles — the closing zipper asks exactly one joint question of the pair — then unzipping them apart again. A whole algorithm becomes a floor plan of zips and cuts unfolding in time.",
     "misconceptions": [
-      { "myth": "A split simply reverses a merge and restores the two original independent states.", "truth": "A merge changes the stabilizer group and measures a joint logical parity. Splitting restores separate patches but retains measurement-induced correlations and Pauli-frame information; a complete protocol includes repeated checks, final measurements, and feed-forward." }
+      {
+        "myth": "A split simply reverses a merge and restores the two original independent states.",
+        "truth": "A merge changes the stabilizer group and measures a joint logical parity. Splitting restores separate patches but retains measurement-induced correlations and Pauli-frame information; a complete protocol includes repeated checks, final measurements, and feed-forward."
+      }
     ]
   },
   "cluster-states-mbqc": {
     "intuition": "Weave the entire tapestry first — every thread crossing every thread. Then compute by pulling threads out one row at a time, where each pull tightens the pattern that remains and decides which thread to pull next. All the entanglement up front; all the choices during the unraveling.",
     "misconceptions": [
-      { "myth": "Every 3D cluster state is exactly a surface code written through time.", "truth": "Specific RHG and foliated constructions relate cluster-state correlation surfaces to histories of topological codes. Universal MBQC additionally needs adaptive non-Pauli measurements or equivalent magic resources; the correspondence is construction-specific, not a blanket identity." }
+      {
+        "myth": "Every 3D cluster state is exactly a surface code written through time.",
+        "truth": "Specific RHG and foliated constructions relate cluster-state correlation surfaces to histories of topological codes. Universal MBQC additionally needs adaptive non-Pauli measurements or equivalent magic resources; the correspondence is construction-specific, not a blanket identity."
+      }
     ]
   },
   "magic-states-distillation": {
     "intuition": "A surface-code Clifford toolkit is a piano missing a note needed for universality. An injected |A⟩ = T|+⟩ resource supplies that T note through a measurement gadget; ideal 15-to-1 distillation accepts fifteen noisy inputs to produce one output whose leading marginal error is cubic, 35p³ + O(p⁴).",
     "misconceptions": [
-      { "myth": "Magic-state cost is either negligible or a fixed fraction of every quantum computer.", "truth": "Non-Clifford resources dominate some algorithms and early resource estimates, but their share depends on the workload, protocol, hardware, target error, routing, and factory schedule. T, CCZ, and Toffoli gadgets also require the appropriate resource or synthesis." }
+      {
+        "myth": "Magic-state cost is either negligible or a fixed fraction of every quantum computer.",
+        "truth": "Non-Clifford resources dominate some algorithms and early resource estimates, but their share depends on the workload, protocol, hardware, target error, routing, and factory schedule. T, CCZ, and Toffoli gadgets also require the appropriate resource or synthesis."
+      }
     ]
   },
   "flag-fault-tolerance": {
     "intuition": "A bell wired to particular dangerous cabinet motions: under the circuit's stated fault model, a damaging propagation must ring the flag or leave a distinguishing syndrome. The bell narrows the possibilities; it does not name the exact microscopic fault.",
     "misconceptions": [
-      { "myth": "A flag qubit universally catches and identifies every dangerous fault.", "truth": "A flag guarantee is specific to a code, ordered circuit, fault count, and recovery rule. Some constructions reduce ancilla overhead relative to verified blocks, but the flag and syndrome together only distinguish the error set required by that proof." }
+      {
+        "myth": "A flag qubit universally catches and identifies every dangerous fault.",
+        "truth": "A flag guarantee is specific to a code, ordered circuit, fault count, and recovery rule. Some constructions reduce ancilla overhead relative to verified blocks, but the flag and syndrome together only distinguish the error set required by that proof."
+      }
     ]
   },
   "zx-calculus-basics": {
     "intuition": "Circuits redrawn as plumbing: green and red spiders joined by pipes, plus a small rulebook for sliding joints along pipes and fusing them. Two networks that the rules connect pass exactly the same water — so you can simplify a computation by re-plumbing the picture.",
     "misconceptions": [
-      { "myth": "The small introductory ZX rulebook proves every true equality of arbitrary qubit maps.", "truth": "ZX rewrites are rigorous and sound, but completeness is stated for a particular fragment with an appropriate complete axiom set. Stabilizer, Clifford+T, and universal qubit fragments require different or additional rules." }
+      {
+        "myth": "The small introductory ZX rulebook proves every true equality of arbitrary qubit maps.",
+        "truth": "ZX rewrites are rigorous and sound, but completeness is stated for a particular fragment with an appropriate complete axiom set. Stabilizer, Clifford+T, and universal qubit fragments require different or additional rules."
+      }
     ]
   },
   "advanced-decoding": {
     "intuition": "Detectives with different maps and clocks: MWPM exactly solves a weighted pairing objective, union-find has attractive scaling in specified topological settings, and correlated, tensor, or learned decoders use other structure. Which one wins depends on the noise, graph, accuracy target, and implementation.",
     "misconceptions": [
-      { "myth": "There is one universally fastest or most accurate decoder.", "truth": "Accuracy, sustained throughput, decision latency, memory, training, and hardware fit are separate axes. Willow used a matching-based decoder ensemble/synthesis—not belief propagation—and its fitted Λ belongs to that declared pipeline." }
+      {
+        "myth": "There is one universally fastest or most accurate decoder.",
+        "truth": "Accuracy, sustained throughput, decision latency, memory, training, and hardware fit are separate axes. Willow used a matching-based decoder ensemble/synthesis—not belief propagation—and its fitted Λ belongs to that declared pipeline."
+      }
     ]
   },
   "real-time-decoding-control": {
     "intuition": "A conveyor belt delivers detector batches at a fixed cadence. If a decoder's sustained service rate is lower by a fixed amount, unfinished work grows approximately linearly; the belt itself does not accelerate. Some control decisions also have latency deadlines even when average throughput is sufficient.",
     "misconceptions": [
-      { "myth": "Throughput and latency are the same, or every correction must be applied physically at once.", "truth": "A Pauli frame can often defer physical corrections, but sustained throughput must prevent unbounded backlog and particular lattice-surgery or non-Clifford feed-forward branches need results before their deadlines. The exact deadlines are architecture-specific." }
+      {
+        "myth": "Throughput and latency are the same, or every correction must be applied physically at once.",
+        "truth": "A Pauli frame can often defer physical corrections, but sustained throughput must prevent unbounded backlog and particular lattice-surgery or non-Clifford feed-forward branches need results before their deadlines. The exact deadlines are architecture-specific."
+      }
     ]
   },
   "magic-state-cultivation": {
     "intuition": "Grow a candidate crystal in a small chamber, reject it when cross-checks reveal a flaw, then carefully graft it into a larger fortress. The escape step can itself crack the crystal, so retries and the full end-to-end circuit—not just the accepted core—set the cost.",
     "misconceptions": [
-      { "myth": "Cultivation has a universal yield or always beats distillation asymptotically.", "truth": "The proposal injects into a distance-3 triangular color code at initial fault distance 1, cross-checks and grows with postselection, then escapes into a larger matchable encoding. Simulated savings are roughly order-of-magnitude only for specified baselines, target errors, and a uniform depolarizing circuit model." }
+      {
+        "myth": "Cultivation has a universal yield or always beats distillation asymptotically.",
+        "truth": "The proposal injects into a distance-3 triangular color code at initial fault distance 1, cross-checks and grows with postselection, then escapes into a larger matchable encoding. Simulated savings are roughly order-of-magnitude only for specified baselines, target errors, and a uniform depolarizing circuit model."
+      }
     ]
   },
   "tqec-compilers-automation": {
     "intuition": "From gate list to a logical factory floor plan: a compiler can choose Pauli-product measurements, patches, routes, schedules, and resource factories. That layout still needs hardware mapping, timing, decoder integration, distance checks, and pulse generation before a chip can execute it.",
     "misconceptions": [
-      { "myth": "A space-time diagram from a conceptual compiler is already a chip-ready program.", "truth": "It is a logical candidate. ZX or frame transformations may reduce a declared cost but offer no universal optimization guarantee; physical controls require architecture-specific routing, timing, decoding, validation, and error budgeting." }
+      {
+        "myth": "A space-time diagram from a conceptual compiler is already a chip-ready program.",
+        "truth": "It is a logical candidate. ZX or frame transformations may reduce a declared cost but offer no universal optimization guarantee; physical controls require architecture-specific routing, timing, decoding, validation, and error budgeting."
+      }
     ]
   },
   "clifford-simulation-hybrid": {
     "intuition": "Stabilizer simulation is efficient bookkeeping, while non-Clifford resources add costly structure. Hybrid methods exploit low non-Clifford content, stabilizer decompositions, or tensor factorization—but their cost depends on the task, circuit structure, and accuracy target.",
     "misconceptions": [
-      { "myth": "A large simulation exactly certifies the real hardware failure rate.", "truth": "A simulator validates the represented circuit, noise model, observable, decoder, and sampling code. Stabilizer trajectories can be exact samples of that model, but finite Monte Carlo estimates have uncertainty and omitted leakage, drift, crosstalk, or non-Markovian effects remain unverified." }
+      {
+        "myth": "A large simulation exactly certifies the real hardware failure rate.",
+        "truth": "A simulator validates the represented circuit, noise model, observable, decoder, and sampling code. Stabilizer trajectories can be exact samples of that model, but finite Monte Carlo estimates have uncertainty and omitted leakage, drift, crosstalk, or non-Markovian effects remain unverified."
+      }
     ]
   },
   "below-threshold-experiments": {
     "intuition": "A dam tested at several thicknesses: Google's 2022 experiment found a modest average distance-5 improvement over distance 3; Willow's distance-3, 5, and 7 memories then showed a clear falling logical-error trend for that circuit and decoder.",
     "misconceptions": [
-      { "myth": "Willow's below-threshold memory result proves universal fault-tolerant computation.", "truth": "For its tested memories, Λ = ε(d)/ε(d+2) = 2.14 ± 0.02, so Λ > 1 meant suppression. The separate 2.4 ± 0.3 number was a lifetime ratio. Gates, magic resources, algorithms, and workload-specific error budgets still require their own end-to-end demonstrations." }
+      {
+        "myth": "Willow's below-threshold memory result proves universal fault-tolerant computation.",
+        "truth": "For its tested memories, Λ = ε(d)/ε(d+2) = 2.14 ± 0.02, so Λ > 1 meant suppression. The separate 2.4 ± 0.3 number was a lifetime ratio. Gates, magic resources, algorithms, and workload-specific error budgets still require their own end-to-end demonstrations."
+      }
+    ]
+  },
+  "qldpc-codes": {
+    "intuition": "Just as classical LDPC codes dominate modern communications by using sparse parity checks, quantum LDPC codes bring these massive efficiency gains to quantum error correction by dropping the strict 2D locality constraint.",
+    "misconceptions": [
+      {
+        "myth": "qLDPC codes require all-to-all connectivity.",
+        "truth": "They require specific non-local connections, but the Tanner graph remains sparse with a bounded degree, unlike codes that need all-to-all coupling."
+      }
     ]
   }
 }
