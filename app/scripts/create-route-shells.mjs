@@ -38,9 +38,9 @@ const ROUTE_META = {
       'The prerequisite ground floor of topological quantum error correction: qubits, superposition, measurement, and the linear algebra the rest of the atlas builds on, with hands-on mini-labs.',
   },
   'altitudes': {
-    title: 'Altitudes — Six Tiers of Understanding — Lattice Atlas',
+    title: 'Five Altitudes — Lattice Atlas',
     description:
-      'The same ideas of topological quantum error correction retold at six rising altitudes, from plain-language intuition up to the research frontier, so you can meet each concept at your level.',
+      'The same quantum idea shown through five honest views: story, cause, model, formal limits, and a way to test the declared claim.',
   },
   'map': {
     title: 'Knowledge Map — Lattice Atlas',

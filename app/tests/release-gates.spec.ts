@@ -141,12 +141,12 @@ test('representative routes do not create horizontal overflow on mobile', async 
 test('explanation depth and an Altitude teach-back persist in the unified learning record', async ({ page }) => {
   await page.goto(`${BASE_PATH}altitudes/`);
 
-  const formalDepth = page.getByRole('button', { name: /FORMAL depth/ });
+  const formalDepth = page.getByRole('tab', { name: /FORMAL depth/ });
   await formalDepth.click();
-  await expect(formalDepth).toHaveAttribute('aria-pressed', 'true');
+  await expect(formalDepth).toHaveAttribute('aria-selected', 'true');
 
   await page.getByLabel('Your explanation').fill(
-    'The invariant is that a syndrome constrains possible faults; this view leaves out noisy repeated measurements.',
+    'The invariant is that complex amplitudes become probabilities only through a declared measurement; this view leaves out device noise.',
   );
   await page.getByRole('button', { name: 'Save to learning record' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Teach-back completion added' })).toBeVisible();
@@ -160,7 +160,111 @@ test('explanation depth and an Altitude teach-back persist in the unified learni
   })).toEqual({ depth: 'formal', teachbacks: 1 });
 
   await page.reload();
-  await expect(page.getByRole('button', { name: /FORMAL depth/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('tab', { name: /FORMAL depth/ })).toHaveAttribute('aria-selected', 'true');
+});
+
+test('Depth Observatory navigates nonlinearly, persists its view, and changes diagrams with the concept', async ({ page }) => {
+  const pageErrors: string[] = [];
+  const consoleErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error' && !/fonts\.(?:googleapis|gstatic)\.com/.test(message.location().url)) {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.goto(`${BASE_PATH}altitudes/`);
+  const observatory = page.locator('[data-depth-observatory]');
+  const tabs = observatory.getByRole('tab');
+  await expect(tabs).toHaveCount(5);
+  await expect(observatory).toHaveAttribute('data-concept-id', 'superposition');
+  await expect(observatory.getByRole('img', { name: /Superposition at story depth/ })).toBeVisible();
+  await expect(observatory.getByRole('switch', { name: 'Show earlier depth layers' })).toBeDisabled();
+
+  const story = observatory.getByRole('tab', { name: /STORY depth/ });
+  await story.focus();
+  await page.keyboard.press('ArrowRight');
+  const cause = observatory.getByRole('tab', { name: /CAUSE depth/ });
+  await expect(cause).toBeFocused();
+  await expect(cause).toHaveAttribute('aria-selected', 'true');
+  await expect(observatory.getByRole('switch', { name: 'Show earlier depth layers' })).toBeEnabled();
+
+  await page.keyboard.press('End');
+  await expect(observatory.getByRole('tab', { name: /VERIFY depth/ })).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(story).toBeFocused();
+
+  const model = observatory.getByRole('tab', { name: /MODEL depth/ });
+  await model.click();
+  await expect(model).toHaveAttribute('aria-selected', 'true');
+  await expect(observatory.locator('[data-depth-state="model"]')).toBeVisible();
+  await expect(observatory.locator('#depth-observatory-panel').getByText('A₀ = (1 + eⁱφ) / 2', { exact: true })).toBeVisible();
+  await observatory.getByRole('button', { name: 'Open the phase experiment' }).click();
+  await expect(observatory.getByRole('tab', { name: /VERIFY depth/ })).toBeFocused();
+  await model.click();
+  await page.keyboard.press('1');
+  await expect(story).toBeFocused();
+  await expect(story).toHaveAttribute('aria-selected', 'true');
+  await model.click();
+
+  const ghost = observatory.getByRole('switch', { name: 'Show earlier depth layers' });
+  await ghost.click();
+  await expect(ghost).toHaveAttribute('aria-checked', 'false');
+  await page.keyboard.press('g');
+  await expect(ghost).toHaveAttribute('aria-checked', 'true');
+
+  await page.getByRole('button', { name: 'Topology', exact: true }).click();
+  await expect(observatory).toHaveAttribute('data-concept-id', 'topology');
+  await expect(observatory.getByRole('img', { name: /Topology at model depth/ })).toBeVisible();
+
+  await expect.poll(() => page.evaluate(() => {
+    const record = JSON.parse(localStorage.getItem('lattice-atlas-progress') ?? '{}');
+    return record.profile?.explanationDepth;
+  })).toBe('model');
+  await page.reload();
+  await expect(page.getByRole('tab', { name: /MODEL depth/ })).toHaveAttribute('aria-selected', 'true');
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Depth Observatory Verify exposes the deterministic phase model in reduced motion and on mobile', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${BASE_PATH}altitudes/`);
+
+  const observatory = page.locator('[data-depth-observatory]');
+  await expect(observatory).toHaveAttribute('data-motion-state', 'static');
+  await observatory.getByRole('tab', { name: /VERIFY depth/ }).click();
+  const verify = observatory.getByRole('complementary', { name: 'Verify preview' });
+  const slider = verify.getByRole('slider', { name: 'Relative phase Δφ' });
+
+  const moveFromZero = async (phase: number) => {
+    await slider.press('Home');
+    for (let value = 0; value < phase; value += 15) await slider.press('ArrowRight');
+    await expect(slider).toHaveValue(String(phase));
+  };
+
+  await moveFromZero(0);
+  await expect(verify.getByText('100.0%', { exact: true })).toBeVisible();
+  await moveFromZero(90);
+  await expect(verify.getByText('50.0%', { exact: true })).toBeVisible();
+  await moveFromZero(180);
+  await expect(verify.getByText('0.0%', { exact: true })).toBeVisible();
+  await moveFromZero(0);
+  const orthogonalRecord = verify.getByRole('button', { name: 'Orthogonal record' });
+  await orthogonalRecord.click();
+  await expect(orthogonalRecord).toHaveAttribute('aria-pressed', 'true');
+  await expect(verify.getByText('50.0%', { exact: true })).toBeVisible();
+  await expect(verify.getByText(/Seeded browser model · finite-sample evidence · not hardware/)).toBeVisible();
+  await expect(verify.getByText(/seed 0x1a771ce/)).toBeVisible();
+
+  const dimensions = await page.evaluate(() => ({
+    viewport: innerWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+  }));
+  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
+  expect(dimensions.body).toBeLessThanOrEqual(dimensions.viewport + 1);
 });
 
 test('five-card Review caps a larger due deck without changing the deferred count mid-session', async ({ page }) => {

@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Map as MapIcon, Route as RouteIcon } from 'lucide-react';
-import MultiAgeCognitiveLens from '@/components/MultiAgeCognitiveLens';
+import DepthObservatory from '@/components/DepthObservatory';
 import SuperTLDR from '@/components/SuperTLDR';
-import ConceptClip from '@/components/ConceptClip';
 import { ALTITUDE_CONCEPTS } from '@/data/altitudes';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useProgress } from '@/store/progress';
@@ -20,7 +19,7 @@ export default function Altitudes() {
   useDocumentTitle('Five Altitudes');
   const reduce = useReducedMotion();
   const { explanationDepth, recordEvidence } = useProgress();
-  const [conceptId, setConceptId] = useState(ALTITUDE_CONCEPTS[0].id);
+  const [conceptId, setConceptId] = useState('superposition');
   const [teachback, setTeachback] = useState('');
   const [selfRating, setSelfRating] = useState<'again' | 'good' | 'easy'>('good');
   const [saveStatus, setSaveStatus] = useState('');
@@ -47,11 +46,11 @@ export default function Altitudes() {
       <header className="lattice-bg">
         <div className="mx-auto max-w-4xl px-6 pb-10 pt-16 md:px-8">
           <SuperTLDR
-            summary="Multi-age cognitive prism presenting quantum error correction across 5 distinct levels of detail (Story, Cause, Model, Formal, Verify)."
+            summary="See one quantum idea five ways: story, cause, model, formal limits, and a way to test it."
             takeaways={[
-              'Story (~5 yrs): Tactile light-up tiles & physical metaphors.',
-              'Cause (~10 yrs) & Model (~15 yrs): Interactive dot-connecting & stabilizer matrix models.',
-              'Formal & Verify (20+ yrs): Rigorous math bounds (Λ), Stim circuit verification, and paper receipts.',
+              'The invariant stays fixed while the representation changes.',
+              'Choose any view; this is not a ranked or age-locked path.',
+              'Verify distinguishes a browser model, a source, and hardware evidence.',
             ]}
           />
           <motion.p
@@ -83,24 +82,10 @@ export default function Altitudes() {
             shows how to distinguish a browser model, a research simulation, a
             published hardware dataset, and direct hardware access.
           </motion.p>
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.24, ease: [...EASE] }}
-            className="mt-8"
-          >
-            <ConceptClip
-              name="metaphor-descent"
-              className="w-full rounded-xl border border-ink-600 object-cover"
-            />
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-text-low">
-              // The descent: chip → lattice → qubits — AI visualization, decorative
-            </p>
-          </motion.div>
         </div>
       </header>
 
-      <section className="mx-auto max-w-4xl px-6 py-10 md:px-8">
+      <section className="mx-auto max-w-[1488px] px-4 py-10 sm:px-6 md:px-8">
         <div className="mb-6 flex flex-wrap gap-2" role="group" aria-label="Choose a concept">
           {ALTITUDE_CONCEPTS.map((item) => (
             <button
@@ -122,9 +107,9 @@ export default function Altitudes() {
             </button>
           ))}
         </div>
-        <MultiAgeCognitiveLens key={concept.id} concept={concept} />
+        <DepthObservatory key={concept.id} concept={concept} />
 
-        <div className="mt-6 rounded-2xl border border-star/35 bg-star/[0.05] p-5 md:p-6">
+        <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-star/35 bg-star/[0.05] p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="eyebrow !text-star">// RETRIEVAL BRIDGE</p>
