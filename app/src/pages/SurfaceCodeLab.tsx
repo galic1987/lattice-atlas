@@ -32,8 +32,8 @@ import {
   type DecodeResult,
   type Lattice,
   type Pauli,
-  type Stabilizer,
 } from '@/lib/surfaceCode';
+import { qubitPoint, faceCenter, facePath } from '@/lib/latticeGeometry';
 import { topicById, shortName } from '@/data';
 import WasmQuantumSandbox from '@/components/WasmQuantumSandbox';
 // three.js-backed views are lazy-loaded: they pull the heavy 3D runtime that
@@ -62,33 +62,8 @@ const OK = '#34D399';
 const CELL = 64;
 const PAD = 52;
 
-/* ------------------------------------------------------------------ */
-/* Geometry helpers                                                    */
-/* ------------------------------------------------------------------ */
 
-function qubitPoint(d: number, q: number): { x: number; y: number } {
-  return { x: PAD + (q % d) * CELL, y: PAD + Math.floor(q / d) * CELL };
-}
 
-function faceCenter(s: Stabilizer): { x: number; y: number } {
-  return { x: PAD + (s.fc - 0.5) * CELL, y: PAD + (s.fr - 0.5) * CELL };
-}
-
-/** SVG path for a stabilizer face: square (interior) or outward semicircle (boundary). */
-function facePath(lat: Lattice, s: Stabilizer): string {
-  const pts = s.qubits.map((q) => qubitPoint(lat.d, q));
-  if (!s.boundary) {
-    const [a, , , dpt] = [pts[0], pts[1], pts[2], pts[3]];
-    return `M ${a.x} ${a.y} L ${pts[1].x} ${pts[1].y} L ${dpt.x} ${dpt.y} L ${pts[2].x} ${pts[2].y} Z`;
-  }
-  const [p1, p2] = pts;
-  const r = CELL / 2;
-  // Bulge away from the lattice: up (fr=0), down (fr=d), left (fc=0), right (fc=d).
-  const sweep = s.fr === 0 || s.fc === lat.d ? 1 : 0;
-  return `M ${p1.x} ${p1.y} A ${r} ${r} 0 0 ${sweep} ${p2.x} ${p2.y} Z`;
-}
-
-/* ------------------------------------------------------------------ */
 /* Playback Pipeline Step Definition                                   */
 /* ------------------------------------------------------------------ */
 
@@ -181,7 +156,7 @@ function LatticeView({
         return (
           <g key={s.id}>
             <path
-              d={facePath(lat, s)}
+              d={facePath(lat, s, CELL, PAD)}
               fill={hot ? SYNDROME : base}
               fillOpacity={hot ? 0.42 : 0.13}
               stroke={hot ? SYNDROME : base}
@@ -190,8 +165,8 @@ function LatticeView({
               className={hot && !reduce ? 'animate-pulse' : undefined}
             />
             <text
-              x={faceCenter(s).x}
-              y={faceCenter(s).y + 3.5}
+              x={faceCenter(s, CELL, PAD).x}
+              y={faceCenter(s, CELL, PAD).y + 3.5}
               textAnchor="middle"
               fontSize={12}
               fontFamily="'JetBrains Mono', monospace"
@@ -205,8 +180,8 @@ function LatticeView({
             {showDefects && hot && (
               <g key={`defect-${s.id}`}>
                 <circle
-                  cx={faceCenter(s).x}
-                  cy={faceCenter(s).y}
+                  cx={faceCenter(s, CELL, PAD).x}
+                  cy={faceCenter(s, CELL, PAD).y}
                   r={16}
                   fill="none"
                   stroke={SYNDROME}
@@ -215,8 +190,8 @@ function LatticeView({
                   className={!reduce ? 'animate-spin' : undefined}
                 />
                 <circle
-                  cx={faceCenter(s).x}
-                  cy={faceCenter(s).y}
+                  cx={faceCenter(s, CELL, PAD).x}
+                  cy={faceCenter(s, CELL, PAD).y}
                   r={5}
                   fill={SYNDROME}
                   className={!reduce ? 'animate-ping' : undefined}
@@ -233,10 +208,10 @@ function LatticeView({
         result?.matches.map((m, i) => {
           const a = stabById.get(m.a);
           if (!a) return null;
-          const pts = [faceCenter(a), ...m.qubits.map((q) => qubitPoint(lat.d, q))];
+          const pts = [faceCenter(a, CELL, PAD), ...m.qubits.map((q) => qubitPoint(lat.d, q, CELL, PAD))];
           if (m.b !== 'boundary') {
             const b = stabById.get(m.b);
-            if (b) pts.push(faceCenter(b));
+            if (b) pts.push(faceCenter(b, CELL, PAD));
           }
           return (
             <motion.polyline
@@ -256,7 +231,7 @@ function LatticeView({
 
       {/* data qubits */}
       {errors.map((e, q) => {
-        const { x, y } = qubitPoint(lat.d, q);
+        const { x, y } = qubitPoint(lat.d, q, CELL, PAD);
         const corrected = correctedQubits.has(q);
         const activeError = showErrors ? e : 0;
 
@@ -353,6 +328,113 @@ function wilsonEstimate(fails: number, trials: number): BinomialEstimate | null 
     lo: Math.max(0, center - halfWidth),
     hi: Math.min(1, center + halfWidth),
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom Hook for Threshold Experiment                                */
+/* ------------------------------------------------------------------ */
+
+function useSurfaceCodeSim() {
+  const workerRef = useRef<Worker | null>(null);
+  const [cells, setCells] = useState<McCell[]>([]);
+  const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(false);
+  const [workerError, setWorkerError] = useState<string | null>(null);
+  const [tps, setTps] = useState(0);
+
+  useEffect(() => () => workerRef.current?.terminate(), []);
+
+  const stopFailedWorker = (worker: Worker, message: string) => {
+    worker.terminate();
+    if (workerRef.current === worker) workerRef.current = null;
+    setRunning(false);
+    setDone(false);
+    setTps(0);
+    setWorkerError(message);
+  };
+
+  const ensureWorker = (): Worker | null => {
+    if (workerRef.current) return workerRef.current;
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('../lib/threshold.worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      setWorkerError('The Monte Carlo worker could not start in this browser.');
+      return null;
+    }
+    const w = worker;
+    w.onmessage = (e: MessageEvent<McProgress>) => {
+      setWorkerError(null);
+      setCells(e.data.cells);
+      setTps(e.data.trialsPerSec);
+      if (e.data.done) {
+        setDone(true);
+        setRunning(false);
+      }
+    };
+    w.onerror = (event) => {
+      event.preventDefault();
+      stopFailedWorker(w, event.message || 'The Monte Carlo worker stopped unexpectedly.');
+    };
+    w.onmessageerror = () => {
+      stopFailedWorker(w, 'The browser could not read a Monte Carlo worker result.');
+    };
+    workerRef.current = w;
+    return w;
+  };
+
+  const toggle = () => {
+    const worker = ensureWorker();
+    if (!worker) return;
+    if (running) {
+      worker.postMessage({ cmd: 'pause' } satisfies McCommand);
+      setRunning(false);
+    } else if (cells.length > 0 && !done) {
+      worker.postMessage({ cmd: 'resume' } satisfies McCommand);
+      setWorkerError(null);
+      setRunning(true);
+    } else {
+      worker.postMessage({
+        cmd: 'start',
+        distances: MC_DISTANCES,
+        pValues: MC_P_VALUES,
+        maxTrials: MC_MAX_TRIALS,
+      } satisfies McCommand);
+      setDone(false);
+      setWorkerError(null);
+      setRunning(true);
+    }
+  };
+
+  const reset = () => {
+    workerRef.current?.postMessage({ cmd: 'pause' } satisfies McCommand);
+    setCells([]);
+    setRunning(false);
+    setDone(false);
+    setWorkerError(null);
+    setTps(0);
+  };
+
+  const retryWorker = () => {
+    if (workerRef.current) workerRef.current.terminate();
+    workerRef.current = null;
+    setCells([]);
+    setDone(false);
+    setRunning(false);
+    setTps(0);
+    setWorkerError(null);
+    const worker = ensureWorker();
+    if (!worker) return;
+    worker.postMessage({
+      cmd: 'start',
+      distances: MC_DISTANCES,
+      pValues: MC_P_VALUES,
+      maxTrials: MC_MAX_TRIALS,
+    } satisfies McCommand);
+    setRunning(true);
+  };
+
+  return { cells, running, done, workerError, tps, toggle, reset, retryWorker };
 }
 
 function seriesFor(cells: McCell[], d: number): SeriesPoint[] {
@@ -478,106 +560,11 @@ function ThresholdChart({ cells, hoverP, onHoverP }: {
 }
 
 function ThresholdSection() {
-  const workerRef = useRef<Worker | null>(null);
-  const [cells, setCells] = useState<McCell[]>([]);
-  const [running, setRunning] = useState(false);
-  const [done, setDone] = useState(false);
-  const [workerError, setWorkerError] = useState<string | null>(null);
-  const [tps, setTps] = useState(0);
+  const { cells, running, done, workerError, tps, toggle, reset, retryWorker } = useSurfaceCodeSim();
   const [hoverP, setHoverP] = useState<number | null>(null);
   const [refP, setRefP] = useState(0.06);
 
-  useEffect(() => () => workerRef.current?.terminate(), []);
 
-  const stopFailedWorker = (worker: Worker, message: string) => {
-    worker.terminate();
-    if (workerRef.current === worker) workerRef.current = null;
-    setRunning(false);
-    setDone(false);
-    setTps(0);
-    setWorkerError(message);
-  };
-
-  const ensureWorker = (): Worker | null => {
-    if (workerRef.current) return workerRef.current;
-    let worker: Worker;
-    try {
-      worker = new Worker(new URL('../lib/threshold.worker.ts', import.meta.url), { type: 'module' });
-    } catch {
-      setWorkerError('The Monte Carlo worker could not start in this browser.');
-      return null;
-    }
-    const w = worker;
-    w.onmessage = (e: MessageEvent<McProgress>) => {
-      setWorkerError(null);
-      setCells(e.data.cells);
-      setTps(e.data.trialsPerSec);
-      if (e.data.done) {
-        setDone(true);
-        setRunning(false);
-      }
-    };
-    w.onerror = (event) => {
-      event.preventDefault();
-      stopFailedWorker(w, event.message || 'The Monte Carlo worker stopped unexpectedly.');
-    };
-    w.onmessageerror = () => {
-      stopFailedWorker(w, 'The browser could not read a Monte Carlo worker result.');
-    };
-    workerRef.current = w;
-    return w;
-  };
-
-  const toggle = () => {
-    const worker = ensureWorker();
-    if (!worker) return;
-    if (running) {
-      worker.postMessage({ cmd: 'pause' } satisfies McCommand);
-      setRunning(false);
-    } else if (cells.length > 0 && !done) {
-      worker.postMessage({ cmd: 'resume' } satisfies McCommand);
-      setWorkerError(null);
-      setRunning(true);
-    } else {
-      worker.postMessage({
-        cmd: 'start',
-        distances: MC_DISTANCES,
-        pValues: MC_P_VALUES,
-        maxTrials: MC_MAX_TRIALS,
-      } satisfies McCommand);
-      setDone(false);
-      setWorkerError(null);
-      setRunning(true);
-    }
-  };
-
-  const reset = () => {
-    workerRef.current?.postMessage({ cmd: 'pause' } satisfies McCommand);
-    setCells([]);
-    setRunning(false);
-    setDone(false);
-    setWorkerError(null);
-    setTps(0);
-  };
-
-  const retryWorker = () => {
-    if (workerRef.current) workerRef.current.terminate();
-    workerRef.current = null;
-    setCells([]);
-    setDone(false);
-    setRunning(false);
-    setTps(0);
-    setWorkerError(null);
-    const worker = ensureWorker();
-    if (!worker) return;
-    worker.postMessage({
-      cmd: 'start',
-      distances: MC_DISTANCES,
-      pValues: MC_P_VALUES,
-      maxTrials: MC_MAX_TRIALS,
-    } satisfies McCommand);
-    setRunning(true);
-  };
 
   const totalTrials = cells.reduce((acc, c) => acc + c.trials, 0);
   const trialsByD = (d: number) => cells.filter((c) => c.d === d).reduce((a, c) => a + c.trials, 0);
