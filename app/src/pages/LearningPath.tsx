@@ -937,6 +937,10 @@ export default function LearningPath() {
 
   return (
     <div className="lattice-bg">
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 z-[100] origin-left"
+        style={{ scaleX: scrollYProgress, background: spineGradient }}
+      />
       {/* Section 1 — header + progress hero */}
       <section className="mx-auto max-w-6xl px-6 pt-32 pb-12 md:px-8">
         <SuperTLDR
